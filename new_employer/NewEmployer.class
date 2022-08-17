@@ -1,0 +1,299 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: NewEmployer.class                                                  |
+ +------------------------------------------------------------------------------+
+ | Description: This is the class that is used to allow ease of passing         |
+ | inputs back and forth between forms.  This class is used by                  |
+ | new_employer.inc.                                                            |
+ +------------------------------------------------------------------------------+
+
+*/
+
+class NewEmployer
+{
+	// Company information
+
+    var $employer_id;                       //int
+    var $company_name;                      //string
+    var $company_website;                   //string
+    var $company_description;               //string
+    var $company_street_address_1;          //string
+    var $company_street_address_2;          //string
+    var $company_street_address_3;          //string
+    var $company_city;                      //string
+    var $company_region_id;                 //int
+    var $company_provstate_id;              //int
+    var $company_country_id;                //int
+    var $company_postal_code;               //string
+    var $company_phone;                     //string
+    var $company_fax;                       //string
+    var $company_email;                     //string
+    var $company_industry_id;               //int
+    var $company_size_id;                   //int (size_id)
+    var $company_department_name;           //string
+    var $company_type_id;                   //int
+
+    // Contact information
+
+    var $contact_id;                        //int
+    var $contact_title;                     //string
+    var $contact_first_name;                //string
+    var $contact_middle_name;               //string
+    var $contact_last_name;                 //string
+    var $contact_called_name;               //string
+    var $contact_email;                     //string
+    var $contact_phone;                     //string
+    var $contact_pager;                     //string
+    var $contact_cellphone;                 //string
+    var $contact_fax;                       //string
+    var $contact_street_address_1;          //string
+    var $contact_street_address_2;          //string
+    var $contact_street_address_3;          //string
+    var $contact_city;                      //string
+    var $contact_region_id;                 //int
+    var $contact_provstate_id;              //int
+    var $contact_country_id;                //int
+    var $contact_postal_code;               //string
+
+    // First job form information
+
+    var $job_position_title;                //string
+    var $job_employer_code;                 //string
+    var $job_num_positions;                 //int
+    var $job_apply_method;                  //string
+    var $job_receive_address;               //string
+    var $job_country_id;                    //int
+    var $job_provstate_id;                  //int
+    var $job_region_id;                     //int
+    var $job_city;                          //string
+    var $job_start_term;                    //string
+    var $job_start_year;                    //string
+    var $job_start_date;                    //date                                                                                                               
+    var $job_start_date_date;               //int                                                                                                                
+    var $job_start_date_month;              //int                                                                                                                
+    var $job_start_date_year;               //int                                                                                                                
+    var $job_end_date;                      //date                                                                                                               
+    var $job_end_date_date;                 //int                                                                                                                
+    var $job_end_date_month;                //int                                                                                                                
+    var $job_end_date_year;                 //int 
+    var $job_salary_amount1;                //int
+    var $job_salary_amount2;                //int
+    var $job_salary_period;                 //string
+    var $job_workterm_lengths;              //array containing the workterm lengths
+    var $job_workterm_hours;                //int
+    var $job_other_postings;                //string
+    var $job_min_academic;                  //int (minimum academic year.  1, 2, 3, 4+)
+    var $job_min_workterms;                 //int (minimum workterms done.  0, 1, 2, 3, 4, 5+)
+    var $job_apply_departments;             //array of ints
+
+    // Second job form information
+
+    var $job_host_department;               //int
+    var $job_disciplines;                   //array containing discipline IDs
+    var $job_description;               	//string
+    var $job_skills_required;               //string
+    var $job_special_requirements;          //string
+    var $job_displayname_on_coverltr;          //string
+    var $job_comments;                      //string
+
+	function NewEmployer($newEmployer)
+	{
+		if($newEmployer)
+		{
+            $this->employer_id = $newEmployer->employer_id;
+            $this->company_name = $newEmployer->company_name;
+            $this->company_website = $newEmployer->company_website;
+            $this->company_description = $newEmployer->company_description;
+            $this->company_street_address_1 = $newEmployer->company_street_address_1;
+            $this->company_street_address_2 = $newEmployer->company_street_address_2;
+            $this->company_street_address_3 = $newEmployer->company_street_address_3;
+            $this->company_city = $newEmployer->company_city;
+            $this->company_region_id = $newEmployer->company_region_id;
+            $this->company_provstate_id = $newEmployer->company_provstate_id;
+            $this->company_country_id = $newEmployer->company_country_id;
+            $this->company_postal_code = $newEmployer->company_postal_code;
+            $this->company_phone = $newEmployer->company_phone;
+            $this->company_fax = $newEmployer->company_fax;
+            $this->company_email = $newEmployer->company_email;
+            $this->company_industry_id = $newEmployer->company_industry_id;
+            $this->company_size_id = $newEmployer->company_size_id;
+            $this->company_department_name = $newEmployer->company_department_name;
+            $this->company_type_id = $newEmployer->company_type_id;
+
+            $this->contact_id = $newEmployer->contact_id;
+            $this->contact_title = $newEmployer->contact_title;
+            $this->contact_first_name = $newEmployer->contact_first_name;
+            $this->contact_middle_name = $newEmployer->contact_middle_name;
+            $this->contact_last_name = $newEmployer->contact_last_name;
+            $this->contact_called_name = $newEmployer->contact_called_name;
+            $this->contact_email = $newEmployer->contact_email;
+            $this->contact_phone = $newEmployer->contact_phone;
+            $this->contact_pager = $newEmployer->contact_pager;
+            $this->contact_cellphone = $newEmployer->contact_cellphone;
+            $this->contact_fax = $newEmployer->contact_fax;
+            $this->contact_street_address_1 = $newEmployer->contact_street_address_1;
+            $this->contact_street_address_2 = $newEmployer->contact_street_address_2;
+            $this->contact_street_address_3 = $newEmployer->contact_street_address_3;
+            $this->contact_city = $newEmployer->contact_city;
+            $this->contact_region_id = $newEmployer->contact_region_id;
+            $this->contact_provstate_id = $newEmployer->contact_provstate_id;
+            $this->contact_country_id = $newEmployer->contact_country_id;
+            $this->contact_postal_code = $newEmployer->contact_postal_code;
+
+            $this->job_position_title = $newEmployer->job_position_title;
+            $this->job_num_positions = $newEmployer->job_num_positions;
+            $this->job_apply_method = $newEmployer->job_apply_method;
+            $this->job_city = $newEmployer->job_city;
+            $this->job_region_id = $newEmployer->job_region_id;
+            $this->job_provstate_id = $newEmployer->job_provstate_id;
+            $this->job_country_id = $newEmployer->job_country_id;
+            $this->job_start_term = $newEmployer->job_start_term;
+            $this->job_start_year = $newEmployer->job_start_year;
+            $this->job_start_date = $newEmployer->job_start_date;
+            $this->job_start_date_date = $newEmployer->job_start_date_date;
+            $this->job_start_date_month = $newEmployer->job_start_date_month;
+            $this->job_start_date_year = $newEmployer->job_start_date_year;
+            $this->job_end_date = $newEmployer->job_end_date;
+            $this->job_end_date_date = $newEmployer->job_end_date_date;
+            $this->job_end_date_month = $newEmployer->job_end_date_month;
+            $this->job_end_date_year = $newEmployer->job_end_date_year;
+            $this->job_workterm_lengths = $newEmployer->job_workterm_lengths;
+            $this->job_workterm_hours = $newEmployer->job_workterm_hours;
+            $this->job_receive_address = $newEmployer->job_receive_address;
+            $this->job_salary_amount1 = $newEmployer->job_salary_amount1;
+            $this->job_salary_amount2 = $newEmployer->job_salary_amount2;
+            $this->job_salary_period = $newEmployer->job_salary_period;
+            $this->job_min_academic = $newEmployer->job_min_academic;
+            $this->job_min_workterms = $newEmployer->job_min_workterms;
+            $this->job_apply_departments = $newEmployer->job_apply_departments;
+            $this->job_host_department = $newEmployer->job_host_department;
+            $this->job_other_postings = $newEmployer->job_other_postings;
+            $this->job_description = $newEmployer->job_description;
+            $this->job_skills_required = $newEmployer->job_skills_required;
+            $this->job_special_requirements = $newEmployer->job_special_requirements;
+            $this->job_displayname_on_coverltr = $newEmployer->job_displayname_on_coverltr;
+            $this->job_comments = $newEmployer->job_comments;
+            $this->job_employer_code = $newEmployer->job_employer_code;
+            $this->job_disciplines = $newEmployer->job_disciplines;
+		}
+	}
+
+    function set_company_values($employer_id, $company_name, $company_website, $company_description, $company_street_address_1,
+            $company_street_address_2, $company_street_address_3,$company_city, $company_region_id, $company_provstate_id, $company_country_id, 
+            $company_postal_code, $company_phone, $company_fax, $company_email, $company_industry_id, $company_size_id, $company_department_name,
+            $company_type_id)
+	{
+        $this->employer_id = removeSlashes(trim($employer_id));
+        $this->company_name = removeSlashes(trim($company_name));
+        $this->company_website = removeSlashes(trim($company_website));
+        $this->company_description = removeSlashes(trim($company_description));
+        $this->company_street_address_1 = removeSlashes(trim($company_street_address_1));
+        $this->company_street_address_2 = removeSlashes(trim($company_street_address_2));
+        $this->company_street_address_3 = removeSlashes(trim($company_street_address_3));
+        $this->company_city = removeSlashes(trim($company_city));
+        $this->company_region_id = removeSlashes(trim($company_region_id));
+        $this->company_provstate_id = removeSlashes(trim($company_provstate_id));
+        $this->company_country_id = removeSlashes(trim($company_country_id));
+        $this->company_postal_code = removeSlashes(trim($company_postal_code));
+        $this->company_phone = removeSlashes(trim($company_phone));
+        $this->company_fax = removeSlashes(trim($company_fax));
+        $this->company_email = removeSlashes(trim($company_email));
+        $this->company_industry_id = removeSlashes(trim($company_industry_id));
+        $this->company_size_id = removeSlashes(trim($company_size_id));
+        $this->company_department_name = removeSlashes(trim($company_department_name));
+        $this->company_type_id = removeSlashes(trim($company_type_id));
+	}
+
+    function set_contact_values($contact_id, $contact_title, $contact_first_name, $contact_middle_name, $contact_last_name,
+            $contact_called_name, $contact_email, $contact_phone, $contact_pager, $contact_cellphone, $contact_fax, $contact_street_address_1, 
+            $contact_street_address_2, $contact_street_address_3, $contact_city, $contact_region_id, $contact_provstate_id, $contact_country_id, 
+            $contact_postal_code)
+	{
+		$this->contact_id = removeSlashes(trim($contact_id));
+		$this->contact_title = removeSlashes(trim($contact_title));
+		$this->contact_first_name = removeSlashes(trim($contact_first_name));
+		$this->contact_middle_name = removeSlashes(trim($contact_middle_name));
+		$this->contact_last_name = removeSlashes(trim($contact_last_name));
+		$this->contact_called_name = removeSlashes(trim($contact_called_name));
+		$this->contact_email = removeSlashes(trim($contact_email));
+		$this->contact_phone = removeSlashes(trim($contact_phone));
+		$this->contact_pager = removeSlashes(trim($contact_pager));
+		$this->contact_cellphone = removeSlashes(trim($contact_cellphone));
+		$this->contact_fax = removeSlashes(trim($contact_fax));
+		$this->contact_street_address_1 = removeSlashes(trim($contact_street_address_1));
+		$this->contact_street_address_2 = removeSlashes(trim($contact_street_address_2));
+		$this->contact_street_address_3 = removeSlashes(trim($contact_street_address_3));
+		$this->contact_city = removeSlashes(trim($contact_city));
+		$this->contact_region_id = removeSlashes(trim($contact_region_id));
+		$this->contact_provstate_id = removeSlashes(trim($contact_provstate_id));
+		$this->contact_country_id = removeSlashes(trim($contact_country_id));
+		$this->contact_postal_code = removeSlashes(trim($contact_postal_code));
+	}
+
+    function set_job_values_1($position_title, $employer_code, $num_positions, $apply_method, $receive_address, $region_id,
+            $city, $provstate_id, $country_id, $start_term, $start_year, $start_date, $start_date_date, $start_date_month, $start_date_year, 
+            $end_date, $end_date_date, $end_date_month, $end_date_year, $salary_amount1, $salary_amount2, $salary_period, $workterm_lengths, 
+            $workterm_hours, $other_postings, $min_academic, $min_workterms, $apply_departments)
+	{
+        $this->job_position_title = removeSlashes(trim($position_title));
+        $this->job_employer_code = removeSlashes(trim($employer_code));
+        $this->job_num_positions = removeSlashes(trim($num_positions));
+        $this->job_apply_method = removeSlashes(trim($apply_method));
+        $this->job_receive_address = removeSlashes(trim($receive_address));
+        $this->job_region_id = removeSlashes(trim($region_id));
+        $this->job_city = removeSlashes(trim($city));
+        $this->job_provstate_id = removeSlashes(trim($provstate_id));
+        $this->job_country_id = removeSlashes(trim($country_id));
+        $this->job_start_term = removeSlashes(trim($start_term));
+        $this->job_start_year = removeSlashes(trim($start_year));
+        $this->job_start_date = removeSlashes(trim($start_date));
+        $this->job_start_date_date = removeSlashes(trim($start_date_date));
+        $this->job_start_date_month = removeSlashes(trim($start_date_month));
+        $this->job_start_date_year = removeSlashes(trim($start_date_year));
+        $this->job_end_date = removeSlashes(trim($end_date)); 
+        $this->job_end_date_date = removeSlashes(trim($end_date_date)); 
+        $this->job_end_date_month = removeSlashes(trim($end_date_month)); 
+        $this->job_end_date_year = removeSlashes(trim($end_date_year));
+        $this->job_salary_amount1 = removeSlashes(trim($salary_amount1));
+        $this->job_salary_amount2 = removeSlashes(trim($salary_amount2));
+        $this->job_salary_period = removeSlashes(trim($salary_period));
+        $this->job_workterm_lengths = $workterm_lengths;
+        $this->job_workterm_hours = removeSlashes(trim($workterm_hours));
+        $this->job_other_postings = removeSlashes(trim($other_postings));
+        $this->job_min_academic = removeSlashes(trim($min_academic));
+        $this->job_min_workterms = removeSlashes(trim($min_workterms));
+        $this->job_apply_departments = $apply_departments;
+	}
+
+	function set_job_values_2($host_department, $job_disciplines, $job_description, $skills_required, $special_requirements, $comments, $displayname_on_coverltr)
+    {
+        $this->job_host_department = removeSlashes(trim($host_department));
+        $this->job_disciplines = removeSlashes($job_disciplines);
+        $this->job_description = removeSlashes(trim($job_description));
+        $this->job_skills_required = removeSlashes(trim($skills_required));
+        $this->job_special_requirements = removeSlashes(trim($special_requirements));
+        $this->job_displayname_on_coverltr = removeSlashes(trim($displayname_on_coverltr));
+        $this->job_comments = removeSlashes(trim($comments));
+    }
+}

@@ -1,0 +1,94 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: scripts.txt                                                        |
+ +------------------------------------------------------------------------------+
+
+Some Mamook[tm] functions need to be run periodically, through a scheduling
+program such as 'cron'.  These functions are found in the misc/scripts directory.
+
+All of the scripts need three variables set before they will run:
+- database name
+- database user
+- database password
+
+The following scripts need to be run once per hour:
+- email_incomplete_lunch.pl
+- email_incomplete_sign_up.pl
+- email_signup_complete.pl
+- interview_status.pl
+
+The following script needs to be run once every five minutes:
+- job_status.pl
+
+The following script needs to be run once a day:
+- aging_script.php
+
+Here is a brief description of the files listed above:
+
++-----------------------------------+
+ email_incomplete_lunch.pl
++-----------------------------------+
+This perl program will determine if a lunch schedule for the next day is     
+incomplete and e-mails the contact associated with the interview if it is.   
+A lunch schedule is complete if the lunch occurs between 23.5 and 24.5 hours 
+from now, and no one is signed up for it.
+
++-----------------------------------+
+ email_incomplete_sign_up.pl
++-----------------------------------+
+This perl program will determine if an interview schedule for the next day   
+is incomplete and e-mails the contact associated with the job if it is.      
+An interview schedule is complete if the first interview time slot for that  
+interview on the next day occurs between 23.5 and 24.5 hours from now, and   
+the number of free interview time slots in the future (not including the     
+interview time slots for the interview schedule one day from now) is less    
+than the number of shortlisted students who have not yet signed up for an    
+interview.
+
++-----------------------------------+
+ email_signup_complete.pl
++-----------------------------------+
+This file determines if an interview signup is complete and e-mails the      
+contact associated with the job when that happens.  Lastly, it updates       
+the emailed_secretary flag in the interview table so that the secretary      
+won't get e-mailed again.
+
++-----------------------------------+
+ interview_status.pl
++-----------------------------------+
+If an interview's last time slot has passed in the last hour then the        
+student status for the job gets updated to 'Waiting for Ranking'
+
++-----------------------------------+
+ job_status.pl
++-----------------------------------+
+This script does two things:                   
+1. If a job's closing time has occurred in the last time increment then the  
+status gets updated to 'CLOSED' and the student status gets updated to       
+'No Longer Accepting Applications'.                                          
+2. Posts jobs after the 24 hr holding pattern
+
++-----------------------------------+
+ aging_script.php
++-----------------------------------+
+This file updates contact statuses and ages them. After a certain 
+time period of inactivity by contacts, their statuses will change
+and age. 

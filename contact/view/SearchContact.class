@@ -1,0 +1,511 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: SearchContact.class                                                |
+ +------------------------------------------------------------------------------+
+ | Description: This file is used to declare the class that holds all of the    |
+ | search criteria for contacts, divisions, and companies.  This is used in     |
+ | order to ease passing search criteria and other information between forms.   |
+ | This class is in fact different from its incarnation in                      |
+ | contact/view/contact/.  Chris has seperated the functionality of searching   |
+ | for contacts from the functionality for searching for companies/divisions.   |
+ | This class is responsible for searching on companies and divisions.          |
+ | :TODO: This class needs to be moved into the contact/view/company directory  |
+ | and should be given a new name corresponding to its functionality.           |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+class SearchContact
+{
+    // Declare all of the contact search variables now, do the rest later.
+
+    var $search_contact_department_id;		//int used to return all contacts at a specific department.
+    var $search_contact_first_name;			//string
+    var $search_contact_last_name;			//string
+    var $search_contact_email_as;			//string, "start" or "containing"
+    var $search_contact_email;			//string
+    var $search_contact_phone_as;			//string, "start" or "containing"
+    var $search_contact_phone;			//string
+    var $search_contact_area;			//int
+    var $search_contact_country;			//int
+    var $search_contact_provstate;			//int
+    var $search_contact_region;			//int
+    var $search_contact_city;			//string
+    var $search_contact_postal_code;		//string
+    var $search_contact_action;			//int
+    var $search_contact_action_by;			//int
+    var $search_contact_action_as;			//string, "on", "before", or "after"
+    var $search_contact_action_on;			//string, date format
+    var $search_contact_flags_boolean;		//string, "and", or "or"
+    var $search_contact_flags;			//array of ints
+    var $search_contact_department_name;		//string
+    var $search_contact_status_status;		//int
+    var $search_contact_status_department;		//int
+
+    // Company criteria used for searching.
+
+    var $search_company_name;			//string
+    var $search_company_name_as;        //string
+    var $search_company_website_as;			//string - "start" or "containing"
+    var $search_company_website;			//string
+    var $search_company_description;		//string - Not sure about this one
+    var $search_company_area;			//int
+    var $search_company_country;			//int
+    var $search_company_provstate;			//int
+    var $search_company_region;			//int
+    var $search_company_city;			//string
+    var $search_company_postal_code;		//string
+    var $search_company_phone_as;			//string, "start" or "containing"
+    var $search_company_phone;			//string
+    var $search_company_email_as;			//string, "start" or "containing"
+    var $search_company_email;			//string
+    var $search_company_yes_industry;		//array of ints
+    var $search_company_no_industry;		//array of ints
+    var $search_company_type;			//array of ints
+    var $search_company_size;			//array of ints
+    var $search_company_comments;			//string - Not sure about this one
+    var $search_company_flags_boolean;		//string, "and", or "or"
+    var $search_company_flags;			//array of ints
+    var $search_company_status_status;		//int
+    var $search_company_status_department;		//int
+
+    // Department criteria used for searching on contacts.
+
+    var $search_department_name;			//string
+    var $search_department_website_as;		//string - "start" or "containing"
+    var $search_department_website;                 //string
+    var $search_department_description;             //string - Not sure about this one
+    var $search_department_area;                    //int
+    var $search_department_country;                 //int
+    var $search_department_provstate;               //int
+    var $search_department_region;                  //int
+    var $search_department_city;                    //string
+    var $search_department_postal_code;             //string
+    var $search_department_phone_as;                //string, "start" or "containing"
+    var $search_department_phone;                   //string
+    var $search_department_email_as;                //string, "start" or "containing"
+    var $search_department_email;                   //string
+    var $search_department_yes_industry;            //array of ints
+    var $search_department_no_industry;		//array of ints
+    var $search_department_size;                    //array of ints
+    var $search_department_comments;                //string - Not sure about this one
+    var $search_department_flags_boolean;		//string, "and", or "or"
+    var $search_department_flags;			//array of ints
+    var $search_department_status_status;		//int
+    var $search_department_status_department;	//int
+
+    // Variables used for special cases of searches, typically from quickmenus
+
+    var $search_employer_id;
+    var $search_division_id;
+    var $search_using_only_employer_id = false;
+    var $search_using_only_division_id = false;
+
+    // Variable used to determine if we're performing a search on companies, divisions, or both.
+
+    var $search_comp_or_div;			//string
+
+    /*
+     Criteria used to determine what to display on the screen, and how to order it.
+     Used by all three levels of searching.
+     */
+
+    var $search_display1;				//string
+    var $search_display2;				//string
+    var $search_display3;				//string
+    var $search_display4;				//string
+    var $search_display5;				//string
+    var $search_display6;				//string
+    var $search_display7;				//string
+    var $search_display8;				//string
+    var $search_order1;				//string
+    var $search_order2;				//string
+    var $search_order3;				//string
+    var $search_order4;				//string
+
+    function SearchContact($searchContact)
+    {
+        if ($searchContact)
+        {
+            $this->search_contact_department_id = $searchContact->search_contact_department_id;
+            $this->search_contact_first_name = $searchContact->search_contact_first_name;
+            $this->search_contact_last_name = $searchContact->search_contact_last_name;
+            $this->search_contact_email_as = $searchContact->search_contact_email_as;
+            $this->search_contact_email = $searchContact->search_contact_email;
+            $this->search_contact_phone_as = $searchContact->search_contact_phone_as;
+            $this->search_contact_phone = $searchContact->search_contact_phone;
+            $this->search_contact_company_name = $searchContact->search_contact_company_name;
+            $this->search_contact_department_name = $searchContact->search_contact_department_name;
+            $this->search_contact_area = $searchContact->search_contact_area;
+            $this->search_contact_country = $searchContact->search_contact_country;
+            $this->search_contact_provstate = $searchContact->search_contact_provstate;
+            $this->search_contact_region = $searchContact->search_contact_region;	
+            $this->search_contact_city = $searchContact->search_contact_city;	
+            $this->search_contact_postal_code = $searchContact->search_contact_postal_code;
+            $this->search_contact_action = $searchContact->search_contact_action;
+            $this->search_contact_action_by = $searchContact->search_contact_action_by;
+            $this->search_contact_action_as = $searchContact->search_contact_action_as;
+            $this->search_contact_action_on = $searchContact->search_contact_action_on;
+            $this->search_contact_flags_boolean = $searchContact->search_contact_flags_boolean;
+            $this->search_contact_flags = $searchContact->search_contact_flags;
+            $this->search_contact_department_name = $searchContact->search_contact_department_name;
+            $this->search_contact_status_status = $searchContact->search_contact_status_status;
+            $this->search_contact_status_department = $searchContact->search_contact_status_department;
+
+            $this->search_company_name = $searchContact->search_company_name;
+            $this->search_company_name_as = $searchContact->search_company_name_as;
+            $this->search_company_website_as = $searchContact->search_company_website_as;
+            $this->search_company_website = $searchContact->search_company_website;
+            $this->search_company_description = $searchContact->search_company_description;
+            $this->search_company_area = $searchContact->search_company_area;
+            $this->search_company_country = $searchContact->search_company_country;
+            $this->search_company_provstate = $searchContact->search_company_provstate;
+            $this->search_company_region = $searchContact->search_company_region;
+            $this->search_company_city = $searchContact->search_company_city;
+            $this->search_company_postal_code = $searchContact->search_company_postal_code;
+            $this->search_company_phone_as = $searchContact->search_company_phone_as;
+            $this->search_company_phone = $searchContact->search_company_phone;
+            $this->search_company_email_as = $searchContact->search_company_email_as;
+            $this->search_company_email = $searchContact->search_company_email;
+            $this->search_company_yes_industry = $searchContact->search_company_yes_industry;
+            $this->search_company_no_industry = $searchContact->search_company_no_industry;
+            $this->search_company_size = $searchContact->search_company_size;
+            $this->search_company_type = $searchContact->search_company_type;
+            $this->search_company_comments = $searchContact->search_company_comments;
+            $this->search_company_flags_boolean = $searchContact->search_company_flags_boolean;
+            $this->search_company_flags = $searchContact->search_company_flags;
+            $this->search_company_status_status = $searchContact->search_company_status_status;
+            $this->search_company_status_department = $searchContact->search_company_status_department;
+
+            $this->search_department_name = $searchContact->search_department_name;
+            $this->search_department_website_as = $searchContact->search_department_website_as;
+            $this->search_department_website = $searchContact->search_department_website;
+            $this->search_department_description = $searchContact->search_department_description;
+            $this->search_department_area = $searchContact->search_department_area;
+            $this->search_department_country = $searchContact->search_department_country;
+            $this->search_department_provstate = $searchContact->search_department_provstate;
+            $this->search_department_region = $searchContact->search_department_region;
+            $this->search_department_city = $searchContact->search_department_city;
+            $this->search_department_postal_code = $searchContact->search_department_postal_code;
+            $this->search_department_phone_as = $searchContact->search_department_phone_as;
+            $this->search_department_phone = $searchContact->search_department_phone;
+            $this->search_department_email_as = $searchContact->search_department_email_as;
+            $this->search_department_email = $searchContact->search_department_email;
+            $this->search_department_yes_industry = $searchContact->search_department_yes_industry;
+            $this->search_department_no_industry = $searchContact->search_department_no_industry;
+            $this->search_department_size = $searchContact->search_department_size;
+            $this->search_department_comments = $searchContact->search_department_comments;
+            $this->search_department_flags_boolean = $searchContact->search_department_flags_boolean;
+            $this->search_department_flags = $searchContact->search_department_flags;
+            $this->search_department_status_status = $searchContact->search_department_status_status;
+            $this->search_department_status_department = $searchContact->search_department_status_department;
+
+            $this->search_comp_or_div = $searchContact->search_comp_or_div;
+
+            $this->search_display1 = $searchContact->search_display1;
+            $this->search_display2 = $searchContact->search_display2;
+            $this->search_display3 = $searchContact->search_display3;
+            $this->search_display4 = $searchContact->search_display4;
+            $this->search_display5 = $searchContact->search_display5;
+            $this->search_display6 = $searchContact->search_display6;
+            $this->search_display7 = $searchContact->search_display7;
+            $this->search_display8 = $searchContact->search_display8;
+            $this->search_order1 = $searchContact->search_order1;
+            $this->search_order2 = $searchContact->search_order2;
+            $this->search_order3 = $searchContact->search_order3;
+            $this->search_order4 = $searchContact->search_order4;
+
+            $this->search_using_only_employer_id = $searchContact->search_using_only_employer_id;
+            $this->search_using_only_division_id = $searchContact->search_using_only_division_id;
+            $this->search_employer_id = $searchContact->search_employer_id;
+            $this->search_division_id = $searchContact->search_division_id;
+        }
+    }
+
+    function set_contact_values_1($contact_search_first_name, $contact_search_last_name, $contact_search_email_as, $contact_search_email,
+            $contact_search_phone_as, $contact_search_phone, $contact_search_company_name, $contact_search_division_name, 
+            $contact_search_area, $contact_search_country, $contact_search_provstate, $contact_search_region, 
+            $contact_search_city, $contact_search_postal_code, $contact_search_action, $contact_search_action_by, $contact_search_action_as, $contact_search_action_on, 
+            $contact_search_flags_boolean, $contact_search_flags, $contact_search_department_name, $contact_search_status_status,
+            $contact_search_status_department, $contact_search_display1, $contact_search_display2, $contact_search_display3, 
+            $contact_search_display4, $contact_search_display5, $contact_search_display6, $contact_search_display7, $contact_search_display8, 
+            $contact_search_order1, $contact_search_order2, $contact_search_order3, $contact_search_order4
+            )
+    {
+        $this->search_contact_first_name = removeSlashes($contact_search_first_name);
+        $this->search_contact_last_name = removeSlashes($contact_search_last_name);
+        $this->search_contact_email_as = removeSlashes($contact_search_email_as);
+        $this->search_contact_email = removeSlashes($contact_search_email);
+        $this->search_contact_phone_as = removeSlashes($contact_search_phone_as);
+        $this->search_contact_phone = removeSlashes($contact_search_phone);
+        $this->search_company_name = removeSlashes($contact_search_company_name);
+        $this->search_department_name = removeSlashes($contact_search_division_name);
+        $this->search_contact_area = removeSlashes($contact_search_area);
+        $this->search_contact_country = removeSlashes($contact_search_country);
+        $this->search_contact_provstate = removeSlashes($contact_search_provstate);
+        $this->search_contact_region = removeSlashes($contact_search_region);
+        $this->search_contact_city = removeSlashes($contact_search_city);
+        $this->search_contact_postal_code = removeSlashes($contact_search_postal_code);
+        $this->search_contact_action = removeSlashes($contact_search_action);
+        $this->search_contact_action_by = removeSlashes($contact_search_action_by);
+        $this->search_contact_action_as = removeSlashes($contact_search_action_as);
+        $this->search_contact_action_on = removeSlashes($contact_search_action_on);
+        $this->search_contact_flags_boolean = removeSlashes($contact_search_flags_boolean);
+        $this->search_contact_flags = removeSlashes($contact_search_flags);
+        $this->search_contact_department_name = removeSlashes($contact_search_department_name);
+        $this->search_contact_status_status = removeSlashes($contact_search_status_status);
+        $this->search_contact_status_department = removeSlashes($contact_search_status_department);
+
+        $this->search_display1 = removeSlashes($contact_search_display1);
+        $this->search_display2 = removeSlashes($contact_search_display2);
+        $this->search_display3 = removeSlashes($contact_search_display3);
+        $this->search_display4 = removeSlashes($contact_search_display4);
+        $this->search_display5 = removeSlashes($contact_search_display5);
+        $this->search_display6 = removeSlashes($contact_search_display6);
+        $this->search_display7 = removeSlashes($contact_search_display7);
+        $this->search_display8 = removeSlashes($contact_search_display8);
+        $this->search_order1 = removeSlashes($contact_search_order1);
+        $this->search_order2 = removeSlashes($contact_search_order2);
+        $this->search_order3 = removeSlashes($contact_search_order3);
+        $this->search_order4 = removeSlashes($contact_search_order4);
+    }
+
+    function set_contact_values_2($search_company_name, $search_company_website_as, $search_company_website, 
+            $search_company_area, $search_company_country, $search_company_provstate, $search_company_region, 
+            $search_company_city, $search_company_postal_code, $search_company_phone_as, $search_company_phone, 
+            $search_company_email_as, $search_company_email, $search_company_yes_industry, $search_company_no_industry,
+            $search_company_size, $search_company_type, $search_company_flags_boolean, $search_company_flags, 
+            $search_company_status_status, $search_company_status_department, $search_department_name, $search_department_website_as,  
+            $search_department_website, $search_department_area, $search_department_country, $search_department_provstate, 
+            $search_department_region, $search_department_city, $search_department_postal_code, $search_department_phone_as, 
+            $search_department_phone, $search_department_email_as, $search_department_email, $search_department_yes_industry, 
+            $search_department_no_industry, $search_department_size, $search_comp_or_div, $search_department_flags_boolean, 
+            $search_department_flags, $search_department_status_status, $search_department_status_department
+            )
+    {
+        $this->search_company_name = removeSlashes($search_company_name);
+        $this->search_company_website_as = removeSlashes($search_company_website_as);
+        $this->search_company_website = removeSlashes($search_company_website);
+        $this->search_company_area = removeSlashes($search_company_area);
+        $this->search_company_country = removeSlashes($search_company_country);
+        $this->search_company_provstate = removeSlashes($search_company_provstate);
+        $this->search_company_region = removeSlashes($search_company_region);
+        $this->search_company_city = removeSlashes($search_company_city);
+        $this->search_company_postal_code = removeSlashes($search_company_postal_code);
+        $this->search_company_phone_as = removeSlashes($search_company_phone_as);
+        $this->search_company_phone = removeSlashes($search_company_phone);
+        $this->search_company_email_as = removeSlashes($search_company_email_as);
+        $this->search_company_email = removeSlashes($search_company_email);
+        $this->search_company_yes_industry = removeSlashes($search_company_yes_industry);
+        $this->search_company_no_industry = removeSlashes($search_company_no_industry);
+        $this->search_company_size = removeSlashes($search_company_size);
+        $this->search_company_type = removeSlashes($search_company_type);
+        $this->search_company_flags_boolean = removeSlashes($search_company_flags_boolean);
+        $this->search_company_flags = removeSlashes($search_company_flags);
+        $this->search_company_status_status = removeSlashes($search_company_status_status);
+        $this->search_company_status_department = removeSlashes($search_company_status_department);
+
+        $this->search_department_name = removeSlashes($search_department_name);
+        $this->search_department_website_as = removeSlashes($search_department_website_as);
+        $this->search_department_website = removeSlashes($search_department_website);
+        $this->search_department_area = removeSlashes($search_department_area);
+        $this->search_department_country = removeSlashes($search_department_country);
+        $this->search_department_provstate = removeSlashes($search_department_provstate);
+        $this->search_department_region = removeSlashes($search_department_region);
+        $this->search_department_city = removeSlashes($search_department_city);
+        $this->search_department_postal_code = removeSlashes($search_department_postal_code);
+        $this->search_department_phone_as = removeSlashes($search_department_phone_as);
+        $this->search_department_phone = removeSlashes($search_department_phone);
+        $this->search_department_email_as = removeSlashes($search_department_email_as);
+        $this->search_department_email = removeSlashes($search_department_email);
+        $this->search_department_yes_industry = removeSlashes($search_department_yes_industry);
+        $this->search_department_no_industry = removeSlashes($search_department_no_industry);
+        $this->search_department_size = removeSlashes($search_department_size);
+        $this->search_department_flags_boolean = removeSlashes($search_department_flags_boolean);
+        $this->search_department_flags = removeSlashes($search_department_flags);
+        $this->search_department_status_status = removeSlashes($search_department_status_status);
+        $this->search_department_status_department = removeSlashes($search_department_status_department);
+    }
+
+    function set_department_values_1($search_department_name, $search_department_website_as, $search_department_website,
+            $search_department_area, $search_department_country, $search_department_provstate, $search_department_region,
+            $search_department_city, $search_department_postal_code, $search_department_phone_as, $search_department_phone,
+            $search_company_name, $search_department_email_as, $search_department_email, $search_department_yes_industry, 
+            $search_department_no_industry, $search_department_size, $search_display1, $search_display2, $search_display3, 
+            $search_display4, $search_display5, $search_display6, $search_display7, $search_display8, $search_order1, $search_order2, 
+            $search_order3, $search_order4, $search_department_flags_boolean, $search_department_flags, $search_department_status_status,
+            $search_department_status_department
+            )
+    {
+        $this->search_department_name = removeSlashes($search_department_name);
+        $this->search_department_website_as = removeSlashes($search_department_website_as);
+        $this->search_department_website = removeSlashes($search_department_website);
+        $this->search_department_area = removeSlashes($search_department_area);
+        $this->search_department_country = removeSlashes($search_department_country);
+        $this->search_department_provstate = removeSlashes($search_department_provstate);
+        $this->search_department_region = removeSlashes($search_department_region);
+        $this->search_department_city = removeSlashes($search_department_city);
+        $this->search_department_postal_code = removeSlashes($search_department_postal_code);
+        $this->search_department_phone_as = removeSlashes($search_department_phone_as);
+        $this->search_department_phone = removeSlashes($search_department_phone);
+        $this->search_company_name = removeSlashes($search_company_name);
+        $this->search_department_email_as = removeSlashes($search_department_email_as);
+        $this->search_department_email = removeSlashes($search_department_email);
+        $this->search_department_yes_industry = removeSlashes($search_department_yes_industry);
+        $this->search_department_no_industry = removeSlashes($search_department_no_industry);
+        $this->search_department_size = removeSlashes($search_department_size);
+        $this->search_department_flags_boolean = removeSlashes($search_department_flags_boolean);
+        $this->search_department_flags = removeSlashes($search_department_flags);
+        $this->search_department_status_status = removeSlashes($search_department_status_status);
+        $this->search_department_status_department = removeSlashes($search_department_status_department);
+
+        $this->search_display1 = removeSlashes($search_display1);
+        $this->search_display2 = removeSlashes($search_display2);
+        $this->search_display3 = removeSlashes($search_display3);
+        $this->search_display4 = removeSlashes($search_display4);
+        $this->search_display5 = removeSlashes($search_display5);
+        $this->search_display6 = removeSlashes($search_display6);
+        $this->search_display7 = removeSlashes($search_display7);
+        $this->search_display8 = removeSlashes($search_display8);
+        $this->search_order1 = removeSlashes($search_order1);
+        $this->search_order2 = removeSlashes($search_order2);
+        $this->search_order3 = removeSlashes($search_order3);
+        $this->search_order4 = removeSlashes($search_order4);
+    }
+
+    function set_department_values_2($search_company_name, $search_company_website_as, $search_company_website,
+            $search_company_area, $search_company_country, $search_company_provstate, $search_company_region,
+            $search_company_city, $search_company_postal_code, $search_company_phone_as, $search_company_phone,
+            $search_company_email_as, $search_company_email, $search_company_yes_industry, $search_company_no_industry, 
+            $search_company_size, $search_company_type, $search_company_flags_boolean, $search_company_flags, 
+            $search_company_status_status, $search_company_status_department
+            )
+    {
+        $this->search_company_name = removeSlashes($search_company_name);
+        $this->search_company_website_as = removeSlashes($search_company_website_as);
+        $this->search_company_website = removeSlashes($search_company_website);
+        $this->search_company_area = removeSlashes($search_company_area);
+        $this->search_company_country = removeSlashes($search_company_country);
+        $this->search_company_provstate = removeSlashes($search_company_provstate);
+        $this->search_company_region = removeSlashes($search_company_region);
+        $this->search_company_city = removeSlashes($search_company_city);
+        $this->search_company_postal_code = removeSlashes($search_company_postal_code);
+        $this->search_company_phone_as = removeSlashes($search_company_phone_as);
+        $this->search_company_phone = removeSlashes($search_company_phone);
+        $this->search_company_email_as = removeSlashes($search_company_email_as);
+        $this->search_company_email = removeSlashes($search_company_email);
+        $this->search_company_yes_industry = removeSlashes($search_company_yes_industry);
+        $this->search_company_no_industry = removeSlashes($search_company_no_industry);
+        $this->search_company_size = removeSlashes($search_company_size);
+        $this->search_company_type = removeSlashes($search_company_type);
+        $this->search_company_flags_boolean = removeSlashes($search_company_flags_boolean);
+        $this->search_company_flags = removeSlashes($search_company_flags);
+        $this->search_company_status_status = removeSlashes($search_company_status_status);
+        $this->search_company_status_department = removeSlashes($search_company_status_department);
+    }
+
+    function set_company_values_1($search_company_name, $search_company_name_as, $search_company_website_as, $search_company_website, $search_company_area, 
+            $search_company_country, $search_company_provstate, $search_company_region, $search_company_city, $search_company_postal_code, 
+            $search_company_phone_as, $search_company_phone, $search_company_email_as, $search_company_email, $search_company_yes_industry, 
+            $search_company_no_industry, $search_company_size, $search_company_type, $search_display1, $search_display2, $search_display3, 
+            $search_display4, $search_display5, $search_display6, $search_display7, $search_display8, $search_order1, $search_order2, $search_order3, 
+            $search_order4, $search_comp_or_div, $search_company_flags_boolean, $search_company_flags, $search_company_status_status, 
+            $search_company_status_department
+            )
+    {
+        $this->search_company_name = removeSlashes($search_company_name);
+        $this->search_company_name_as = removeSlashes($search_company_name_as);
+        $this->search_company_website_as = removeSlashes($search_company_website_as);
+        $this->search_company_website = removeSlashes($search_company_website);
+        $this->search_company_area = removeSlashes($search_company_area);
+        $this->search_company_country = removeSlashes($search_company_country);
+        $this->search_company_provstate = removeSlashes($search_company_provstate);
+        $this->search_company_region = removeSlashes($search_company_region);
+        $this->search_company_city = removeSlashes($search_company_city);
+        $this->search_company_postal_code = removeSlashes($search_company_postal_code);
+        $this->search_company_phone_as = removeSlashes($search_company_phone_as);
+        $this->search_company_phone = removeSlashes($search_company_phone);
+        $this->search_company_name = removeSlashes($search_company_name);
+        $this->search_company_email_as = removeSlashes($search_company_email_as);
+        $this->search_company_email = removeSlashes($search_company_email);
+        $this->search_company_yes_industry = removeSlashes($search_company_yes_industry);
+        $this->search_company_no_industry = removeSlashes($search_company_no_industry);
+        $this->search_company_size = removeSlashes($search_company_size);
+        $this->search_company_type = removeSlashes($search_company_type);
+        $this->search_company_flags_boolean = removeSlashes($search_company_flags_boolean);
+        $this->search_company_flags = removeSlashes($search_company_flags);
+        $this->search_company_status_status = removeSlashes($search_company_status_status);
+        $this->search_company_status_department = removeSlashes($search_company_status_department);
+
+        $this->search_display1 = removeSlashes($search_display1);
+        $this->search_display2 = removeSlashes($search_display2);
+        $this->search_display3 = removeSlashes($search_display3);
+        $this->search_display4 = removeSlashes($search_display4);
+        $this->search_display5 = removeSlashes($search_display5);
+        $this->search_display6 = removeSlashes($search_display6);
+        $this->search_display7 = removeSlashes($search_display7);
+        $this->search_display8 = removeSlashes($search_display8);
+        $this->search_order1 = removeSlashes($search_order1);
+        $this->search_order2 = removeSlashes($search_order2);
+        $this->search_order3 = removeSlashes($search_order3);
+        $this->search_order4 = removeSlashes($search_order4);
+
+        $this->search_comp_or_div = removeSlashes($search_comp_or_div);
+    }
+
+    // This function is used to setup searching specifically based on an employer_id (used through quickmenus).
+    function search_on_employer_id($employer_id)
+    {
+        if (!trim($employer_id))
+        {
+            return false;
+        }
+
+        $this->search_using_only_division_id = false;
+        $this->search_using_only_employer_id = true;
+        unset($this->search_division_id);
+        $this->search_employer_id = $employer_id;
+
+        return true;
+    }
+
+    // This function is used to setup searching specifically based on a division_id (used through quickmenus).
+    function search_on_division_id($division_id)
+    {
+        if (!trim($division_id))
+        {
+            return false;
+        }
+
+        $this->search_using_only_employer_id = false;
+        $this->search_using_only_division_id = true;
+        unset($this->search_employer_id);
+        $this->search_division_id = $division_id;
+
+        return true;
+    }
+}
+
+?>

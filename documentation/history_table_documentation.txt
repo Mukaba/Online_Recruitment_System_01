@@ -1,0 +1,554 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: history_table_documentation.txt                                    |
++------------------------------------------------------------------------------+
+
+This file's purpose is to document all of the tables currently used in Mamook[tm] by the
+history module.
+
+This document was created on Feb 24, 2003
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+Primary Key
+[Multiple Key]
+Foreign Key(s)
+    foreign key -> main table that the key links to
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+
+--------------------------------------------------------------------------------
+
+Table Name:  applications
+Purpose:  Stores students' job applications in the system.
+
+Primary Key:  { applications_id }
+Multiple Key:  { resume_id, student_number, job_id, coverletter_id, app_status }
+Foreign Keys:
+                app_status -> application_status
+                coverletter_id -> coverletter
+                job_id -> job_info
+                resume_id -> resume
+                student_number -> student
+
+This table is only included in this release because the history module assumes 
+its existence.  Check job applications documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  contact
+Purpose:  Stores all the contacts available in the system.
+
+Primary Key:  { contact_id } 
+Foreign Keys:
+                country_id -> country_list
+                provstate_id -> provstate_list
+                region_id -> region_list
+
+This table is only included in this release because the history module assumes 
+its existence.  Check contact documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  contact_internal
+Purpose:  Stores specific information for internal contacts.
+
+Primary Key:  { contact_id } 
+Multiple Key:  { contact_id, department_id }
+Foreign Keys:
+                contact_id -> contact
+                department_id -> department
+
+This table is only included in this release because the history module assumes 
+its existence.  Check contact documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  country_list
+Purpose:  Stores all the countries available in the system.
+
+Primary Key:  { country_id }
+Foreign Keys:
+                area_id -> area_list
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  department
+Purpose:  Stores all the available co-op departments.
+
+Primary Key:  { department_id }
+Foreign Keys:
+                default_building_id -> building
+                primary_contact_id -> contact, contact_internal
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  department_history_flags
+Purpose:  Stores history flags that are used by each department.
+This is a relation table for history_flags.
+
+Primary Key:  { department_id, history_flags_id }
+Foreign Keys:
+                department_id -> department
+                history_flags_id -> history_flags 
+
+--------------------------------------------------------------------------------
+
+Table Name:  department_history_report_subject
+Purpose:  Stores work term report subjects that are used by each department.
+This is a relation table for history_report_subject
+
+Primary Key:  { department_id, report_subject_id }
+Foreign Keys:
+                department_id -> department
+                report_subject_id -> history_report_subject 
+
+--------------------------------------------------------------------------------
+
+Table Name:  discipline
+Purpose:  Stores all the disciplines available in the system.
+
+Primary Key:  { discipline_id }
+Foreign Keys:
+                department_id -> department
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  eligible_placed
+Purpose:  Stores the specific terms for which a student is eligible or placed.
+
+Primary Key:  { record_id }
+Multiple Key:  { resume_id, student_number, job_id, coverletter_id, app_status }
+Foreign Keys:
+                app_status -> application_status
+                coverletter_id -> coverletter
+                job_id -> job_info
+                resume_id -> resume
+                student_number -> student
+
+    Column Name:  added_by_admin
+    Purpose:  Boolean { 0, 1 } value for whether or not the application was added by admin.
+
+    Column Name:  applied_date
+    Purpose:  The date and time the student applied to the job.
+
+    Column Name:  transcript
+    Purpose:  Boolean { 0, 1 } value for whether or not the application should be sent with
+    the student's transcript.
+
+--------------------------------------------------------------------------------
+
+Table Name:  employer_company
+Purpose:  Stores all the available companies in the system.
+
+Primary Key:  { employer_id }
+Multiple Key:  { employer_id, company_name }
+Foreign Keys:
+                change_by_1 -> contact, contact_internal
+                change_by_2 -> contact, contact_internal
+                change_by_3 -> contact, contact_internal
+                company_type_id -> company_type
+                country_id -> country_list
+                employer_id -> employer_company
+                entered_by -> contact, contact_internal
+                industry_id -> industries
+                provstate_id -> provstate_list
+                region_id -> region_list
+                size_id -> employer_sizes
+
+This table is only included in this release because the history module assumes 
+its existence.  Check contact documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  employer_department
+Purpose:  Stores all the available company divisions.
+
+Primary Key:  { department_id }
+Multiple Key:  { employer_id, department_name }
+Foreign Keys:
+                change_by_1 -> contact, contact_internal
+                change_by_2 -> contact, contact_internal
+                change_by_3 -> contact, contact_internal
+                country_id -> country_list
+                employer_id -> employer_company
+                entered_by -> contact, contact_internal
+                industry_id -> industries
+                provstate_id -> provstate_list
+                region_id -> region_list
+                size_id -> employer_sizes
+
+This table is only included in this release because the history module assumes 
+its existence.  Check contact documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  history
+Purpose:  Stores the records for all the job placements made in the system.
+
+Primary Key:  { student_number, department_id }
+Multiple Key:  { employer_id, student_number, term_id, year, company_department_id,
+                 job_id, department_id }
+Foreign Keys:
+                change_by_1 -> contact, contact_internal
+                change_by_2 -> contact, contact_internal
+                change_by_3 -> contact, contact_internal
+                company_country -> country_list
+                company_department_id -> employer_department
+                company_province -> provstate_list
+                company_region_id -> region_list
+                contact_id -> contact
+                contact_id2 -> contact
+                department_id -> department
+                employer_id -> employer_company
+                job_id -> job_info
+                options -> history_options
+                report_subject -> department_history_report_subject
+                site_visit_by -> contact, contact_internal
+                site_visit_by_supervisor -> contact, contact_internal
+                site_visit_type_id -> site_visit_type
+                site_visit_type_id_supervisor -> contact, contact_internal
+                student_number -> student
+                term_id -> term
+                work_term_country -> country_list
+                work_term_province -> provstate_list
+                work_term_region_id -> region_list
+                wt_status -> history_status
+
+    Column Name:  student_work_phone
+    Purpose:  Student's workplace phone number for the work term.
+
+    Column Name:  job_title
+    Purpose:  Student's work position title for the work term.
+
+    Column Name:  site_visit_by 
+    Purpose:  Contact, probably an internal contact, who did the work site visit.
+
+    Column Name:  report_title
+    Purpose:  Student's work term report title.
+
+    Column Name:  report_code
+    Purpose:  A general purpose field that can be used for arbitrary purposes.
+    At UVic, it's used for anything from codes that say the report's been graded,
+    to dates of when the reports were received.
+
+    Column Name:  work_term_length
+    Purpose:  Work term duration in months.
+
+    Column Name:  work_email
+    Purpose:  E-mail address that the student can respond to from work or during their
+    work term.
+
+    Column Name:  salary
+    Purpose:  Salary, currently stored as Amount/Pay period, eg. 2200/month.  This will
+    column will likely change in the future to a numeric value, with the pay period
+    in a seperate column.
+
+    Column Name:  comment
+    Purpose:  Stores any comments advisors wish to make about the work term.
+
+    Column Name:  work_site_visit_notes
+    Purpose:  Stores notes advisors wish to make about the site visit.
+
+    Column Name:  department_name
+    Purpose:  Stores the name of the company department/division that the student
+    is employed at.
+
+    Column Name:  company_position
+    Purpose:  DEPRECATED
+    
+    Column Name:  supervisor_*
+    Purpose:  Stores information for the student's work supervisor.
+
+    Column Name:  work_term_*
+    Purpose:  Stores the student's home address while they're on work term.
+
+    Column Name:  wt_status
+    Purpose:  Foreign key for history_status, that shows the academic grade
+    for the workterm.
+
+    Column Name:  options
+    Purpose:  Stores confirmation options like to be confirmed, verbal confirmation,
+    letter of confirmation, etc. information about the work term.  This is needed
+    because the history record is made as soon as the student is offered the job,
+    and this options column says at what stage the confirmation process is.
+
+    Column Name:  hitech
+    Purpose:  DEPRECATED
+
+    Column Name:  site_visit_date_supervisor
+    Purpose:  Stores the date that a site visit was made with the work supervisor.
+    This can be different from the visit made with the student--they might be 
+    scheduled on different days.
+
+    Column Name:  changes_recorded_*
+    Purpose:  Stores recent changes made to the individual history record.
+
+    Column Name:  change_by_*
+    Purpose:  Stores which contact made the 3 most recent changes recorded in
+    changes_recorded_*.
+
+    Column Name:  change_date_*
+    Purpose:  Stores the dates on which the 3 most recent changes of
+    changes_recorded_* were made.
+
+--------------------------------------------------------------------------------
+
+Table Name:  history_flags
+Purpose:  Stores all the history flags available for use in the system.  These
+flags are arbitrary and defined by the needs of each co-op department.
+
+Primary Key:  { history_flags_id }
+
+    Column Name:  description
+    Purpose:  Textual description of the flag
+
+    Column Name:  order_by
+    Purpose:  Column used for alternative ordering in sql.
+
+    Column Name:  comment
+    Purpose:  Comment for a particular flag.  Used currently to redudantly store
+    which department uses each flag.
+
+--------------------------------------------------------------------------------
+
+Table Name:  history_flags_join
+Purpose:  Stores the flags that have been applied to a history record.
+
+Primary Key:  { history_id, history_flags_id }
+Foreign Keys:
+                history_id -> history
+                history_flags_id -> history_flags
+
+    Column Name:  department_id
+    Purpose:  DEPRECATED
+
+--------------------------------------------------------------------------------
+
+Table Name:  history_notes
+Purpose:  Stores all the notes saved against each history record.
+
+Primary Key:  { history_notes_id }
+Multiple Key:  { history_notes_id, history_id } 
+Foreign Keys:
+                history_id -> history
+                contact_id -> contact, contact_internal
+
+    Column Name:  date_entered
+    Purpose:  Time and date the note was saved, emphasis on the fact that this is
+    saved in a date and time format despite the name.
+
+    Column Name:  contact_id
+    Purpose:  Advisor or contact who saved the note.
+
+--------------------------------------------------------------------------------
+
+Table Name:  history_options
+Purpose:  Stores the available levels of confirmation for job placements.
+Eg.  verbal confirmation, written confirmation, etc.
+
+Primary Key:  { history_options_id }
+
+    Column Name:  history_options_name
+    Purpose:  Textual description or name for the level of confirmation.
+
+--------------------------------------------------------------------------------
+
+Table Name:  history_report_subject
+Purpose:  Stores the available work term report subjects.
+
+Primary Key:  { report_subject_id }
+Multiple Key:  { report_subject_id, department_id }
+Foreign Keys:
+                department_id -> department
+
+    Column Name:  report_subject_name
+    Purpose:  The subject name.
+
+    Column Name:  department_id
+    Purpose:  Which co-op department uses the subject.
+
+    Column Name:  comment
+    Purpose:  Textual comment.  For now, it is used to redundantly store the
+    co-op department code for the department that uses the subject.  This
+    may change in the future.
+
+--------------------------------------------------------------------------------
+
+Table Name:  history_status
+Purpose:  Stores the available statuses for work terms.  This usually denotes the
+academic standing for a given work term, from academic grades to codes
+like COM for complete and INP for in progress.
+
+Primary Key:  { history_status_id }
+
+    Column Name:  history_status_name
+    Purpose:  Textual description of the history status.
+
+--------------------------------------------------------------------------------
+
+Table Name:  job_info
+Purpose:  Stores all the available job descriptions.
+
+Primary Key:  { job_id }
+Multiple Key:  { employer_id, department_id, job_code, term_id, year
+                 , closing_date, status, country_id, provstate_id, region_id
+                 , closing_time, contact_id, employer_department_id, industry }
+Foreign Keys:
+                employer_id -> employer_company
+                department_id -> department
+                term_id -> term
+                status -> job_status
+                country_id -> country_list
+                provstate_id -> provstate_list
+                region_id -> region_list
+                entered_by -> contact, contact_internal
+                last_updated_by -> contact, contact_internal
+                student_status -> student_status
+                employer_department_id -> employer_department
+                industry -> industries
+                internal_contact_id -> contact, contact_internal
+                interview_term_id -> term
+                admin_status -> admin_status
+                employer_status -> employer_status
+
+This table is only included in this release because the history module assumes 
+its existence.  Check job descriptions documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  provstate_list
+Purpose:  Stores all the available provinces and states.
+
+Primary Key:  { provstate_id } 
+Multiple Key:  { provstate_id, country_id }
+Foreign Keys:
+                country_id -> country_list
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  region_list
+Purpose:  Stores all the available geographical regions.
+
+Primary Key:  { region_id }
+Multiple Key:  { region_id, provstate_id }
+Foreign Keys:
+                provstate_id -> provstate_list
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  site_visit_type
+Purpose:  Stores all the different types of site visits available.
+
+Primary Key:  { site_visit_type_id }
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  student
+Purpose:  Stores all the students in the system.
+
+Primary Key:  { student_number }
+Foreign Keys:
+                student_status -> student_status
+                province_current -> provstate_list
+                province_permanent -> provstate_list
+                country_current -> country_list
+                country_permanent -> country_list
+                current_region_id -> region_list
+                permanent_region_id -> region_list
+
+This table is only included in this release because the history module assumes 
+its existence.  Check student documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  student_department
+Purpose:  Stores all the department-specific student information in the system.
+
+Primary Key:  { record_id }
+Multiple Key:  { department_id, student_number }
+Foreign Keys:
+                department_id -> department_id
+                student_number -> student
+                discipline_id -> discipline
+                change_by_1 -> contact, contact_internal
+                change_by_2 -> contact, contact_internal
+                change_by_3 -> contact, contact_internal
+
+This table is only included in this release because the history module assumes 
+its existence.  Check student documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  student_flags_join
+Purpose:  Stores all the student flags set for each student.
+
+Primary Key:  { record_id, student_flags_id }
+Foreign Keys:
+                record_id -> student_department
+                student_flags_id -> student_flags
+                student_number -> student
+
+This table is only included in this release because the history module assumes 
+its existence.  Check student documentation for more details.
+
+--------------------------------------------------------------------------------
+
+Table Name:  term
+Purpose:  Stores all the available academic terms and their information.
+
+Primary Key:  { term_id }
+
+This table is only included in this release because the history module assumes 
+its existence.  Check base documentation for more details.
+
+--------------------------------------------------------------------------------

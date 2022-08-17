@@ -1,0 +1,284 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: Contact.class                                                      |
+ +------------------------------------------------------------------------------+
+ | Description: This file holds all of the temporary input for adding a new     |
+ | contact to simplify passing it to the database.  This is the parent file     |
+ | for all of the other classes used in the contact module, and basically just  |
+ | declares the variables and a function called contact.                        |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+class Contact
+
+{
+
+	//Information specific to companies
+	
+	var $employer_id;			//int
+	var $company_name;			//string
+	var $company_website;			//string
+	var $company_description;		//string
+	var $company_street_address_1;		//string
+	var $company_street_address_2;		//string
+	var $company_street_address_3;		//string
+	var $company_city;			//string
+	var $company_region_id;			//int
+	var $company_provstate_id;		//int
+	var $company_country_id;		//int
+	var $company_postal_code;		//string
+	var $company_phone;			//string
+	var $company_fax;			//string
+	var $company_email;			//string
+	var $company_changes_recorded_1;	//string
+	var $company_changes_recorded_2;	//string	
+	var $company_changes_recorded_3;	//string	
+	var $company_change_by_1;		//string
+	var $company_change_by_2;		//string
+	var $company_change_by_3;		//string
+	var $company_change_date_1;		//string (in date format)
+	var $company_change_date_2;		//string (in date format)
+	var $company_change_date_3;		//string (in date format)
+	var $company_flags;			//array
+	var $company_industry_id;		//int (or array.  Not sure about this one either)
+	var $company_size_id;			//int (size_id)
+	var $company_department_comments;	//string (not currently used)
+	var $company_name_legitimate;		//int
+	var $company_type_id;			//int
+	var $company_status;			//int
+	var $company_new_note;			//string
+	var $company_note_ids;			//array of ints
+	var $company_delete_note_ids;		//array of ints
+	
+	//Information specific to departments
+
+	var $department_id;			//int
+	var $department_company_id;		//int
+	var $department_name;			//string
+	var $department_website;		//string
+	var $department_description;		//string
+	var $department_location_info;		//string
+	var $department_street_address_1;	//string
+	var $department_street_address_2;	//string
+	var $department_street_address_3;	//string
+	var $department_city;			//string
+	var $department_region_id;		//int
+	var $department_provstate_id;		//int
+	var $department_country_id;		//int
+	var $department_postal_code;		//string
+	var $department_phone;			//string
+	var $department_fax;			//string
+	var $department_email;			//string
+	var $department_changes_recorded_1;	//string
+	var $department_changes_recorded_2;	//string
+	var $department_changes_recorded_3;	//string
+	var $department_change_by_1;		//string
+	var $department_change_by_2;		//string
+	var $department_change_by_3;		//string
+	var $department_change_date_1;		//string (in date format)
+	var $department_change_date_2;		//string (in date format)
+	var $department_change_date_3;		//string (in date format)
+	var $department_flags;			//array
+	var $department_industry_id;		//int (or array.  Not sure about this one either)
+	var $department_size_id;		//int (size_id)
+	var $department_department_comments;	//string (not currently used)
+	var $department_name_legitimate;	//int
+	var $department_status;			//int
+	var $department_new_note;		//int
+	var $department_note_ids;		//array of ints
+	var $department_delete_note_ids;	//array of ints
+	
+	//Information specific to contacts
+
+	var $contact_id;			//int
+	var $contact_employer_id;		//int
+	var $contact_department_id;		//int
+	var $contact_title;			//string
+	var $contact_first_name;		//string
+	var $contact_middle_name;		//string
+	var $contact_last_name;			//string
+	var $contact_called_name;		//string
+	var $contact_greeting;			//string
+	var $contact_email;			//string
+	var $contact_phone;			//string
+	var $contact_pager;			//string
+	var $contact_cellphone;			//string
+	var $contact_fax;			//string
+	var $contact_position_title;		//string
+	var $contact_department_name;		//string
+	var $contact_location_info;		//string
+	var $contact_street_address_1;		//string
+	var $contact_street_address_2;		//string
+	var $contact_street_address_3;		//string
+	var $contact_city;			//string
+	var $contact_region_id;			//int
+	var $contact_provstate_id;		//int
+	var $contact_country_id;		//int
+	var $contact_postal_code;		//string
+	var $contact_status_id; 		//int	
+    var $contact_status_flag_array;     //array
+    var $contact_deleted_flag;          //int (0 or 1)
+	var $contact_department_comments;	//string (not currently used)
+	var $contact_changes_recorded_1;	//string
+	var $contact_changes_recorded_2;	//string
+	var $contact_changes_recorded_3;	//string
+	var $contact_change_by_1;		//string
+	var $contact_change_by_2;		//string
+	var $contact_change_by_3;		//string
+	var $contact_change_date_1;		//string (in date format)
+	var $contact_change_date_2;		//string (in date format)
+	var $contact_change_date_3;		//string (in date format)
+	var $contact_last_contacted_on;		//string (in date format)
+	var $contact_last_contacted_by;		//string
+	var $contact_last_action_on;		//string (in date format)
+	var $contact_last_action_by;		//string
+	var $contact_last_action_id;		//int
+	var $contact_flags;			//array
+	var $contact_new_note;			//string
+	var $contact_note_ids;			//array of ints
+	var $contact_delete_note_ids;		//array of ints
+
+	function Contact($contact)
+	{
+		if ($contact)
+		{
+            $this->employer_id = $contact->employer_id;
+            $this->company_name = $contact->company_name;                       
+            $this->company_website = $contact->company_website;                    
+            $this->company_description = $contact->company_description;                
+            $this->company_street_address_1 = $contact->company_street_address_1;           
+            $this->company_street_address_2 = $contact->company_street_address_2;           
+            $this->company_street_address_3 = $contact->company_street_address_3;
+            $this->company_city = $contact->company_city;                       
+            $this->company_region_id = $contact->company_region_id;                     
+            $this->company_provstate_id = $contact->company_provstate_id;               
+            $this->company_country_id = $contact->company_country_id;                 
+            $this->company_postal_code = $contact->company_postal_code;                
+            $this->company_phone = $contact->company_phone;                      
+            $this->company_fax = $contact->company_fax;                        
+            $this->company_email = $contact->company_email;                      
+            $this->company_changes_recorded_1 = $contact->company_changes_recorded_1;            
+            $this->company_changes_recorded_2 = $contact->company_changes_recorded_2;            
+            $this->company_changes_recorded_3 = $contact->company_changes_recorded_3;            
+            $this->company_change_by_1 = $contact->company_change_by_1;                
+            $this->company_change_by_2 = $contact->company_change_by_2;                
+            $this->company_change_by_3 = $contact->company_change_by_3;                
+            $this->company_change_date_1 = $contact->company_change_date_1;              
+            $this->company_change_date_2 = $contact->company_change_date_2;              
+            $this->company_change_date_3 = $contact->company_change_date_3;              
+            $this->company_flags = $contact->company_flags;                      
+            $this->company_industry_id = $contact->company_industry_id;                     
+            $this->company_size_id = $contact->company_size_id;
+            $this->company_department_comments = $contact->company_department_comments;        
+            $this->company_name_legitimate = $contact->company_name_legitimate;
+            $this->company_status = $contact->company_status;
+            $this->company_new_note = $contact->company_new_note;
+            $this->company_note_ids = $contact->company_note_ids;
+            $this->company_delete_note_ids = $contact->company_delete_note_ids;
+            $this->company_type_id = $contact->company_type_id;
+
+            $this->department_company_id = $contact->department_company_id;
+            $this->department_id = $contact->department_id;
+            $this->department_name = $contact->department_name;                    
+            $this->department_website = $contact->department_website;                 
+            $this->department_description = $contact->department_description;             
+            $this->department_location_info = $contact->department_location_info;
+            $this->department_street_address_1 = $contact->department_street_address_1;        
+            $this->department_street_address_2 = $contact->department_street_address_2;        
+            $this->department_street_address_3 = $contact->department_street_address_3;
+            $this->department_city = $contact->department_city;                    
+            $this->department_region_id = $contact->department_region_id;                  
+            $this->department_provstate_id = $contact->department_provstate_id;            
+            $this->department_country_id = $contact->department_country_id;              
+            $this->department_postal_code = $contact->department_postal_code;             
+            $this->department_phone = $contact->department_phone;                   
+            $this->department_fax = $contact->department_fax;                     
+            $this->department_email = $contact->department_email;                   
+            $this->department_changes_recorded_1 = $contact->department_changes_recorded_1;         
+            $this->department_changes_recorded_2 = $contact->department_changes_recorded_2;         
+            $this->department_changes_recorded_3 = $contact->department_changes_recorded_3;         
+            $this->department_change_by_1 = $contact->department_change_by_1;             
+            $this->department_change_by_2 = $contact->department_change_by_2;             
+            $this->department_change_by_3 = $contact->department_change_by_3;             
+            $this->department_change_date_1 = $contact->department_change_date_1;           
+            $this->department_change_date_2 = $contact->department_change_date_2;           
+            $this->department_change_date_3 = $contact->department_change_date_3;           
+            $this->department_flags = $contact->department_flags;                   
+            $this->department_industry_id = $contact->department_industry_id;                  
+            $this->department_size_id = $contact->department_size_id;
+            $this->department_department_comments = $contact->department_department_comments;     
+            $this->department_name_legitimate = $contact->department_name_legitimate;
+            $this->department_status = $contact->department_status;
+            $this->department_new_note = $contact->department_new_note;
+            $this->department_note_ids = $contact->department_note_ids;
+            $this->department_delete_note_ids = $contact->department_delete_note_ids;
+
+            $this->contact_employer_id = $contact->contact_employer_id;
+            $this->contact_department_id = $contact->contact_department_id;
+            $this->contact_id = $contact->contact_id;
+            $this->contact_title = $contact->contact_title;
+            $this->contact_first_name = $contact->contact_first_name;
+            $this->contact_middle_name = $contact->contact_middle_name;
+            $this->contact_last_name = $contact->contact_last_name;
+            $this->contact_called_name = $contact->contact_called_name;
+            $this->contact_greeting = $contact->contact_greeting;
+            $this->contact_email = $contact->contact_email;
+            $this->contact_phone = $contact->contact_phone;
+            $this->contact_pager = $contact->contact_pager;
+            $this->contact_cellphone = $contact->contact_cellphone;
+            $this->contact_fax = $contact->contact_fax;
+            $this->contact_position_title = $contact->contact_position_title;
+            $this->contact_department_name = $contact->contact_department_name;
+            $this->contact_location_info = $contact->contact_location_info;
+            $this->contact_street_address_1 = $contact->contact_street_address_1;
+            $this->contact_street_address_2 = $contact->contact_street_address_2;
+            $this->contact_street_address_3 = $contact->contact_street_address_3;
+            $this->contact_city = $contact->contact_city;
+            $this->contact_region_id = $contact->contact_region_id;
+            $this->contact_provstate_id = $contact->contact_provstate_id;
+            $this->contact_country_id = $contact->contact_country_id;
+            $this->contact_postal_code = $contact->contact_postal_code;
+            $this->contact_status_id = $contact->contact_status_id;
+            $this->contact_status_flag_array = $contact->contact_status_flag_array;
+            $this->contact_department_comments = $contact->contact_department_comments;
+            $this->contact_changes_recorded_1 = $contact->contact_changes_recorded_1;
+            $this->contact_changes_recorded_2 = $contact->contact_changes_recorded_2;
+            $this->contact_changes_recorded_3 = $contact->contact_changes_recorded_3;
+            $this->contact_change_by_1 = $contact->contact_change_by_1;
+            $this->contact_change_by_2 = $contact->contact_change_by_2;
+            $this->contact_change_by_3 = $contact->contact_change_by_3;
+            $this->contact_change_date_1 = $contact->contact_change_date_1;
+            $this->contact_change_date_2 = $contact->contact_change_date_2;
+            $this->contact_change_date_3 = $contact->contact_change_date_3;
+            $this->contact_last_contacted_on = $contact->contact_last_contacted_on;
+            $this->contact_last_contacted_by = $contact->contact_last_contacted_by;
+            $this->contact_flags = $contact->contact_flags;
+            $this->contact_new_note = $contact->contact_new_note;
+            $this->contact_note_ids = $contact->contact_note_ids;
+            $this->contact_delete_note_ids = $contact->contact_delete_note_ids;
+        }
+    }
+}

@@ -1,0 +1,334 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: newCompany_newContact.inc                                          |
+ +------------------------------------------------------------------------------+
+ | Description: This file is used to shift all of the inputs for a pending      |
+ | company, contact and job into a permanent spot for them in the database,     |
+ | when both the company and the contact are new ones..                         |
+ +------------------------------------------------------------------------------+
+
+*/
+
+assert(isset($job_id));
+
+// Draw pending values from database.
+
+$pendingEmployer = new PendingEmployer('');
+$pendingEmployer->load_pending_values($job_id);
+
+// Insert company values
+
+$sql = ("
+	INSERT INTO employer_company
+	(
+	company_name, website, company_description, street_address_1, street_address_2, street_address_3, city, 
+	region_id, provstate_id, country_id, postal_code, phone, fax, email, industry_id, entered_by, entered_on, 
+	size_id, company_display, company_type_id
+	)
+	VALUES (
+	'" . addslashes(trim($pendingEmployer->company_name)) . "',
+	'" . addslashes(trim($pendingEmployer->company_website)) . "',
+	'" . addslashes(trim($pendingEmployer->company_description)) . "',
+	'" . addslashes(trim($pendingEmployer->company_street_address_1)) . "',
+	'" . addslashes(trim($pendingEmployer->company_street_address_2)) . "',
+	'" . addslashes(trim($pendingEmployer->company_street_address_3)) . "',
+	'" . addslashes(trim($pendingEmployer->company_city)) . "',
+	'" . addslashes(trim($pendingEmployer->company_region_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_provstate_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_country_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_postal_code)) . "',
+	'" . addslashes(trim($pendingEmployer->company_phone)) . "',
+	'" . addslashes(trim($pendingEmployer->company_fax)) . "',
+	'" . addslashes(trim($pendingEmployer->company_email)) . "',
+	'" . addslashes(trim($pendingEmployer->company_industry_id)) . "',
+	'" . addslashes(trim($auth->contact_id)) . "',
+	CURRENT_DATE,
+	'" . addslashes(trim($pendingEmployer->company_size_id)) . "',
+	'1',
+	'" . addslashes(trim($pendingEmployer->company_type_id)) . "'
+	)
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+$sql = ("
+	SELECT LAST_INSERT_ID() AS new_employer_id
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+$row = $result->FetchRow();
+$new_employer_id = $row["new_employer_id"];
+
+// Insert department values
+
+$sql = ("
+	INSERT INTO employer_department
+	(employer_id, department_name, department_website, department_description, street_address_1, street_address_2, street_address_3, 
+    city, region_id, provstate_id, country_id, postal_code, phone, fax, email, industry_id, entered_by, entered_on, size_id)
+	VALUES (
+    '" . addslashes(trim($new_employer_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_name)) . "',
+	'" . addslashes(trim($pendingEmployer->company_website)) . "',
+	'" . addslashes(trim($pendingEmployer->company_description)) . "',
+	'" . addslashes(trim($pendingEmployer->company_street_address_1)) . "',
+	'" . addslashes(trim($pendingEmployer->company_street_address_2)) . "',
+	'" . addslashes(trim($pendingEmployer->company_street_address_3)) . "',
+	'" . addslashes(trim($pendingEmployer->company_city)) . "',
+	'" . addslashes(trim($pendingEmployer->company_region_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_provstate_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_country_id)) . "',
+	'" . addslashes(trim($pendingEmployer->company_postal_code)) . "',
+	'" . addslashes(trim($pendingEmployer->company_phone)) . "',
+	'" . addslashes(trim($pendingEmployer->company_fax)) . "',
+	'" . addslashes(trim($pendingEmployer->company_email)) . "',
+	'" . addslashes(trim($pendingEmployer->company_industry_id)) . "',
+	'" . addslashes(trim($auth->contact_id)) . "',
+	CURRENT_DATE,
+	'" . addslashes(trim($pendingEmployer->company_size_id)) . "'
+	)
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+$sql = ("
+	SELECT LAST_INSERT_ID() AS new_department_id
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+$row = $result->FetchRow();
+$new_department_id = $row["new_department_id"];
+
+// Delete old company values
+
+$sql = ("
+	DELETE FROM pending_employer_company
+	WHERE employer_id='" . addslashes($pendingEmployer->employer_id) . "'
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+// Insert contact values
+
+$sql = ("
+	INSERT INTO contact
+	(
+	title, first_name, last_name, called_name, middle_name, email, phone, pager, cellphone, fax, street_address_1, 
+	street_address_2, street_address_3, city, region_id, provstate_id, country_id, postal_code
+	)
+	VALUES (
+	'" . addslashes(trim($pendingEmployer->contact_title)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_first_name)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_last_name)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_called_name)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_middle_name)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_email)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_phone)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_pager)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_cellphone)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_fax)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_street_address_1)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_street_address_2)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_street_address_3)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_city)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_region_id)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_provstate_id)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_country_id)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_postal_code)) . "'
+	)
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+$sql = ("
+	SELECT LAST_INSERT_ID() AS new_contact_id
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+$row = $result->FetchRow();
+$new_contact_id = $row["new_contact_id"];
+
+// Insert contact_employer values
+
+$sql = ("
+	INSERT INTO contact_employer
+	(
+	contact_id, employer_id, department_id, department_name, employer_type, entered_by, entered_on
+	)
+	VALUES (
+	'" . addslashes(trim($new_contact_id)) . "',
+	'" . addslashes(trim($new_employer_id)) . "',
+	'" . addslashes(trim($new_department_id)) . "',
+	'" . addslashes(trim($pendingEmployer->contact_department_name)) . "',
+	'2',
+	'" . addslashes(trim($auth->contact_id)) . "',
+	CURRENT_DATE
+	)
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+// Delete from pending contact table
+
+$sql = ("
+	DELETE FROM pending_employer_contact
+	WHERE contact_id='" . addslashes($pendingEmployer->contact_id) . "'
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+// Insert the job description
+
+$pendingEmployer->job_workterm_lengths = implode(",", $pendingEmployer->job_workterm_lengths);
+
+$sql = ("
+	INSERT INTO job_info
+	(
+	employer_id, department_id, contact_id, employer_department_id, term_id, year, position_title, num_positions, 
+	apply_method, receive_address, country_id, provstate_id, region_id, city, salary_amount1, salary_amount2, salary_period, 
+	workterm_lengths, other_postings, job_description, min_academic, min_workterms, special_requirements, skills_required, 
+	comments, status, entered_by, workterm_hours, employer_code, is_rejectable, admin_status, date_entered, temp_date_entered,
+    start_date, end_date, displayname_on_coverltr
+	)
+	VALUES (
+	'" . addslashes(trim($new_employer_id)) . "',
+	'" . addslashes(trim($pendingEmployer->job_host_department)) . "',
+	'" . addslashes(trim($new_contact_id)) . "',
+	'" . addslashes(trim($new_department_id)) . "',
+	'" . addslashes(trim($pendingEmployer->job_start_term)) . "',
+	'" . addslashes(trim($pendingEmployer->job_start_year)) . "',
+	'" . addslashes(trim($pendingEmployer->job_position_title)) . "',
+	'" . addslashes(trim($pendingEmployer->job_num_positions)) . "',
+	'" . addslashes(trim($pendingEmployer->job_apply_method)) . "',
+	'" . addslashes(trim($pendingEmployer->job_receive_address)) . "',
+	'" . addslashes(trim($pendingEmployer->job_country_id)) . "',
+	'" . addslashes(trim($pendingEmployer->job_provstate_id)) . "',
+	'" . addslashes(trim($pendingEmployer->job_region_id)) . "',
+	'" . addslashes(trim($pendingEmployer->job_city)) . "',
+	'" . addslashes(trim($pendingEmployer->job_salary_amount1)) . "',
+	'" . addslashes(trim($pendingEmployer->job_salary_amount2)) . "',
+	'" . addslashes(trim($pendingEmployer->job_salary_period)) . "',
+	'" . addslashes(trim($pendingEmployer->job_workterm_lengths)) . "',
+	'" . addslashes(trim($pendingEmployer->job_other_postings)) . "',
+	'" . addslashes(trim($pendingEmployer->job_description)) . "',
+	'" . addslashes(trim($pendingEmployer->job_min_academic)) . "',
+	'" . addslashes(trim($pendingEmployer->job_min_workterms)) . "',
+	'" . addslashes(trim($pendingEmployer->job_special_requirements)) . "',
+	'" . addslashes(trim($pendingEmployer->job_skills_required)) . "',
+	'" . addslashes(trim($pendingEmployer->job_comments)) . "',
+	'" . NOT_CHECKED . "',
+	'" . addslashes(trim($auth->contact_id)) . "',
+	'" . addslashes(trim($pendingEmployer->job_workterm_hours)) . "',
+	'" . addslashes(trim($pendingEmployer->job_employer_code)) . "',
+	'1',
+	'1',
+    CURRENT_DATE(),
+    '" . getTempDateEntered($pendingEmployer->job_start_term, $pendingEmployer->job_start_year) . "',
+    ". ($pendingEmployer->job_start_date ? "'".$pendingEmployer->job_start_date."'" : "NULL").",
+    ". ($pendingEmployer->job_end_date ? "'".$pendingEmployer->job_end_date."'" : "NULL").",
+    ". ($pendingEmployer->job_displayname_on_coverltr ? "'".$pendingEmployer->job_displayname_on_coverltr."'" : "0")."
+        
+	)
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+$sql = ("
+	SELECT LAST_INSERT_ID() AS new_job_id
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+$row = $result->FetchRow();
+$new_job_id = $row["new_job_id"];
+	
+// Insert apply departments
+
+for ($i = 0; $i < sizeof($pendingEmployer->job_apply_departments); $i++)
+{
+	$sql = ("
+		INSERT INTO department_job_join(
+		department_id, job_id
+		)
+		VALUES (
+		'" . addslashes($pendingEmployer->job_apply_departments[$i]) . "',
+		'" . addslashes($new_job_id) . "'
+		)
+		");
+	$result = $GLOBALS['dbh']->Execute($sql);
+}
+
+// Insert applicable disciplines
+
+for ($i = 0; $i < sizeof($pendingEmployer->job_disciplines); $i++)
+{
+	$sql = ("
+		INSERT INTO job_discipline_join(
+		job_id, discipline_id
+		)
+		VALUES (
+		'" . addslashes($new_job_id) . "',
+		'" . addslashes($pendingEmployer->job_disciplines[$i]) . "'
+		)
+		");
+	$GLOBALS['dbh']->Execute($sql);
+}
+
+// Update the statuses of the new contact, division and company, for each applicable department
+$sql = ("
+    SELECT department_id
+    FROM department
+    WHERE job_list = '1'
+    ");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+while ($row = $result->FetchRow())
+{
+    updateContactStatus($new_contact_id, $row['department_id'], null, null);
+}
+
+// Delete from the pending job table
+
+$sql = ("
+	DELETE FROM pending_job_description
+	WHERE job_id='" . addslashes($pendingEmployer->job_id) . "'
+	");
+$result = $GLOBALS['dbh']->Execute($sql);
+
+$msg .= ("The company and contact information have been saved into the database.");
+
+$msg .= ("  The job description has also been saved with <b>Unchecked</b> status.  You may now edit the job's inputs and update it's");
+$msg .= (" status using the <b>Edit Job</b> option under <b>Job Descriptions</b>.  If you would like to generate an e-mail a login ID");
+$msg .= (" and password for this contact, you may do so by clicking the button below.<br /><br />");
+
+$msg .= ("
+	<center>
+	<table cellspacing=2 cellpadding=2>
+	<tr>
+                <td>
+                <form method='post' action='$PHP_SELF'>
+		<input type='hidden' name='select' value='add_contact' />
+		<input type='hidden' name='level1' value='contact' />
+		<input type='hidden' name='contact_id' value='" . $new_contact_id . "' />
+		<input type='hidden' name='employer_id' value='" . $new_employer_id . "' />
+		<input type='hidden' name='department_id' value='none' />
+		<input type='hidden' name='continue' value='email_contact_lp' />
+		<input type='submit' value='Generate an E-mail Login/Password' />
+                </form>
+                </td>
+	</tr>
+  	</table>
+	</center>
+	");
+
+notify($msg);
+
+?>

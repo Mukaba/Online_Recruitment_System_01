@@ -1,0 +1,117 @@
+body { margin: 0px; padding: 0px; background-image: url("images/bg.jpg");
+            background-position: top left; background-repeat: repeat; background-color: #ffffff}
+
+.bg {background-image: url("images/bg.jpg")}
+.topbar_bg {background-image: url("images/topbar_bg.jpg")}
+.center {text-align: center}
+
+.black { color: #000000; }
+b { color: #666699; }
+h5.black { color: #000000; }
+h1,h2,h3,h4,h5,h6,th { color: #333366; }
+
+a:link { text-decoration: none; color: #3333ff}
+a:active { text-decoration: none; }
+a:visited { text-decoration: none; color: #3333ff; }
+a.blue:visited { text-decoration: none; color: #3333ff; }
+
+/* for links at the top of the tables that allow ordering the columns */
+a.orderable { cursor: s-resize; }
+
+a.preference:link { text-decoration: none; color: #ffffff; }
+a.preference:visited { text-decoration: none; color: #ffffff; }
+
+/* rows used throughout the page */
+.row0 { color: #000000; background-color: #ccccff; }
+.row1 { color: #000000; background-color: #9999cc; }
+.row2 { color: #000000; background-color: #ccccff; }
+.row3 { color: #43a2b4; background-color: #cccccc; }
+.row4 { color: #000000; background-color: #cccccc; }
+.row5 { color: #000000; background-color: #cccccc; }
+
+/* the bar class is used for the left menu bar */
+/* .bar { color: #ffffff;  } */
+.bar a { font-weight: bold; color: #ffffff; }
+.bar a:link { color: #ffffff; }
+.bar a:active { color: #ffffff; }
+.bar a:visited { color: #ffffff; }
+
+/* menu blocks */
+.menuitem a { color: #000000; }
+.menuitem a:link { color: #000000; }
+.menuitem a:active { color: #000000; }
+.menuitem a:visited { color: #000000; }
+
+.bar2 a { font-weight: bold; color: #ffffff; }
+.bar2 a:link { color: #ffffff; }
+.bar2 a:active { color: #ffffff; }
+.bar2 a:visited { color: #ffffff; }
+
+.backgrey { background-color: #cccccc; }
+
+/* the tobar class is used for the top menu bar (only used on the view page) */
+.topbar { color: #ffffff; background-color: #666699; }
+
+/* the classes for <td> in tables
+ * the grey is for the column name of a menu
+ * rows can alternate colours when appropriate, or show students in row0d and breaks in row1d */
+
+/* old rows.. mostly grey and goldish colors */
+.rowgrey { color: #000000; background-color: #666699; }
+.row0d { color: #333333; background-color: #efefde; }
+.row1d { color: #333333; background-color: #e3e3e3; }
+.row2d { color: #333333; background-color: #999999; }
+/*efefde*/
+/*
+.rowgrey { color: #000000; background-color: #666666; }
+.row0d { color: #333333; background-color: #cccc99; }
+.row1d { color: #333333; background-color: #cccccc; }
+*/
+
+/* different bold classes */
+b.green { color: #336666; }
+b.white { color: #ffffff; }
+b.black { color: #000000; }
+b.red	{ color: #ff0000; }
+b.blue  { color: #333366; }
+b.lightblue { color : #9999cc; }
+b.instruct  { color: #ffff99; }
+
+span.white { color: #ffffff; }
+
+.bodytext { color: #336666; }
+
+.barbase { color: #cccccc; font-weight: lighter; }
+
+.light { color: #000000; background-color: #ccccff; }
+.med { color: #000000; background-color: #9999cc; }
+.dark { color: #000000; background-color: #333366; }
+
+.darktext { color: #333366; }
+
+
+/* calendar */
+.cal-titlebar { background-color: #666699; }
+.cal-title { font-weight: bold; }
+
+.cal-date-area { background-color: #ffffff; }
+.cal-dates {}
+
+.cal-day-names-area { background-color: #cccccc; }
+.cal-day-names {}
+   
+.cal-today { background-color: #ccccff; }
+   
+.cal-submit {}
+
+/*	debug message */
+.debug { color: #ffffff; background-color: #000000; }
+
+table.notify { color: #000000; background-color: #cc9999; }
+table.error { color: #000000; background-color: #ff9933; font-weight: bold; }
+
+div.clock { color: #ffffff; }
+
+
+/*  used to identifiy options used has within table - resume/admin/view.inc */
+.tableheaders { color: #333366; font-weight: bold; font-style: italic; }

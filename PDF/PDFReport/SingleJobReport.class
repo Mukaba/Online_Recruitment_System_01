@@ -1,0 +1,593 @@
+<?php
+/*
+
+   +------------------------------------------------------------------------------+
+   | Mamook[tm] Software                                                          |
+   +------------------------------------------------------------------------------+
+   | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+   +------------------------------------------------------------------------------+
+   | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+   | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+   | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+   | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+   | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+   | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+   | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+   | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+   | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+   | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |
+   |                                                                              |
+   | Software distributed under the License is distributed on an "AS IS" basis,   |
+   | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+   | the specific language governing rights and limitations under the License.    |
+   +------------------------------------------------------------------------------+
+   | Filename: SingleJobReport.class                                              |
+   +------------------------------------------------------------------------------+
+   | Description: This file is used to help convert many of our HTML documents    |
+   | into PDF files.                                                              |
+   +------------------------------------------------------------------------------+
+
+ */
+
+define( "INTERVIEW", 1 );	
+define( "INT_BREAK", 2 );	
+define( "LUNCH", 3 );	
+
+define( "FILE", "PDF/PDFReport/" . uniqid( "COOPX" ) . ".pdf" );	
+
+/*** 	8.5 x 11 inch	***/
+define( "WIDTH", 602 );
+define( "HEIGHT", 792 );
+define( "VMARGIN", 30 );
+define( "HMARGIN", 50 );	
+define( "RADIUS", 18 );
+
+define( "TOP", 670 );
+define ( "LHEIGHT", 24 );	// Line height
+
+class SingleJobReport extends EditInterview
+{
+	
+	//added by Emily on Feb 2, 2001 to prevent pdf_save in createnewpage from being called more than
+	//once which will create an error when printing
+	var $page_count = 1;
+	var $font_TB, $font_TR, $font_TI;
+
+	function decrementY( $amount, $pdf ){
+		global $y;
+		
+		$y -= $amount;
+		if ($y < (LHEIGHT + VMARGIN) ){
+			pdf_end_page ( $pdf );
+			$this->createNewPage( $pdf );
+			$y = HEIGHT-VMARGIN - LHEIGHT;
+		}
+
+	}
+	
+	function createSchedule( $pdf )
+	{
+		global $y;	//	current y-coordinate
+		
+		$this->decrementY( LHEIGHT, $pdf );
+
+		for( $i = 0; $i < count( $this->int_dates ); $i++ )
+		{
+			
+			$result = $GLOBALS['dbh']->Execute("SELECT distinct int_time, int_type FROM interview_time
+						WHERE job_id='$this->job_id' AND int_date='" . $this->int_dates[$i] . "' AND switch = 0 AND int_type = '". INTERVIEW ."' AND sequential= 0
+						ORDER by int_type, int_time, interviewer_id" );
+								
+			/***	check there is enough space to fit a daily schedule in, if not, display the schedule in next page.		***/			
+			$count =  $result->RecordCount();
+			$rows = ceil( $count / 2 );
+				
+			if ( $y < LHEIGHT * ( $rows + 3 ) )
+			{
+				pdf_end_page	( $pdf );
+				$this->createNewPage( $pdf );
+				$y = HEIGHT-VMARGIN-LHEIGHT;
+			}
+			
+			if( count( $this->int_dates ) > 1 )
+			{
+
+				if ($this->font_TB) {
+					pdf_setfont		($pdf, $this->font_TB, 13);
+				}
+				pdf_setlinewidth		( $pdf, 2 );
+				
+				$date = formatLongDate  	( $this->int_dates[$i] );
+				$length = pdf_stringwidth	( $pdf, $date );
+
+			   	pdf_moveto			( $pdf, HMARGIN, $y + 5 );
+				pdf_lineto			( $pdf, ( WIDTH - $length )/2 - 25  , $y + 5 );
+			   	pdf_moveto			( $pdf, ( WIDTH + $length )/2 + 25 , $y + 5 );
+				pdf_lineto			( $pdf, WIDTH - HMARGIN  , $y + 5 );
+   				pdf_stroke			( $pdf );
+				pdf_show_xy			( $pdf, $date, ( WIDTH - $length )/2  , $y );
+				$this->decrementY( LHEIGHT, $pdf );
+
+			}				
+			
+			if( $count == 0 )
+				continue;
+			
+			if ($this->font_TB) {
+				pdf_setfont		($pdf, $this->font_TB, 13);
+			}
+ 			pdf_setrgbcolor_fill		( $pdf, 0.2, 0.2, 0.4 );
+			pdf_show_xy			( $pdf, "Interview Times:", HMARGIN, $y );
+			if ($this->font_TR) {
+				pdf_setfont		($pdf, $this->font_TR, 13);
+			}
+			pdf_setrgbcolor_fill		( $pdf, 0, 0, 0 );
+
+			$counter = 1;						
+			while($row = $result->FetchRow())
+			{
+				if( $counter <= $rows )
+					pdf_show_xy	( $pdf, formatTime( $row['int_time'], false ), HMARGIN + 60, $y - $counter * LHEIGHT );
+				else			
+					pdf_show_xy	( $pdf, formatTime( $row['int_time'], false ), HMARGIN + 230, $y - ($counter - $rows) * LHEIGHT );
+    				$counter++;
+			}
+			
+			$this->decrementY( LHEIGHT * ( $rows + 2), $pdf );
+	
+  			$result = $GLOBALS['dbh']->Execute("SELECT distinct int_time FROM interview_time
+						WHERE job_id='$this->job_id' AND int_date='" . $this->int_dates[$i] . "' AND switch = 0 AND int_type = '". LUNCH ."'" );
+			if( ($row =  $result->FetchRow()) )
+			{
+				if ($this->font_TB) {
+					pdf_setfont		($pdf, $this->font_TB, 13);
+				}
+ 				pdf_setrgbcolor_fill		( $pdf, 0.2, 0.2, 0.4 );
+				pdf_show_xy			( $pdf, "Lunch:", HMARGIN, $y );
+				if ($this->font_TR) {
+					pdf_setfont		($pdf, $this->font_TR, 13);
+				}
+				pdf_setrgbcolor_fill		( $pdf, 0, 0, 0 );
+				$this->decrementY ( LHEIGHT, $pdf );
+				pdf_show_xy			( $pdf, formatTime( $row['int_time'], false ), HMARGIN + 60, $y );
+				$this->decrementY ( LHEIGHT, $pdf );
+			}
+		}
+
+	}
+	
+	function createNewPage( $pdf )
+	{
+		pdf_begin_page($pdf, WIDTH, HEIGHT);
+		pdf_set_value				( $pdf, "textrendering", 0);
+		if ($this->font_TR) {
+			pdf_setfont		($pdf, $this->font_TR, 13);
+		}
+		pdf_setlinewidth			( $pdf, 2 );
+		pdf_set_value			( $pdf, "charspacing", 1.8);
+		pdf_setrgbcolor_stroke		( $pdf, 0.4, 0.3, 0.4 );
+		
+		//added by Emily on Feb 2, 2001
+		if ($this->page_count == 1){
+			pdf_save				( $pdf );
+		}
+		$this->page_count++;
+	}	
+
+	function SingleJobReport( $job_id, $department )
+	{
+		$this->loadValues( $job_id );
+		
+		$pdf = pdf_new();
+		pdf_open_file( $pdf, FILE );
+
+		$this->font_TB = pdf_findfont($pdf, "Times-Bold", "host", 0);
+		$this->font_TR = pdf_findfont($pdf, "Times-Roman", "host", 0);
+		$this->font_TI = pdf_findfont($pdf, "Times-Italic", "host", 0);
+		
+		/***	set general info 	***/	
+		pdf_set_info($pdf, "Author", "Robin Liu");
+		pdf_set_info($pdf, "Title", $this->job_code);
+		pdf_set_info($pdf, "Creator", ORGANIZATION);
+	
+		/***	open a new page and set environment vars	***/
+		$this->createNewPage( $pdf );
+
+		/***	generate the header    ***/
+		$this->creatHeader( $pdf, $department );	
+		
+		/***	init the top coordinate of content		***/
+		$y = TOP;
+
+		/***  	display employer name, job code, date(s), location(s), interviewer(s) 	***/	
+		$this->createGeneralInfo( $pdf );	
+		if( $this->presentation == 1 )
+			$this->createPresentation($pdf);
+		$this->createStudentList( $pdf );
+		$this->createSchedule( $pdf );
+	
+		pdf_end_page($pdf);
+	
+		pdf_close($pdf);
+						
+		/***	send the generated pdf to browser		***/
+		$this->sendPDF();		
+		
+	}
+	
+	function creatHeader( $pdf, $department )
+	{
+		pdf_setlinewidth			( $pdf, 4 );
+		pdf_setrgbcolor_fill		( $pdf, 0.4, 0.3, 0.4 );
+	   	
+	   	/*** 	draw the box arround the header	***/
+	   	pdf_moveto					( $pdf, HMARGIN+RADIUS, HEIGHT-VMARGIN );
+		pdf_lineto					( $pdf, WIDTH-HMARGIN-RADIUS, HEIGHT-VMARGIN );
+	
+		pdf_moveto					( $pdf, HMARGIN+RADIUS, 736-RADIUS );
+		pdf_lineto					( $pdf, WIDTH-HMARGIN-RADIUS, 736-RADIUS );
+   	
+	   	pdf_moveto					( $pdf, HMARGIN, 736 );
+		pdf_lineto					( $pdf, HMARGIN, HEIGHT-VMARGIN-RADIUS );
+
+	   	pdf_moveto					( $pdf, WIDTH-HMARGIN, 736 );
+		pdf_lineto					( $pdf, WIDTH-HMARGIN, HEIGHT-VMARGIN-RADIUS );
+
+		pdf_arc						( $pdf, WIDTH-HMARGIN-RADIUS, HEIGHT-VMARGIN-RADIUS, RADIUS, 0, 90 );
+		pdf_arc						( $pdf, HMARGIN+RADIUS, HEIGHT-VMARGIN-RADIUS, RADIUS, 90, 180 );
+		pdf_arc						( $pdf, HMARGIN+RADIUS, 736, RADIUS, 180, 270 );
+		pdf_arc						( $pdf, WIDTH-HMARGIN-RADIUS, 736, RADIUS, 270, 360 );
+		pdf_stroke					( $pdf );
+	
+		/***	display header text 	***/		
+//		pdf_set_font				( $pdf, "Helvetica-BoldOblique", 28, "host" );
+		$font = pdf_findfont($pdf, "Courier-Bold", "host", 0);
+		if ($font) {
+			pdf_setfont		($pdf, $font, 28);
+		}
+
+		pdf_set_value			( $pdf, "charspacing", 5);
+	
+		pdf_show_boxed($pdf, "INTERVIEW SCHEDULE", HMARGIN+RADIUS, 700+RADIUS, WIDTH - 2*( HMARGIN + RADIUS ), HEIGHT-700-VMARGIN-RADIUS-4, "center");
+	
+        	pdf_restore  ( $pdf );
+
+	}
+
+
+	function print_string ($str_show, $num_points, $start_width, $pdf){
+		global $y;
+		
+		if (pdf_stringwidth( $pdf, $str_show ) < $num_points){
+			pdf_show_xy		( $pdf, $str_show, $start_width, $y );
+			$this->decrementY( LHEIGHT, $pdf);
+		}else{
+			$words = split(" +", $str_show);
+			
+			$char_count = 0;
+			$last_str = "";
+			
+			for ($i=0;$i<count($words);$i++){
+				$word = $words[$i];
+				if (pdf_stringwidth( $pdf, $word ) > $num_points){
+					if ($last_str != ""){
+						pdf_show_xy	( $pdf, trim($last_str), $start_width, $y );
+						$this->decrementY( LHEIGHT, $pdf );
+					}
+					$last_str = "";	
+
+					$str_tmp = $words[$i];
+					while (pdf_stringwidth( $pdf, $word ) > $num_points){
+						$num_chars = intval($num_points / pdf_stringwidth( $pdf, "W" ));
+						while (pdf_stringwidth( $pdf, substr($word, 0, $num_chars)) < $num_points){
+							if ($num_chars > strlen($word)){
+								break;
+							}
+							$num_chars++;
+						}
+						pdf_show_xy	($pdf, trim(substr($word, 0, $num_chars)) . "-", $start_width, $y);
+						$word = substr($word, $num_chars, strlen($word));
+						$this->decrementY( LHEIGHT, $pdf);
+					}
+					$char_count = 0;
+
+
+				}
+				
+				$char_count += pdf_stringwidth( $pdf, $word . " " );
+				if ($char_count >= $num_points){
+					pdf_show_xy 	($pdf, trim($last_str), $start_width, $y);
+					$this->decrementY( LHEIGHT, $pdf );
+					$char_count = pdf_stringwidth( $pdf, $word );
+					$last_str = $word;
+				}else{
+					$last_str .= " " . $word;
+				}
+			}
+			if ($last_str != ""){
+				pdf_show_xy	( $pdf, trim($last_str), $start_width, $y );
+				$this->decrementY ( LHEIGHT, $pdf);
+			}
+
+
+		}
+	}
+
+	function createGeneralInfo( $pdf )
+	{
+		global $y;	//	current y-coordinate
+		
+		$y = TOP;
+		if ($this->font_TB) {
+			pdf_setfont		($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy		( $pdf, "EMPLOYER NAME:", HMARGIN, TOP );
+		if ($this->font_TR) {
+			pdf_setfont		($pdf, $this->font_TR, 13);
+		}
+		$num_points = 332; 
+		$this->print_string($this->company_name, $num_points, 220, $pdf);
+
+	
+		for( $i=0; $i<count( $this->interviewers ); $i++ )
+		{
+			if( $i == 0 ) 	
+			{
+				$interviewers = $this->interviewers[$i];
+				$locations = $this->location_names[$i];
+			}
+			else		
+			{
+				$interviewers = $interviewers . ", ". $this->interviewers[$i];
+			
+				/***	Ensure no duplicate location appear		***/
+				if( !eregi( "^(.*, )?(" . $this->location_names[$i] . ")(, .*)?$", $locations ) )
+				{
+					$locations = $locations . ", " . $this->location_names[$i];
+				}
+			}
+		}
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy	( $pdf, "INTERVIEWER(S):", HMARGIN, $y );
+		if ($this->font_TR) {
+			pdf_setfont($pdf, $this->font_TR, 13);
+		}
+		$this->print_string($interviewers, $num_points, 220, $pdf);
+		
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy	( $pdf, "JOB CODE:", HMARGIN, $y );
+		if ($this->font_TR) {
+			pdf_setfont($pdf, $this->font_TR, 13);
+		}
+		pdf_show_xy	( $pdf, $this->job_code, 220, $y );
+	
+		$this->decrementY( LHEIGHT, $pdf );
+
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy	( $pdf, "DATE(S):", HMARGIN, $y );
+		
+		for( $i = 0; $i < count( $this->int_dates ); $i++ )
+		{
+			if( $i % 2 == 0 )
+			{
+				if( $i == (count( $this->int_dates )-1) )
+        			{
+					pdf_show_xy	( $pdf, formatStandardDate($this->int_dates[$i], false), 220, $y );
+				    	$this->decrementY( LHEIGHT, $pdf );
+				}
+				else
+					pdf_show_xy	( $pdf, formatStandardDate($this->int_dates[$i], false), 220, $y );
+			}				
+			else
+			{				
+				pdf_show_xy	( $pdf, formatStandardDate($this->int_dates[$i], false), 380, $y );
+				$this->decrementY ( LHEIGHT, $pdf );
+			}
+		}
+		pdf_set_value		( $pdf, "charspacing", 1.8);
+	
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy		( $pdf, "LOCATION(S):", HMARGIN, $y );
+		if ($this->font_TR) {
+			pdf_setfont($pdf, $this->font_TR, 13);
+		}		
+	
+		if( isPhone($this->interview_medium) )
+		{
+			pdf_show_xy( $pdf, $locations, 220, $y );
+		    	$this->decrementY ( LHEIGHT, $pdf );
+   			pdf_set_parameter	( $pdf, "underline", "true" );
+			pdf_show_xy		( $pdf, "THIS IS A TELEPHONE INTERVIEW", 220, $y );
+			pdf_set_parameter	( $pdf, "underline", "false" );
+			$this->decrementY ( LHEIGHT, $pdf );
+		}
+		elseif( isOnCampus($this->interview_place) )
+		{   //on campus
+			$this->print_string( $locations, $num_points, 220, $pdf );
+		}
+		else
+		{   //off campus & not phone interview
+			$this->print_string( $this->address1, $num_points, 220, $pdf );
+			if( $this->address2 != '' )
+			{
+				$this->print_string ( $this->address2, $num_points, 220, $pdf );
+			}
+			$str = $this->city . ",  " . $this->province;
+			$this->print_string( $str, $num_points, 220, $pdf );	
+			
+			if( !eregi( "^(ca|can|canada)$", $this->country ) )
+			{		
+				$this->print_string( $this->country, $num_points, 220, $pdf );
+			}			
+						
+		}
+		
+		if( $this->notes != "")
+		{
+			//pdf_set_char_spacing	( $pdf, 1.8 );
+			if ($this->font_TB) {
+				pdf_setfont($pdf, $this->font_TB, 13);
+			}
+			pdf_show_xy		( $pdf, "NOTES:", HMARGIN, $y );
+			if ($this->font_TR) {
+				pdf_setfont($pdf, $this->font_TR, 13);
+			}
+			$this->print_string($this->notes, $num_points, 220, $pdf);	
+		}
+
+		if ( $this->staff_notes != "")
+		{
+			if ($this->font_TB) {
+				pdf_setfont($pdf, $this->font_TB, 13);
+			}
+			pdf_show_xy		( $pdf, "CO-OP STAFF NOTES:", HMARGIN, $y );
+			if ($this->font_TR) {
+				pdf_setfont($pdf, $this->font_TR, 13);
+			}
+			$this->print_string($this->staff_notes, $num_points, 220, $pdf);
+		}
+	}
+	
+	function createStudentList( $pdf )
+	{
+		global $y;
+		
+		$this->decrementY( LHEIGHT, $pdf );
+		
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_setrgbcolor_fill		( $pdf, 0.2, 0.2, 0.4 );
+		pdf_show_xy			( $pdf, "STUDENTS TO BE INTERVIEWED:", HMARGIN, $y ); 	 	
+		pdf_setrgbcolor_fill		( $pdf, 0, 0, 0 );
+		if ($this->font_TR) {
+			pdf_setfont($pdf, $this->font_TR, 13);
+		}
+		
+		$this->decrementY( LHEIGHT, $pdf );
+		
+	 	if( $this->students )
+		{
+			$students = explode( chr(10), $this->students );
+			$count = count( $students );
+			$rows = ceil( $count / 2 );
+			
+			for( $i = 0; $i < $rows; $i++ )
+			{
+				pdf_show_xy	( $pdf, $students[$i], HMARGIN, $y );
+				if( $i+$rows < $count){	
+					if (pdf_stringwidth($pdf, $students[$i]) > 300 - HMARGIN){
+						$this->decrementY( LHEIGHT, $pdf );
+						pdf_show_xy	( $pdf, $students[ $i+$rows ], HMARGIN, $y );
+					}else{
+						pdf_show_xy	( $pdf, $students[ $i+$rows ], 300, $y );
+					}
+				}
+				$this->decrementY( LHEIGHT, $pdf );
+			}
+		}
+	}	
+	
+	function sendPDF()
+	{	
+		header( "Content-type: application/pdf");
+		header( "Content-Disposition: attachment; filename=Report.pdf" );
+		header( "Content-Description: PHP4 Generated Data" );
+	
+		/*** open the pdf file and send to browser ***/
+		$fp = fopen( FILE, "r" );
+	
+		fpassthru($fp);
+        	unlink( FILE );
+	
+	}
+	
+	function createPresentation( $pdf )
+	{
+		global $y;
+		
+		$this->pres_notes = trim( strip_tags($this->pres_notes) );
+		if( $this->pres_notes )
+		{
+			$num_points= intval(WIDTH - 140 - HMARGIN);
+			$note_rows = ceil( strlen($this->pres_notes ) / $num_points );
+		}
+		if ( $y < LHEIGHT * ( $note_rows + 5 ) )
+		{
+			pdf_end_page				( $pdf );
+			$this->createNewPage( $pdf );
+			$y = HEIGHT-VMARGIN-LHEIGHT;
+		}
+			
+
+        /**
+         *	calculate if there is enough space to fit presentation info into current page
+		 *  if not, create new page.
+		 */
+		$this->decrementY( LHEIGHT, $pdf );
+		
+		pdf_set_value			( $pdf, "charspacing", 4);
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 14);
+		}
+		pdf_setrgbcolor_fill		( $pdf, 0.2, 0.2, 0.4 );
+		pdf_show_xy			( $pdf, "Presentation", HMARGIN, $y );
+		pdf_setrgbcolor_fill		( $pdf, 0, 0, 0 );
+		pdf_set_value			( $pdf, "charspacing", 1.8);
+		$this->decrementY( LHEIGHT, $pdf );
+				 		 		
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy			( $pdf, "Date:", HMARGIN, $y );
+		pdf_show_xy			( $pdf, formatLongDate( $this->pres_date ), 140, $y );
+		$this->decrementY( LHEIGHT, $pdf );
+
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy			( $pdf, "Time:", HMARGIN, $y );
+		if ($this->font_TR) {
+			pdf_setfont($pdf, $this->font_TR, 13);
+		}
+		pdf_show_xy			( $pdf, formatTime( $this->pres_time, false ) . "  -  " . formatTime( add_times($this->pres_time, $this->pres_len), false ), 140, $y );
+		$this->decrementY( LHEIGHT, $pdf );
+		
+		if ($this->font_TB) {
+			pdf_setfont($pdf, $this->font_TB, 13);
+		}
+		pdf_show_xy			( $pdf, "Location:", HMARGIN, $y );
+		if ($this->font_TR) {
+			pdf_setfont($pdf, $this->font_TR, 13);
+		}
+		
+		$this->print_string ($this->pres_loc, $num_points, 140, $pdf);
+		
+
+		if( $this->pres_notes )
+		{
+			if ($this->font_TB) {
+				pdf_setfont($pdf, $this->font_TB, 13);
+			}
+			pdf_show_xy		( $pdf, "Notes:", HMARGIN, $y );
+		
+			if ($this->font_TR) {
+				pdf_setfont($pdf, $this->font_TR, 13);
+			}
+	
+			$this->print_string ( $this->pres_notes, $num_points, 140, $pdf );
+			
+		}	
+		
+	}
+
+}
+?>

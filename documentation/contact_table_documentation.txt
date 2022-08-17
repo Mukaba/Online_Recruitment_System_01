@@ -1,0 +1,1434 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: contact_table_documentation.txt                                    |
++------------------------------------------------------------------------------+
+
+This file's purpose is to document all of the tables currently used in Mamook[tm] by the
+contact module.
+
+This document was created on Jan 14, 2003
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+-----------------
+
+2nd Table Name
+
+2nd Table's Purpose
+
+etc.
+
+
+Table Name: employer_sizes
+
+Purpose: This table stores all of the size ranges that a company can be associated with.
+
+
+	Column Name: size_id
+	
+	Purpose: This field is the id number used to keep track of different size
+	ranges.  This is the primary key for the table.
+
+	Column Name: size_range
+
+	Purpose: This field is simply the actual range of the corresponding size range.
+	Eg. 50-200
+
+---------------------------------------------------------------------------------
+
+Table Name: company_flags
+
+Purpose: This table stores all of the available company flags that co-op departments
+can choose to have enabled or not.  Eg. If there are 16 flags in total, the engineering
+department may choose to have 10 of those flags shown on their company information 
+screen, and have 5 of those flags turned on, and 5 turned off.
+
+
+	Column Name: flag_id
+
+	Purpose: This field is the id number used to keep track of the different
+	flags.  This is the primary key for the table.
+
+	Column Name: flag_name
+
+	Purpose: This field is the name of the corresponding flag.
+
+    Column Name: comment
+
+    Purpose: This field is used to provide a description for this flag, and is transparent
+    to the mamook system (only used for database administration).
+
+---------------------------------------------------------------------------------
+
+Table Name: department_company_flags
+
+Purpose: This table stores all of the employer flags from the company_flags table
+that each co-op department would like to be able to set for companies.  
+Eg.  There are 16 flags in total in the company_flags table.  Engineering co-op chooses
+to have 10 of those flags shown on their company informatin screen, so this table
+keeps a link for engineering co-op's department id and the flag id's for each of the 
+10 chosen flags.
+
+	
+	Column Name: department_id
+
+	Purpose: This field is the id number of the department that is associated
+	with the flag represented by the flag_id below.
+
+	Column Name: flag_id
+	
+	Purpose: This field is the id number of the flag that is associated with
+	the department represented above by its department_id.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_division_flags
+
+Purpose: This table stores all of the employer flags from the company_flags table
+that each co-op department would like to be able to set for departments.
+Eg.  There are 16 flags in total in the company_flags table.  Engineering co-op chooses
+to have 4 of these flags shown on their department information screen, so this table
+keeps a link for engineering co-op's department id and the flag id's for each of these
+4 chosen flags.
+
+
+	Column Name: department_id
+
+	Purpose: This field is the id number of the department that is associated
+	with the flag represented by the flag_id below.
+
+	Column Name: flag_id
+
+	Purpose: This field is the id number of the flag that is associated with
+	the department represented above by its department_id.
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_company
+
+Purpose: This table holds all of the information for a company in the database.
+
+
+	Column Name: employer_id
+
+	Purpose: This field is the id number used to keep track of different companies.
+	This is the primary key for the table.
+
+	Column Name: company_name
+
+	Purpose: This field is simply the name of the corresponding company.
+
+	Column Name: website
+
+	Purpose: This field holds the address for the corresponding companies website.
+
+	Column Name: company_description
+	
+	Purpose: This field holds the companies description.  This is displayed on any
+	jobs that are posted with/by this company.
+
+	Column Name: street_address_1
+
+	Purpose: This is the first part of the street address for this company.  This
+	address will most likely be for the company's head office.
+
+	Column Name: street_address_2
+	
+	Purpose: This is the second part of the street address for this company, in 
+	case a second field is needed.
+
+	Column Name: street_address_3
+	
+	Purpose: This is the third part of the street address for this company, in 
+	case a third field is needed.
+
+	Column Name: city
+
+	Purpose: This is the city that the company resides in/operates out of.  This
+	will most likely be for its head office.
+
+	Column Name: region_id
+
+	Purpose: This is the id number for the region of the province that the
+	company resides in/operates out of.  This field is only relevant for
+	companies that operate in certain provinces of Canada.
+
+	Column Name: provstate_id
+
+	Purpose: This is the id number for the province or state that the company 
+	resides in/operates out of.
+
+	Column Name: country_id
+
+	Purpose: This is the id number for the country that the company resides in/
+	operates out of.
+
+	Column Name: postal_code
+
+	Purpose: This is the postal code for the company.
+
+	Column Name: phone
+
+	Purpose: This is the phone number for the company.  This will most likely
+	be the phone number to the head office, as contacts will hold phone numbers
+	specific to themselves.
+
+	Column Name: fax
+
+	Purpose: This is the company's general purpose fax number.
+
+	Column Name: email
+
+	Purpose: This is the company's general purpose email address.
+
+	Column Name: change_reason_1
+
+	Purpose: This field stores the most recent reason that the company
+	information was changed by a co-op staff member.  This field is 
+	necessary, since contact and company information will be shared
+	campus wide. 
+
+	Column Name: change_reason_2
+
+	Purpose: This field stores the second most recent reason that the
+	company information was changed by a co-op staff member.
+
+	Column Name: change_reason_3
+
+	Purpose: This field stores the third most recent reason that the
+	company information was changed by a co-op staff member.
+
+	Column Name: change_by_1
+
+	Purpose: This field stores the login_id of the co-op staff
+	member that changed this company's information most recently.
+	This field corresponds to the change_reason_1 field, and is
+	necessary for the same reason.
+
+	Column Name: change_by_2
+
+	Purpose: This field stores the login_id of the second most
+	recent co-op staff member that changed this company's information, 
+	and corresponds to change_reason_2.
+
+	Column Name: change_by_3
+
+	Purpose: This field stores the login_id of the third most
+	recent co-op staff member that changed this company's information
+	and corresponds to change_reason_3.
+
+	Column Name: change_date_1
+
+	Purpose: This field stores the date that the most recent
+	changes to this company's information were made.  This date
+	corresponds with the change_by_1 and change_reason_1 fields.
+
+	Column Name: change_date_2
+
+	Purpose: This field stores the date that the second most
+	recent changes to this company's information were made.  
+	This date corresponds with the change_by_2 and change_reason_2
+	fields.
+
+	Column Name: change_date_3
+
+	Purpose: This field stores the date that the third most
+	recent changes to this company's information were made.
+	This date corresponds with the change_by_3 and change_reason_3
+	fields.
+
+	Column Name: size_id
+
+	Purpose: This field holds the id number of the size range
+	that this company belongs to.  Eg. If this company had 
+	between 50-200 people, and 50-200 had an id number of '1',
+	this field would hold '1'.
+
+	Column Name: entered_by
+
+	Purpose: This field holds the login_id of the person that
+	entered this company into the database.
+	
+	Column Name: entered_on
+
+	Purpose: This field holds the date that this company was
+	entered into the database.
+
+	Column Name: general_comments
+
+	Purpose: This field holds comments that all of the co-op
+	staff members at UVic can see.  Employers cannot see these
+	comments, nor can students.
+
+    Column Name: industry_id
+
+    Purpose: This field is a foreign key that represents the primary industry
+    that this company is a part of.
+
+    Column Name: company_display
+
+    Purpose: This field is used as a boolean to determine whether or not this
+    company is one that should be displayed as a standard company for the purposes
+    of adding contacts, jobs, etc.  Some companies exist solely as the result of
+    an interview (a side-effect of interview being implemented first), and as such
+    should not be treated as real companies.
+
+    Column Name: company_type_id
+
+    Purpose: This field is a foreign key that represents the relation of this company
+    to the government (the key points to the employer_type table)
+
+    Column Name: company_name_legitimate
+
+    Purpose: This field is not currently used, but can be used along with code that has
+    been disabled to indicate whether or not the company name is legitimate.  This is
+    a useful feature for data cleanup.
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_company_comments
+
+Purpose: This table holds comments for companies that are specific to a single co-op
+department.  This feature is currently disabled.
+
+
+	Column Name: employer_company_id
+	
+	Purpose: This field holds the id number of the employer that these comments are
+	for.
+
+	Column Name: department_id
+
+	Purpose: This field holds the id number of the department that these comments
+	belong to.
+
+	Column Name: comments
+
+	Purpose: This field holds the actual comments (belonging to the department and
+	associated with the employer given above).
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_department
+
+Purpose: This table holds information for the departments of a given company.  Much
+of this information is similar to that which is stored in the employer_company table.
+NOTE: This table is named employer_department, but it really represents a division.
+Employer department's changed their name to 'Divisions' late into the implementation
+of this module, and so many of the names remain as department.  Poor, but alas,
+no time to fix this currently.
+
+
+	Column Name: department_id
+
+	Purpose: This field holds the id number used to keep track of all of the
+	divisions.  This is the primary key for the table.
+
+	Column Name: employer_id
+
+	Purpose: This field holds the id number that corresponds to the company
+	that this division belongs to.
+
+	Column Name: department_name
+
+	Purpose: This field holds the name of this division.
+
+	Column Name: department_website
+
+	Purpose: This field holds the URL to the division's website, if it is
+	different than the parent company's.
+
+	Column Name: department_description
+
+	Purpose: This field holds the division's description.
+
+	Column Name: street_address_1
+
+	Purpose: This field holds the first part of the division's
+	street address, if it is different than the parent company's.
+
+	Column Name: street_address_2
+
+	Purpose: This field holds the second part of the division's
+	street address, if it is different than the parent company's,
+	and if there IS a second part.
+
+	Column Name: street_address_3
+
+	Purpose: This field holds the third part of the division's
+	street address, if it is different than the parent company's,
+	and if there IS a third part.
+
+	Column Name: country_id
+
+	Purpose: This field holds the id number that corresponds to the
+	country that the division operates out of.  Eg. If the division
+	operates out of England, and England's country_id is 4, this field
+	will hold a 4.
+
+	Column Name: provstate_id
+
+	Purpose: This field holds the id number that corresponds to the
+	province or state that the division operates out of.  This
+	field will only be set if the division resides in Canada or
+	the US.  Eg. If the division operates out of BC, and BC's
+	provstate_id is 1, then this field will hold a 1.
+
+	Column Name: region_id
+
+	Purpose: This field holds the id number that corresponds to the
+	region that the division operates out of.  This field will only
+	be set if the division resides in certain Canadian provinces.
+	Eg.  If the division operates out of Greater Victoria, and
+	Greater Victoria has a region_id of 4, then this field will
+	hold a 4.
+
+	Column Name: city
+
+	Purpose: This field holds the name of the city that the division
+	operates out of.
+
+	Column Name: postal_code
+
+	Purpose: This field holds the postal code of the division's
+	mailing address.
+
+	Column Name: phone
+
+	Purpose: This field holds the division's general purpose
+	phone number.
+
+	Column Name: fax
+
+	Purpose: This field holds the division's general purpose fax
+	number.
+
+	Column Name: email
+
+	Purpose: This field holds the division's general purpose
+	email address
+
+	Column Name: change_reason_1
+
+	Purpose: This field holds the most recent reason that the division's
+	information was changed by a co-op staff member.
+
+	Column Name: change_reason_2
+
+	Purpose: This field holds the second most recent reason that the 
+	division's information was changed by a co-op staff member.
+
+	Column Name: change_reason_3
+
+	Purpose: This field holds the third most recent reason that the
+	division's information was changed by a co-op staff member.
+
+	Column Name: change_by_1
+
+	Purpose: This field holds the login_id of the most recent staff
+	member to change this division's information.  This field corresponds
+	to change_reason_1.
+
+	Column Name: change_by_2
+
+	Purpose: This field holds the login_id of the second most recent
+	staff member to change this division's information.  This field
+	corresponds to change_reason_2.
+
+	Column Name: change_by_3
+
+	Purpose: This field holds the login_id of the third most recent
+	staff member to change this division's information.  This field
+	corresponds to change_reason_3.
+
+	Column Name: change_date_1
+
+	Purpose: This field holds the date of the most recent change(s)
+	made to this division's information.  This field corresponds
+	to change_reason_1 and change_by_1.
+
+	Column Name: change_date_2
+
+	Purpose: This field holds the date of the second most recent
+	change(s) made to this division's information.  This field
+	corresponds to change_reason_2 and change_by_2.
+
+	Column Name: change_date_3
+
+	Purpose: This field holds the date of the third most recent
+	change(s) made to this division's information.  This field
+	corresponds to change_reason3 and change_by_3.
+
+    Column Name: size_id
+
+    Purpose: This field holds the id number of the size range
+    that this division belongs to.  Eg. If this division had
+    between 50-200 people, and 50-200 had an id number of '1',
+    this field would hold '1'.
+
+	Column Name: entered_by
+
+	Purpose: This field holds the login_id of the co-op staff
+	member that entered this division into the database.
+
+	Column Name: entered_on
+
+	Purpose: This field holds the date that this division
+	was entered into the database.
+
+	Column Name: general_comments
+
+	Purpose: This field holds comments for this division.  These
+	comments can be seen by all of the co-op staff at UVic, but not
+	by the employer.
+
+    Column Name: industry_id
+
+    Purpose: This field is a foreign key that represents the primary industry
+    that this division is a part of.
+
+    Column Name: location_info
+
+    Purpose: This field is treated as a boolean to represent whether or not this division
+    is using the company or its own location information.
+
+    Column Name: department_name_legitimate
+
+    Purpose: This field is not currently used, but can be used along with code that has
+    been disabled to indicate whether or not the division name is legitimate.  This is
+    a useful feature for data cleanup.
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_department_comments
+
+Purpose: This table holds comments for departments that are specific
+to a single co-op department.
+
+
+	Column Name: employer_department_id
+
+	Purpose: This field holds the id number for the employer department
+	that the comments in this record are for.
+
+	Column Name: department_id
+
+	Purpose: This field holds the id number for the CO-OP department
+	that the comments are associated with.
+
+	Column Name: comments
+
+	Purpose: This field holds the actual comments (associated with the
+	employer department and co-op department).
+
+---------------------------------------------------------------------------------
+
+Table Name: contact
+
+Purpose: This table holds all of the information for contacts of types: 'student',
+and 'internal', and holds some of the information for contacts of types: 'employer',
+'potential_employer'.  As of right now, I'm unsure of how much information this
+table holds for contacts of type 'alumni'.
+
+
+	Column Name: contact_id
+
+	Purpose: This field holds the id number that is used to keep track of
+	various contacts.  This is the primary key for the table.
+
+	Column Name: type
+
+	Values: 'student', 'internal', 'employer', 'potential_employer', 'alumni'
+
+	Purpose: This field holds the type of contact that this is.  It can contain
+	one of the five above values.  If the contact type is 'employer' or 
+	'potential_employer', then there will be an entry in the table contact_employer
+	that corresponds to this contact.
+
+	Column Name: title
+
+	Purpose: This is the contact's title.  This could be something like Mr.
+	Mrs., Dr., Ms., etc.
+
+	Column Name: first_name
+
+	Purpose: This field holds the contact's first name.
+
+	Column Name: last_name
+
+	Purpose: This field holds the contact's last name.
+
+	Column Name: called_name
+
+	Purpose: This field holds the name the contact prefers to be called by.
+
+	Column Name: middle_name
+
+	Purpose: This field holds the contact's middle name.
+
+	Column Name: greeting
+
+	Purpose: This field holds the way the contact is greeted in letters, etc.
+	Eg. Some contacts prefer to be called by their first name, while some 
+	prefer to be addressed as Dr. 'last_name'.
+
+	Column Name: email
+	
+	Purpose: This field holds the contact's email address.
+
+	Column Name: phone
+
+	Purpose: This field holds the contact's phone number.
+
+	Column Name: pager
+
+	Purpose: This field holds the contact's pager number.
+
+	Column Name: cellphone
+
+	Purpose: This field holds the contact's cell phone number.
+
+	Column Name: fax
+
+	Purpose: This field holds the contact's fax number.
+
+	Column Name: street_address_1
+
+	Purpose: This field holds the first part of the contact's street
+	address.
+
+	Column Name: street_address_2
+
+	Purpose: This field holds the second part of the contact's street
+	address (if there is a second part).
+
+	Column Name: street_address_3
+
+	Purpose: This field holds the third part of the contact's street
+	address (if there is a third part).
+
+	Column Name: country_id
+
+	Purpose: This field holds the id number of the country that the
+	contact resides in.  Eg. If the id number for Canada is 1 and the
+	contact lives in Canada, this field will hold 1.
+
+	Column Name: provstate_id
+
+	Purpose: This field holds the id number of the province or state
+	that the contact resides in.  This field will only have a value 
+	if the contact lives in either Canada or the US. Eg. If the
+	contact resides in British Columbia, and BC has a provstate_id
+	of 3, then this field will hold a 3.
+
+	Column Name: region_id
+
+	Purpose: This field holds the id number of the region that the
+	contact resides in.  This field will only have a value if the 
+	contact resides certain provinces.  Eg. If the contact lives
+	in Greater Victoria, and its region id is 8, then this field
+	will hold an 8.
+
+	Column Name: city
+
+	Purpose: This field holds the city that the contact resides in.
+
+	Column Name: postal code
+
+	Purpose: This field stores the postal code for the contact's
+	mailing address.
+
+    Column Name: location_info
+
+    Purpose: This field is treated as a boolean to represent whether or not this contact
+    is using the company, division, or its own location information.
+
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_employer
+
+Purpose: This table holds any extra information for contacts of type
+'employer' or 'potential_employer' that isn't held in the contact
+table.
+
+	
+	Column Name: contact_id
+
+	Purpose: This field holds the id number that corresponds with
+	this contact's id number in the 'contact' table.  This is the
+	primary key for this table.
+
+	Column Name: employer_id
+
+	Purpose: This field holds the id number of the company that
+	this contact is associated with.
+
+	Column Name: department_id
+
+	Purpose: This field holds the id number of the department
+	that this contact is associated with.
+
+	Column Name: employer_type
+
+	Purpose: This field is now obsolete, and has been replaced with
+    the 'contact_types' and 'department_contact_status' tables, allowing
+    a status to be set for a contact for each co-op department.  This
+    field should be removed when possible.
+
+	Column Name: general_comments
+
+	Purpose: This field contains comments pertaining to this
+	contact that all of the UVic co-op staff can see.
+
+	Column Name: change_reason_1
+
+	Purpose: This field contains the reason for the most
+	recent change(s) made to this contact's information.
+
+	Column Name: change_reason_2
+
+	Purpose: This field contains the reason for the 
+	second most recent change(s) made to this contact's
+	information.
+
+	Column Name: change_reason_3
+
+	Purpose: This field contains the reason for the
+	third most recent change(s) made to this contact's
+	information.
+
+	Column Name: change_by_1
+
+	Purpose: This field contains the login id of the
+	co-op staff member who made the most recent change(s)
+	to this contact's information.
+
+	Column Name: change_by_2
+	
+	Purpose: This field contains the login id of the
+	co-op staff member who made the second most recent
+	change(s) to this contact's information.
+
+	Column Name: change_by_3
+	
+	Purpose: This field contains the login id of the
+	co-op staff member who made the third most recent
+	change(s) to this contact's information.
+
+	Column Name: change_date_1
+
+	Purpose: This field contains the date of the
+	most recent change(s) to this contact's information.
+
+	Column Name: change_date_2
+
+	Purpose: This field contains the date of the second 
+	most recent change(s) to this contact's information.
+
+	Column Name: change_date_3
+
+	Purpose: This field contains the date of the third
+	most recent change(s) to this contact's information. 
+
+	Column Name: entered_by
+
+	Purpose: This field holds the login id of the co-op staff
+	member that entered this contact into the database.
+
+	Column Name: entered_on
+
+	Purpose: This field holds the date that this
+	contact was entered into the database.
+
+    Column Name: position
+
+    Purpose: This field is the position title that this contact
+    has within their company.  Eg.  'Project Manager'
+
+    Column Name: staff_mem
+
+    Purpose: This field is a legacy field left over from the transfer
+    of UVic's old data.  It can be removed for other organizations,
+    of left if the organization wishes to write code to allow ownership
+    of contact's by different members at their organization.
+
+    Column Name: department_name
+
+    Purpose: This field allows for a finer level of granularity to indicate the
+    contact's working department within the division they work for.  Eg.  The
+    contact could work for 'Northridge Consulting' as the company, 'West Coast Office'
+    as the division, and 'Testing Department' as the department.  This field
+    holds only a name, and is primarily used by system users rather than the
+    software itself.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_flags
+
+Purpose: This table holds all of the flags that can be turned on or off
+for a contact in the contact_employer table.
+
+	
+	Column Name: flag_id
+	
+	Purpose: This column holds the id number that is used to
+	keep track of all the flags in the contact_flags table.
+	This is the primary key for the table.
+
+	Column Name: flag_name
+
+	Purpose: This column holds the name of the flag.
+
+    Column Name: comment
+
+    Purpose: This column is used to specify a comment about this specific
+    flag.  This field is transparent to the software, and used only by
+    database administrators.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_contact_flags
+
+Purpose: This table stores all of the contact flags each department chooses to use.  
+Eg. There are 12 flags in total in the contact_flags table.  Engineering co-op 
+chooses to have 7 of those flags shown on their company informatin screen, so this 
+table keeps a link for engineering co-op's department id and the flag id's of each 
+of the 7 chosen flags.
+
+
+	Column Name: department_id
+
+	Purpose: This field is the id number of the department that is associated
+    with the flag represented by the flag_id below.
+    
+    Column Name: flag_id
+    
+    Purpose: This field is the id number of the flag that is associated with
+    the department represented above by its department_id.
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_contact_comments
+
+Purpose: This table stores comments for contacts that are specific to a given
+co-op department.  This feature is currently disabled throughout the software.
+
+
+	Column Name: employer_contact_id
+
+	Purpose: This field stores the contact_id that the comments below correspond
+	to.
+
+	Column Name: department_id
+
+	Purpose: This field stores the department_id of the co-op department that
+	the comments below belong to.
+
+	Column Name: comments
+
+	Purpose: This field stores the actual comments that correspond with the above
+	department_id and contact_id.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_types
+
+Purpose: This table holds all of the different types an employer
+contact can be, such as 'potential employer' or 'defunct', etc.
+
+
+	Column Name: type_id
+
+	Purpose: This field holds the id number that is used
+	to differentiate and keep track of the various types.
+	This is the primary key for the table.
+
+	Column Name: type_name
+
+	Purpose: This is the name of the contact type.  Eg.
+	This field could hold a value like 'Potential Employer'.
+
+    Column Name: level_of_activity
+
+    Purpose: This is an integer which allows statuses to be sorted.  With this,
+    we can choose one contact over another based on their statuses.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_internal
+
+Purpose: This table is used to keep track of any additional information not stored
+in the contact table that pertains to contacts that internal to the software
+essentially users of the system, and other people working at the organization
+running the system.
+
+
+	Column Name: contact_id
+
+	Purpose: This is the contact's id number, and is used as a link to the contact
+	table.  This is the primary key for the table.
+
+	Column Name: department_id
+
+	Purpose: This is the id number of the co-op department that this contact
+	works for.  Eg.  If a contact worked for Engineering Co-op, which had
+	a department_id of 4, this field would hold the value '4'.
+
+	Column Name: interview_contact_list
+
+	Purpose: This field is a boolean value that determines whether or not
+	this contact can be chosen to have replies sent to them in regards to
+	emails sent out to students.  Eg.  If this value is 0, then this contact
+	cannot be chosen as the contact to receive correspondence regarding students
+	dropped from a shortlist.  If it is 1, this contact COULD be chosen.
+
+	Column Name: login_id
+
+	Purpose: This field holds the login_id for this contact.
+
+	Column Name: password
+
+	Purpose: This field is historical, and no longer used.  This field
+    is used to store a password to allow coordinators to login and give
+    us feedback when they are do not have a login with our system.
+
+    Column Name: employee_number
+
+    Purpose: The employee number of this internal contact.
+
+    Column Name: netlink_id
+
+    Purpose: This is the login_id this user uses to login to the system at UVic,
+    using the netlink system.
+
+    Column Name: interview_lunch_list
+
+    Purpose: This column represents a boolean value that determines whether or not
+    the user can be assigned as a host in the assign lunch part of the interview system.
+
+    Column Name: pulldown_menu_group
+
+    Purpose:  This field is a represents a boolean value that determines whether or not
+    this contact is in department that is also part of a group, in which case they need
+    options allowing them to do things like 'View all blah in your GROUP', as well as the
+    standard set of options.  This field should be replaced with a query against the contact's
+    department and the department_group table.
+
+    Column Name: search_use_advanced
+
+    Purpose: This field allows the user to default their search pages to either
+    an advanced or a basic search.  A 1 in this field indicates that they would
+    like to default to the advanced search when searching for students.
+
+    Column Name: site_visit_list
+
+    Purpose: This field is a boolean value representing whether or not the user
+    would like to appear on work site visit pull down lists.
+
+    Column Name: search_use_advanced_emp
+
+    Purpose: This field allows the user to default their search pages to either
+    an advanced or a basic search.  A 1 in this field indicates that they would
+    like to default to the advanced search when searching for employers.
+
+    Column Name: search_use_advanced_hist
+
+    Purpose: This field allows the user to default their search pages to either
+    an advanced or a basic search.  A 1 in this field indicates that they would
+    like to default to the advanced search when searching for history records.
+
+    Column Name: menu_use_javascript
+
+    Purpose: This field represents a boolean value indicating whether or not
+    javascript menus are enabled for this user.  A 1 in this field indicates 
+    that the user is using the javascript menus.
+
+    Column Name: application_replyto_list
+
+    Purpose: This field represents a boolean value indicating whether or not
+    the user will appear as someone that can be replied to in the application
+    reply-to pulldown menu.  A 1 indicates that they will show up in the list.
+
+    Column Name: flash_use
+
+    Purpose: This field represents a boolean value indicating whether or not
+    the user would like to use the flash plugin.  A 1 indicates that they would
+    like to use the flash plugin.
+
+    Column Name: general_email
+
+    Purpose: This field represents a boolean value indicating whether or not
+    the contact's name shows up on general e-mail lists.  A 1 indicates that
+    they do show up on these lists.
+
+    Column Name: traffic_director_email
+
+    Purpose: This field represents a boolean value indicating whether or not
+    the contact is sent e-mails intended for the trafficdirectory, such as
+    when a new job has arrived from a new employer.  A 1 indicates that they
+    are to receive these e-mails.
+
+    Column Name: email_signature
+
+    Purpose: This field is the e-mail signature that this user will have
+    automatically appended to any mail that they send through the system.
+    
+    Column Name: employer_info_menu
+
+    Purpose: This field is the choice made by the user of whether they want to
+    default to Companies/Divisions or Contacts when they click on any of the 
+    following Employer Info sections: view, add, edit.
+    
+---------------------------------------------------------------------------------
+
+Table Name: company_flags_set
+
+Purpose: This table is used to store all of the flags that
+have been set for employer companies.
+
+
+	Column Name: employer_id
+
+	Purpose: This is the id number that corresponds (in the 'employer_company'
+	table) to the company that the flag below is set for.
+
+	Column Name: flag_id
+
+	Purpose: This is the id number that corresponds (in the 'company_flags'
+	table) to the flag that is set for the company represented above.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_flags_set
+
+Purpose: This table is used to store all of the flags
+that have been set for employer divisions.
+
+
+	Column Name: department_id
+
+	Purpose: This is the id number that corresponds (in the 'employer_department'
+	table) to the department that the flag below is set for.
+
+	Column Name: flag_id
+
+	Purpose: This is the id number that corresponds (in the 'company_flags'
+	table) to the flag that is set for the company represented above.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_flags_set
+
+Purpose: This table is used to store all of the flags
+that have been set for employer contacts.
+
+
+	Column Name: contact_id
+
+	Purpose: This is the id number that corresponds (in the 'contact' and
+	'contact_employer' tables) to the contact that the flag below is set for.
+
+	Column Name: flag_id
+
+	Purpose: This is the id number that corresponds (in the 'contact_flags'
+	table) to the flag that is set for the contact represented above.
+
+---------------------------------------------------------------------------------
+
+Table Name: action_types
+
+Purpose: This table is used to store all of the different action types
+that can be performed on contacts.
+
+
+	Column Name: action_id
+
+	Purpose: This is the id number used to keep track of all
+	the different action types.  This is the primary key for
+	the table.
+
+	Column Name: action_name
+
+	Purpose: This field is simply the name of the action.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_flags_set
+
+Purpose: This table is used to store all of the flags
+that have been set for employer contacts.
+
+
+	Column Name: contact_id
+
+	Purpose: This is the id number that corresponds (in the 'contact' and
+	'contact_employer' tables) to the contact that the flag below is set for.
+
+	Column Name: flag_id
+
+	Purpose: This is the id number that corresponds (in the 'contact_flags'
+	table) to the flag that is set for the contact represented above.
+
+---------------------------------------------------------------------------------
+
+Table Name: company_notes
+
+Purpose: This table is used to store all of the notes users of the system have
+stored for a given company.
+
+    
+    Column Name: employer_id
+
+    Purpose: This is the id number that corresponds to the company that this
+    note pertains to.
+
+    Column Name: notes
+
+    Purpose: These are the actual notes themselves.
+
+    Column Name: date_entered
+
+    Purpose: This is the date that the note was entered.
+
+    Column Name: entered_by
+
+    Purpose: This is the contact_id of the user that entered this specific note.
+
+    Column Name: note_id
+
+    Purpose: This is the primary key for this table.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_notes
+
+Purpose: This table is now obsolete.  It used to be used to store all of the 
+notes users of the system had stored for a given contact. Contact notes are 
+now saved as part of the contact_actions_set table.
+
+    
+    Column Name: contact_id
+
+    Purpose: This is the id number that corresponds to the contact that this
+    note pertains to.
+
+    Column Name: notes
+
+    Purpose: These are the actual notes themselves.
+
+    Column Name: date_entered
+
+    Purpose: This is the date that the note was entered.
+
+    Column Name: entered_by
+
+    Purpose: This is the contact_id of the user that entered this specific note.
+
+    Column Name: note_id
+
+    Purpose: This is the primary key for this table.
+
+---------------------------------------------------------------------------------
+
+Table Name: division_notes
+
+Purpose: This table is used to store all of the notes users of the system have
+stored for a given division.
+
+    
+    Column Name: department_id
+
+    Purpose: This is the id number that corresponds to the division that this
+    note pertains to.
+
+    Column Name: notes
+
+    Purpose: These are the actual notes themselves.
+
+    Column Name: date_entered
+
+    Purpose: This is the date that the note was entered.
+
+    Column Name: entered_by
+
+    Purpose: This is the contact_id of the user that entered this specific note.
+
+    Column Name: note_id
+
+    Purpose: This is the primary key for this table.
+
+---------------------------------------------------------------------------------
+
+Table Name: company_type
+
+Purpose: This table is used to store the available types a company can be.  The types
+correspond to different levels of government the company can belong to, such as
+Federal Government, or Non Profit Organization.  This field should probably
+be renamed to something that makes more sense, like 'government_type' but their
+currently is not time to do this.
+
+    
+    Column Name: type_id
+
+    Purpose: This is the primary key for the table.
+
+    Column Name: type_code
+
+    Purpose: This is the code that is used to display the various types in
+    drop down menus (so FG for Federal Government).
+
+    Column Name: type_name
+
+    Purpose: This is the full name of the type.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_actions_set
+
+Purpose: This table is where we store all of the actions that have been set for
+contacts.
+
+    
+    Column Name: action_id
+
+    Purpose: This is a foreign key corresponding to the action that has been set
+    for the contact matched by contact_id
+
+    Column Name: contact_id
+
+    Purpose: This is a foreign key that corresponds to the contact that this action
+    has been set for.
+
+    Column Name: action_by
+
+    Purpose: This is the contact_id of the person that performed this action.
+
+    Column Name: action_on
+
+    Purpose: This is the date that this action took place on.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_company_status
+
+Purpose: This table stores the statuses that co-op departments have set for any given
+company.
+
+    
+    Column Name: employer_id
+
+    Purpose: This is a foreign key corresponding to the company that this status
+    has been set for.
+
+    Column Name: status_id
+
+    Purpose: This is a foreign key that corresponds to the status that has been
+    set for this company.
+
+    Column Name: department_id
+
+    Purpose: This is a foreign key corresponding to the co-op department that has
+    set this status (since different departments can have different statuses for the
+    same company/division/contact).
+
+---------------------------------------------------------------------------------
+
+Table Name: department_contact_status
+
+Purpose: This table stores the statuses that co-op departments have set for any given
+contact.
+
+    
+    Column Name: contact_id
+
+    Purpose: This is a foreign key corresponding to the contact that this status
+    has been set for.
+
+    Column Name: status_id
+
+    Purpose: This is a foreign key that corresponds to the status that has been
+    set for this contact.
+
+    Column Name: department_id
+
+    Purpose: This is a foreign key corresponding to the co-op department that has
+    set this status (since different departments can have different statuses for the
+    same company/division/contact).
+
+---------------------------------------------------------------------------------
+
+Table Name: department_division_status
+
+Purpose: This table stores the statuses that co-op departments have set for any given
+division.
+
+    
+    Column Name: division_id
+
+    Purpose: This is a foreign key corresponding to the division that this status
+    has been set for (unfortunately, this relates to department_id in employer_department,
+    not division_id :().
+
+    Column Name: status_id
+
+    Purpose: This is a foreign key that corresponds to the status that has been
+    set for this division.
+
+    Column Name: department_id
+
+    Purpose: This is a foreign key corresponding to the co-op department that has
+    set this status (since different departments can have different statuses for the
+    same company/division/contact).
+
+---------------------------------------------------------------------------------
+
+Table Name: division_flags
+
+Purpose: This table stores the flags that can be set for any given division.
+
+    
+    Column Name: flag_name
+
+    Purpose: This is the name of the flag.
+
+    Column Name: flag_id
+
+    Purpose: This is the primary key for this flag.
+
+    Column Name: comment
+
+    Purpose: This is typically a comment to keep track of which co-op department
+    this flag is for (although flag's CAN be shared across departments).
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_status
+
+Purpose: This table stores the statuses that can be set for any given company.
+
+    
+    Column Name: status_id
+
+    Purpose: This is the primary key for this status.
+
+    Column Name: status_name
+
+    Purpose: This is the name of this status.
+
+    Column Name: level_of_activity
+
+    Purpose: This is an integer which allows statuses to be sorted.  With this,
+    we can choose one company over another based on their statuses.
+
+---------------------------------------------------------------------------------
+
+Table Name: industries
+
+Purpose: This table stores the various industries that a company/division can be involved with.
+    
+
+    Column Name: industry_id
+
+    Purpose: This is the primary key for this industry.
+
+    Column Name: industry_name
+
+    Purpose: This is the name of the industry.
+
+    Column Name: order_by
+
+    Purpose: This is the order that we use to order industries.  This is probably just a legacy now, but remains in
+    the database because it could be a useful feature later on.
+
+---------------------------------------------------------------------------------
+
+Table Name: title
+
+Purpose: This table stores the various titles that can be set for any given contact (Mr, Mrs, etc.)
+
+    
+    Column Name: title_id
+
+    Purpose: This is the primary key for this table.
+
+    Column Name: title_name
+
+    Purpose: This is the name of title (so basically the title itself)
+
+---------------------------------------------------------------------------------
+
+Table Name: student
+
+Purpose: This table is only present in this release because the contact and base modules
+assume its existance.
+
+---------------------------------------------------------------------------------
+
+Table Name: employer_login
+
+Purpose: This table is only present in this release because the contact and base modules
+assume its existance.
+
+---------------------------------------------------------------------------------
+
+Table Name: student_department
+
+Purpose: This table is only present in this release because the contact and base modules
+assume its existance.
+
+---------------------------------------------------------------------------------
+
+Table Name: job_info
+
+Purpose: This table is only present in this release because the contact and base modules
+assume its existance.
+
+---------------------------------------------------------------------------------
+
+Table Name: history
+
+Purpose: This table is only present in this release because the contact and base modules
+assume its existance.
+
+---------------------------------------------------------------------------------
+
+Table Name: term
+
+Purpose: This table is only present in this release because the contact and base modules
+assume its existance.
+
+---------------------------------------------------------------------------------

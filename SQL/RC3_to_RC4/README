@@ -1,0 +1,37 @@
++------------------------------------------------------------------------------+
+| Mamook(R) Software                                                           |
++------------------------------------------------------------------------------+
+| Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
++------------------------------------------------------------------------------+
+| THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+| ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+| PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+| PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+| RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+| RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+| ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+| FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+| COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+| ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+|                                                                              |
+| Software distributed under the License is distributed on an "AS IS" basis,   |
+| WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+| the specific language governing rights and limitations under the License.    | 
++------------------------------------------------------------------------------+
+| Filename: README                                                             |
++------------------------------------------------------------------------------+
+| Description: This file provides instructions for updating the database       |
++------------------------------------------------------------------------------+
+
+IMPORTANT NOTE: This only applies when updating from version Mamook-2.0RC3 to 
+Mamook-2.0RC4.  If you downloaded Mamook-2.0RC4 or later, the changes have 
+already been applied.
+
+The changes from version Mamook-2.0RC3 to Mamook-2.0RC4 require updates to the 
+database.  The changes involve adding a new column to job_info that allows staff
+to provide job notes to students in the job descriptions page. You should be 
+able to apply the sql file to the database without needing to make any changes.
+
+To apply the changes to the database (assuming your database is "MAMOOK"):
+mysql -u username -p MAMOOK < RC3_to_RC4.sql
+

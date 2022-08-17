@@ -1,0 +1,2828 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: EditStudent.class                                                  |
+ +------------------------------------------------------------------------------+
+ | Description: This class is used to aid in the passing of data between        |
+ | forms. It inherits from the Student Class. This class has been completely    |
+ | revamped and rebuilt by Adam to allow for a more object oriented             |
+ | methodology. Most functions now related to the manipulation of a student     |
+ | and their attributes reside directly in this class.                          |
+ +------------------------------------------------------------------------------+
+
+*/
+/* Folding - use zo to open and zc to close.  Can also use za to toggle (either open or closed).
+             zM closes all.
+*/
+include_once('student_info/Student.class');
+// {{{ class EditStudent extends Student
+class EditStudent extends Student
+{
+    // Variable below used for a new photo.
+    var $new_photo;
+
+    // {{{ function EditStudent($student)
+    function EditStudent($student)
+    {
+        $this->Student($student);
+    } // }}}
+    // {{{ function loadValues($record_id)
+    // Function below is used to load values from the database.  A record id is taken as a parameter.
+    function loadValues($record_id)
+    {
+        global $auth;
+
+        // Sanity check
+        assert($record_id);
+
+    $this->record_id = $record_id;
+
+        // Pull information from the student table.
+
+        $sql = ("
+            SELECT DISTINCT *
+            FROM student AS s
+            INNER JOIN student_department AS sd ON sd.student_number=s.student_number
+            WHERE sd.record_id='" . $record_id . "'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $this->login_id = $row["login_id"];
+        $this->netlink_id = $row["netlink_id"];
+        $this->student_number = $row["student_number"];
+
+        $this->first_name = $row["first_name"];
+        $this->middle_name = $row["middle_name"];
+        $this->last_name = $row["last_name"];
+        $this->preferred_name = $row["preferred_name"];
+        $this->email = $row["email"];
+        $this->email2 = $row["email2"];
+
+        $this->street_address_current = $row["street_address_current"];
+        $this->street_address_current2 = $row["street_address_current2"];
+        $this->street_address_current3 = $row["street_address_current3"];
+        $this->city_current = $row["city_current"];
+        $this->province_current = $row["province_current"];
+        $this->country_current = $row["country_current"];
+        $this->region_current = $row["current_region_id"];
+        $this->postal_code_current = $row["postal_code_current"];
+        $this->phone_current = $row["phone_current"];
+        $this->fax_current = $row["fax_current"];
+
+        $this->street_address_permanent = $row["street_address_permanent"];
+        $this->street_address_permanent2 = $row["street_address_permanent2"];
+        $this->street_address_permanent3 = $row["street_address_permanent3"];
+        $this->postal_code_permanent = $row["postal_code_permanent"];
+        $this->city_permanent = $row["city_permanent"];
+        $this->province_permanent = $row["province_permanent"];
+        $this->country_permanent = $row["country_permanent"];
+        $this->region_permanent = $row["permanent_region_id"];
+        $this->phone_permanent = $row["phone_permanent"];
+        $this->fax_permanent = $row["fax_permanent"];
+
+        $this->which_address = $row["which_address"];
+
+        $this->current = $row["current"];
+        $this->student_status = $row["student_status"];
+        $this->birth = $row["birth"];
+        $this->high_school = $row["high_school"];
+        $this->photo = $row["photo"];
+        $this->citizen = $row["citizen"];
+        $this->gender = $row["gender"];
+
+        $this->emergency_name = $row["emergency_name"];
+        $this->emergency_relationship = $row["emergency_relationship"];
+        $this->emergency_home_phone = $row["emergency_home_phone"];
+        $this->emergency_home_fax = $row["emergency_home_fax"];
+        $this->emergency_work_phone = $row["emergency_work_phone"];
+        $this->emergency_work_fax = $row["emergency_work_fax"];
+        $this->emergency_email = $row["emergency_email"];
+
+        // Pull information from the student department table.
+
+        $sql = ("
+            SELECT DISTINCT *
+            FROM student_department
+            WHERE record_id='" . $record_id . "'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $this->department_id = $row["department_id"];
+
+        $this->comment = $row["comment"];
+        $this->advisor = $row["advisor"];
+        $this->coop_advisor = $row["coop_advisor"];
+        $this->academic_year = $row["academic_year"];
+        $this->grad_gpa = $row["grad_gpa"];
+        $this->admit = $row["admit"];
+        if ($this->admit == '0000-00-00')
+        {
+            $this->admit = '';
+        }
+        
+        $this->convocation_month = $row["convocation_month"];
+        $this->convocation_year  = $row["convocation_year"]; 
+        
+        $this->grad = $row["grad"];
+        if ($this->grad == '0000-00-00')
+        {
+            $this->grad = '';
+        } 
+                                                    
+        /*
+        :EXPIRY: Date to Expire:  Undetermined
+                 Date Entered:    May-30-2003
+                 Entered by:      Shaun
+
+            - This section contains the graduation date for the students.  As of May 30, 2003, this has been changed to two separate fields 
+              (dropdown selection boxes).  
+            - This has been done to keep better data consistency.  
+            - I decided to keep a copy of all the grad date related information in the classes as the code needs this to keep the date in the DB
+              (i.e. the date is removed from memory somewhere along the line if the classes are not kept up)
+        
+        $this->grad = $row["grad"];
+        if ($this->grad == '0000-00-00')
+        {
+            $this->grad = '';
+        }
+        */
+        
+        $this->withdraw = $row["withdraw"];
+        if ($this->withdraw == '0000-00-00')
+        {
+            $this->withdraw = '';
+        }
+        $this->discipline_id = $row["discipline_id"];
+        $this->start_year = $row["start_year"];
+        $this->grad_year = $row["grad_year"];
+
+        $this->changes_recorded_1 = $row["changes_recorded_1"];
+        $this->changes_recorded_2 = $row["changes_recorded_2"];
+        $this->changes_recorded_3 = $row["changes_recorded_3"];
+        $this->change_by_1 = $row["change_by_1"];
+        $this->change_by_2 = $row["change_by_2"];
+        $this->change_by_3 = $row["change_by_3"];
+        $this->change_date_1 = $row["change_date_1"];
+        $this->change_date_2 = $row["change_date_2"];
+        $this->change_date_3 = $row["change_date_3"];
+
+        // Pull out notes
+
+        $sql = ("
+            SELECT DISTINCT student_notes_id
+            FROM student_notes
+            WHERE record_id='" . $record_id . "'
+            ORDER BY date_entered DESC
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        while ($row = $result->FetchRow())
+        {
+            $this->note_ids[] = $row["student_notes_id"];
+        }
+
+        /*
+         Ugly code lies beyond:  This section of the code populates the semesters array.  We need to make sure that we completely fill out the array, hence
+         the use of the variables: $num_terms_retrieved and $num_years_retrieved.  This ensures that we can perform comparisons across an array
+         created from values drawn out of the database, and an array returned from the edit_student_form.inc
+        */
+
+        // Determine the term that we begin all student semester tables at.
+        $sql = ("
+            SELECT DISTINCT term_id
+            FROM term
+            ORDER BY order_by
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+        $next_term = $row["term_id"];
+        $next_year = $this->start_year;
+
+        // These variables are used to determine the number of iterations that we must perform
+        $num_years_retrieved = 0;
+        $ending_year = $next_year + SEMESTER_TABLE_YEARS;
+        $num_terms_retrieved = 0;
+
+        // Determine the last term of the year (that which the term ends on).  This should be the term with the highest year order value
+        $sql = ("
+            SELECT DISTINCT term_id
+            FROM term
+            ORDER BY order_by DESC
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $ending_term = $row["term_id"];
+
+        // Pull out semesters information
+        $sql = ("
+            SELECT DISTINCT st.term_id, st.year, s.semesters_id 
+            FROM semesters_table AS st, semesters AS s, term AS t
+            WHERE st.record_id='" . $record_id . "'
+            AND s.semesters_id=st.semesters_id 
+            AND t.term_id=st.term_id
+            ORDER BY st.year, t.year_order
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+
+        while ($row = $result->FetchRow())
+        {
+            /*
+             If the term_id and year in $row doesn't match our $next_term and $next_year, advance them, setting $semesters corresponding to them to false, 
+             until they do match the ones in $row.
+            */
+
+            while ($next_year < $row["year"])
+            {
+                $this->semesters[$next_year][$next_term] = false;
+                $nextTermYear = getNextTermYear2($next_term, $next_year);
+                if ($nextTermYear["year"] != $next_year)
+                {
+                    // We've advanced a year, so increment our year marker.
+                    $num_years_retrieved++;
+                }
+                if ($nextTermYear["term"] != $next_term)
+                {
+                    // We've advanced a term, so increment out term marker.
+                    $num_terms_retrieved++;
+                }
+                $next_term = $nextTermYear["term"];
+                $next_year = $nextTermYear["year"];
+                $num_years_retrieved++;
+            }
+
+            while ($next_term != $row["term_id"])
+            {
+                $this->semesters[$next_year][$next_term] = false;
+                $nextTermYear = getNextTermYear2($next_term, $next_year);
+
+                // Sanity check, next_year should not be advancing once we're at this point.
+                assert($next_year == $nextTermYear["year"]);
+
+                if ($nextTermYear["term"] != $next_term)
+                {
+                    // We've advanced a term, so increment out term marker.
+                    $num_terms_retrieved++;
+                }
+
+                $next_term = $nextTermYear["term"];
+            }
+
+            $this->semesters[$next_year][$next_term] = $row["semesters_id"];
+            $nextTermYear = getNextTermYear2($next_term, $next_year);
+            if ($nextTermYear["year"] != $next_year)
+            {
+                // We've advanced a year, so increment our year marker.
+                $num_years_retrieved++;
+            }
+            if ($nextTermYear["term"] != $next_term)
+            {
+                // We've advanced a term, so increment out term marker.
+                $num_terms_retrieved++;
+            }
+            $next_term = $nextTermYear["term"];
+            $next_year = $nextTermYear["year"];
+            $num_years_retrieved++;
+        }
+
+        while ($num_years_retrieved < SEMESTER_TABLE_YEARS)
+        {
+            // We have not yet retrieved all of the years that we need to.
+            $this->semesters[$next_year][$next_term] = false;
+            $nextTermYear = getNextTermYear2($next_term, $next_year);
+            if ($nextTermYear["year"] != $next_year)
+            {
+                // We've advanced a year, so increment our year marker.
+                $num_years_retrieved++;
+            }
+            if ($nextTermYear["term"] != $next_term)
+            {
+                // We've advanced a term, so increment out term marker.
+                $num_terms_retrieved++;
+            }
+            $next_term = $nextTermYear["term"];
+            $next_year = $nextTermYear["year"];
+        }
+
+        while ($num_terms_retrieved < (SEMESTER_TABLE_YEARS * TERMS_IN_YEAR))
+        {
+            // We have not yet retrieved all of the terms that we need to.
+            $this->semesters[$next_year][$next_term] = false;
+            $nextTermYear = getNextTermYear2($next_term, $next_year);
+
+            if ($nextTermYear["term"] != $next_term)
+            {
+                // We've advanced a term, so increment out term marker.
+                $num_terms_retrieved++;
+            }
+            $next_term = $nextTermYear["term"];
+            $next_year = $nextTermYear["year"];
+        }
+
+        // Pull out general flags information
+        // This has been changed so that we now pull out flags pertaining to a students department, not the person editing the student.
+
+        $sql = ("
+            SELECT DISTINCT sf.student_flags_id
+            FROM student_flags AS sf, department_student_flags AS dsf, student_flags_join AS sfj
+            WHERE dsf.student_flags_id=sf.student_flags_id
+            AND sfj.student_flags_id=sf.student_flags_id
+            AND dsf.department_id='" . $this->department_id . "'
+            AND sf.flag_type_id='" . GENERAL_FLAGS . "'
+            AND sfj.record_id='" . $record_id . "'
+            ORDER BY sf.description
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        while ($row = $result->FetchRow())
+        {
+            $this->general_flags[] = $row["student_flags_id"];
+        }
+
+        // Pull out eligible_placed flags information
+
+        $sql = ("
+            SELECT DISTINCT t.term_id AS eligible_term, " . date('Y') . " + esf.year_space AS eligible_year, ep.term_id, ep.year
+            FROM student_flags AS sf, department_student_flags AS dsf, special_flags AS spf, student_department AS sd 
+            LEFT JOIN edit_student_flags AS esf ON esf.student_flags_id=sf.student_flags_id 
+            LEFT JOIN eligible_placed AS ep ON ep.student_flags_id=sf.student_flags_id AND ep.term_id=esf.term_id AND ep.year=esf.year_space + " . date('Y') . " AND ep.record_id='" . $record_id . "' 
+            LEFT JOIN term AS t ON t.term_id=esf.term_id 
+            WHERE sd.record_id='" . $record_id . "' 
+            AND sf.student_flags_id=" . ELIGIBLE_FLAG . " 
+            AND dsf.student_flags_id=sf.student_flags_id 
+            AND spf.flag_type_id=sf.flag_type_id
+            AND sd.department_id=dsf.department_id
+            ORDER BY esf.order_by, t.term_id, sf.description
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        while ($row = $result->FetchRow())
+        {
+            if ($row["term_id"] != NULL && $row["year"] != NULL)
+            {
+                $this->eligible_flags[$row["eligible_year"]][$row["eligible_term"]] = true;
+            }
+            else
+            {
+                $this->eligible_flags[$row["eligible_year"]][$row["eligible_term"]] = false;
+            }
+        }
+
+        $sql = ("
+            SELECT DISTINCT sf.student_flags_id
+            FROM student_flags AS sf, department_student_flags AS dsf, student_flags_join AS sfj
+            WHERE dsf.student_flags_id=sf.student_flags_id
+            AND sfj.student_flags_id=sf.student_flags_id
+            AND dsf.department_id='" . $auth->department . "'
+            AND sf.flag_type_id='" . PROFILE_FLAGS . "'
+            AND sfj.record_id='" . $record_id . "'
+            ORDER BY sf.description
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        while ($row = $result->FetchRow())
+        {
+            $this->profile_flags[] = $row["student_flags_id"];
+        }
+    } // }}}
+    // {{{ function set_values_faculty(...)
+   function set_values_faculty($start_year, $semesters, $emergency_name, $emergency_relationship, $emergency_home_phone,
+            $emergency_work_phone, $emergency_home_fax, $emergency_work_fax, $emergency_email, $new_note,
+            $note_ids, $delete_note_ids)
+    {
+        if (is_numeric($start_year))
+        {
+            $this->start_year = removeSlashes($start_year);
+        }
+        else
+        {
+            $this->start_year = null;
+        }
+        //:TODO We need some way to do error checking here.  The user has to be warned that the start year they entered was not a valid format.
+        $this->semesters = removeSlashes($semesters);
+        $this->emergency_name = removeSlashes($emergency_name);
+        $this->emergency_relationship = removeSlashes($emergency_relationship);
+        $this->emergency_home_phone = removeSlashes($emergency_home_phone);
+        $this->emergency_work_phone = removeSlashes($emergency_work_phone);
+        $this->emergency_home_fax = removeSlashes($emergency_home_fax);
+        $this->emergency_work_fax = removeSlashes($emergency_work_fax);
+        $this->emergency_email = removeSlashes($emergency_email);
+        $this->new_note = removeSlashes($new_note);
+        $this->note_ids = trim_array($note_ids);
+        $this->delete_note_ids = trim_array($delete_note_ids);
+
+        // If they've changed the start year, we need to account for this, by adding ($start_year - $year_offset) to the year of the semesters
+        if (is_numeric($start_year))
+        {
+            if ($this->semesters && is_array($this->semesters) && $this->start_year != "NULL")
+            {
+                $temp = Array();
+                $year_keys = array_keys($this->semesters);
+                foreach ($year_keys as $yk)
+                {
+                    // If we don't yet have the offset, set it.
+                    if (!isset($year_offset))
+                    {
+                        $year_offset = $this->start_year - $yk;
+                    }
+                    $term_keys = array_keys($this->semesters[$yk]);
+                    foreach ($term_keys as $tk)
+                    {
+                        $temp[($yk + $year_offset)][$tk] = $this->semesters[$yk][$tk] ? $this->semesters[$yk][$tk] : false;
+                    }
+                }
+
+                $this->semesters = $temp;
+            }
+        }
+        else 
+        {
+            if ($this->semesters && is_array($this->semesters) && $this->start_year != "NULL")
+            {
+                $temp = Array();
+                $year_keys = array_keys($this->semesters);
+                foreach ($year_keys as $yk)
+                {
+                    // If we don't yet have the offset, set it.
+                    if (!isset($year_offset))
+                    {
+                        $year_offset = $this->start_year - $yk;
+                    }
+                    $term_keys = array_keys($this->semesters[$yk]);
+                    foreach ($term_keys as $tk)
+                    {
+                        $temp[($yk + $year_offset)][$tk] = $this->semesters[$yk][$tk] ? $this->semesters[$yk][$tk] : false;
+                    }
+                }
+
+                $this->semesters = $temp;
+            }
+        }
+    } // }}}
+    // {{{ function set_values(...)
+    //Please note that the $grad parameter has been kept in to ensure the grad date is kept for historical purposes
+    function set_values($first_name, $last_name, $middle_name, $preferred_name, $birth, $citizen, $high_school, $gender, $photo, $newphoto, $deletephoto,
+        $discipline_id, $academic_year, $grad_year, $coop_advisor, $advisor, $admit, $withdraw, $convocation_month, $convocation_year, $grad, $grad_gpa, $start_year, $semesters, $general_flags, $eligible_flags,
+        $profile_flags, $street_address_current, $street_address_current2, $street_address_current3, $city_current, $province_current, $country_current, $region_current,
+        $postal_code_current, $phone_current, $fax_current, $email, $email2, $street_address_permanent, $street_address_permanent2, $street_address_permanent3, 
+        $city_permanent, $province_permanent, $country_permanent, $region_permanent, $postal_code_permanent, $phone_permanent, $fax_permanent, $emergency_name, $emergency_relationship,
+        $emergency_home_phone, $emergency_work_phone, $emergency_home_fax, $emergency_work_fax, $emergency_email, $new_note, $note_ids, $delete_note_ids)
+    {
+        $this->first_name = removeSlashes(trim($first_name));
+        $this->last_name = removeSlashes(trim($last_name));
+        $this->middle_name = removeSlashes(trim($middle_name));
+        $this->preferred_name = removeSlashes(trim($preferred_name));
+        $this->birth = removeSlashes(trim($birth));
+        $this->citizen = removeSlashes(trim($citizen));
+        $this->high_school = removeSlashes(trim($high_school));
+        $this->gender = removeSlashes(trim($gender));
+        $this->photo = removeSlashes($photo);
+        $this->new_photo = removeSlashes($newphoto);
+        $this->deletephoto = removeSlashes($deletephoto);
+        $this->discipline_id = removeSlashes($discipline_id);
+        $this->academic_year = removeSlashes($academic_year);
+        $this->grad_year = removeSlashes($grad_year);
+        $this->advisor = removeSlashes(trim($advisor));
+        $this->coop_advisor = removeSlashes($coop_advisor);
+        $this->admit = removeSlashes($admit);
+        $this->withdraw = removeSlashes($withdraw);
+
+        $this->grad = removeSlashes($grad); 
+        /* :EXPIRY: Expires on: Undecided
+                    Entered by: Shaun
+                    Entered on: May-30-2003
+                                                                    
+          - See the above expiry entered by shaun for explanation.
+        
+        $this->grad = removeSlashes($grad);
+        */
+        
+        $this->convocation_month = removeSlashes($convocation_month);
+        $this->convocation_year = removeSlashes($convocation_year);
+        
+        $this->grad_gpa = removeSlashes($grad_gpa);
+        if (is_numeric($start_year))
+        {
+            $this->start_year = removeSlashes($start_year);
+        }
+        else
+        {
+            $this->start_year = null;
+        }
+        //:TODO We need some way to do error checking here.  The user has to be warned that the start year they entered was not a valid format.
+        $this->semesters = removeSlashes($semesters);
+        $this->general_flags = trim_array($general_flags);
+        $this->eligible_flags = $eligible_flags;
+        $this->profile_flags = trim_array($profile_flags);
+        $this->street_address_current = removeSlashes($street_address_current);
+        $this->street_address_current2 = removeSlashes($street_address_current2);
+        $this->street_address_current3 = removeSlashes($street_address_current3);
+        $this->city_current = removeSlashes($city_current);
+        $this->province_current = removeSlashes($province_current);
+        $this->country_current = removeSlashes($country_current);
+        $this->region_current = removeSlashes($region_current);
+        $this->postal_code_current = removeSlashes($postal_code_current);
+        $this->phone_current = removeSlashes($phone_current);
+        $this->fax_current = removeSlashes($fax_current);
+        $this->email = removeSlashes($email);
+        $this->email2 = removeSlashes($email2);
+        $this->street_address_permanent = removeSlashes($street_address_permanent);
+        $this->street_address_permanent2 = removeSlashes($street_address_permanent2);
+        $this->street_address_permanent3 = removeSlashes($street_address_permanent3);
+        $this->city_permanent = removeSlashes($city_permanent);
+        $this->province_permanent = removeSlashes($province_permanent);
+        $this->country_permanent = removeSlashes($country_permanent);
+        $this->region_permanent = removeSlashes($region_permanent);
+        $this->postal_code_permanent = removeSlashes($postal_code_permanent);
+        $this->phone_permanent = removeSlashes($phone_permanent);
+        $this->fax_permanent = removeSlashes($fax_permanent);
+        $this->emergency_name = removeSlashes($emergency_name);
+        $this->emergency_relationship = removeSlashes($emergency_relationship);
+        $this->emergency_home_phone = removeSlashes($emergency_home_phone);
+        $this->emergency_work_phone = removeSlashes($emergency_work_phone);
+        $this->emergency_home_fax = removeSlashes($emergency_home_fax);
+        $this->emergency_work_fax = removeSlashes($emergency_work_fax);
+        $this->emergency_email = removeSlashes($emergency_email);
+        $this->new_note = removeSlashes($new_note);
+        $this->note_ids = trim_array($note_ids);
+        $this->delete_note_ids = trim_array($delete_note_ids);
+
+        // If they've changed the start year, we need to account for this, by adding ($start_year - $year_offset) to the year of the semesters
+        if (is_numeric($start_year))
+        {
+            if ($this->semesters && is_array($this->semesters) && $this->start_year != "NULL")
+            {
+                $temp = Array();
+                $year_keys = array_keys($this->semesters);
+                foreach ($year_keys as $yk)
+                {
+                    // If we don't yet have the offset, set it.
+                    if (!isset($year_offset))
+                    {
+                        $year_offset = $this->start_year - $yk;
+                    }
+                    $term_keys = array_keys($this->semesters[$yk]);
+                    foreach ($term_keys as $tk)
+                    {
+                        $temp[($yk + $year_offset)][$tk] = $this->semesters[$yk][$tk] ? $this->semesters[$yk][$tk] : false;
+                    }
+                }
+
+                $this->semesters = $temp;
+            }
+        }
+        else
+        {
+            if ($this->semesters && is_array($this->semesters) && $this->start_year != "NULL")
+            {
+                $temp = Array();
+                $year_keys = array_keys($this->semesters);
+                foreach ($year_keys as $yk)
+                {
+                    // If we don't yet have the offset, set it.
+                    if (!isset($year_offset))
+                    {
+                        $year_offset = $this->start_year - $yk;
+                    }
+                    $term_keys = array_keys($this->semesters[$yk]);
+                    foreach ($term_keys as $tk)
+                    {
+                        $temp[($yk + $year_offset)][$tk] = $this->semesters[$yk][$tk] ? $this->semesters[$yk][$tk] : false;
+                    }
+                }
+
+                $this->semesters = $temp;
+            }
+        }
+    } // }}}
+    // {{{ function checkValuesFaculty()
+    function checkValuesFaculty()
+    {
+            if (trim($this->start_year) && !is_numeric($this->start_year))
+            {
+                $error_msg .= ("The start year must either be blank, or a number with no decimal.<BR>");
+            }
+            if (trim($this->emergency_home_phone) && !isValidPhoneNumber($this->emergency_home_phone))
+            {
+                $error_msg .= ("If you wish to provide an emergency home phone number, it must be in a valid format (###-###-####), include an area code.<BR>");
+            }
+            if (trim($this->emergency_work_phone) && !isValidPhoneNumber($this->emergency_work_phone))
+            {
+                $error_msg .= ("If you wish to provide an emergency work phone number, it must be in a valid format (###-###-####), include an area code.<BR>");
+            }
+            if (trim($this->emergency_home_fax) && !isValidPhoneNumber($this->emergency_home_fax))
+            {
+                $error_msg .= ("If you wish to provide an emergency home fax number, it must be in a valid format (###-###-####), include an area code.<BR>");
+            }
+            if (trim($this->emergency_work_fax) && !isValidPhoneNumber($this->emergency_work_fax))
+            {
+                $error_msg .= ("If you wish to provide an emergency work fax number, it must be in a valid format (###-###-####), include an area code.<BR>");
+            }
+            if (trim($this->emergency_email) && !isValidEmail($this->emergency_email))
+            {
+                $error_msg .= ("If you wish to provide an emergency e-mail address, it must be a valid one.<BR>");
+            }
+
+        if ($error_msg)
+        {
+            // Cut off the last <BR>
+            $error_msg = substr($error_msg, 0, -4);
+            return $error_msg;
+        }
+        else
+        {
+            return null;
+        }
+    } // }}}
+    // {{{ function checkValues()
+    function checkValues()
+    {
+        if (!trim($this->first_name))
+        {
+            $error_msg .= ("No first name has been set for this student.<BR>");
+        }
+        if (!trim($this->last_name))
+        {
+            $error_msg .= ("No last name has been set for this student.<BR>");
+        }
+        if (trim($this->email) && !isValidEmail($this->email))
+        {
+            $error_msg .= ("The primary e-mail address is in an invalid format.<BR>");
+        }
+        if (trim($this->email2) && !isValidEmail($this->email2))
+        {
+            $error_msg .= ("The secondary e-mail address is in an invalid format.<BR>");
+        }
+        if (trim($this->birth) && validDate($this->birth) == -1)
+        {
+            $error_msg .= ("The birth date was not in a valid format (YYYY-MM-DD).<BR>");
+        }
+        if (!trim($this->gender))
+        {
+            $error_msg .= ("No gender has been set for this student.<BR>");
+        }
+        if (!((is_array($this->general_flags) && in_array("55", $this->general_flags)) XOR (trim($this->admit))))
+        {
+            $error_msg .= ("The student must have either their applied flag or their admittance date set (not both).<BR>");
+        }
+        if (trim($this->admit) && validDate($this->admit) == -1)
+        {
+            $error_msg .= ("If you wish to supply an admit date, it must be in a valid format (YYYY-MM-DD).<BR>");
+        }
+        if (trim($this->academic_year) && !is_numeric($this->academic_year))
+        {
+            $error_msg .= ("The academic year was not in a valid format (must be a number).<BR>");
+        }
+        if (trim($this->grad_year) && !is_numeric($this->grad_year))
+        {
+            $error_msg .= ("The grad year was not in a valid format (must be a number).<BR>");
+        }
+        if (trim($this->start_year) && !is_numeric($this->start_year))
+        {
+            $error_msg .= ("The start year must either be blank, or a number with no decimal.<BR>");
+        }
+
+        if (!trim($this->convocation_month) && trim($this->convocation_year))
+        {
+            $error_msg .= ("You must choose a month, if you select a year for the convocation date.<BR>");
+        }
+
+        if (trim($this->convocation_month) && !trim($this->convocation_year))
+        {
+            $error_msg .= ("You must choose a year, if you select a month for the convocation date.<BR>");
+        }
+
+        /* :EXPIRY: Expires on: Undecided
+           Entered by: Shaun
+           Entered on: May-30-2003
+
+           - See above expiry entered by shaun for explanation.
+
+           if (trim($this->grad) && validDate($this->grad) == -1)
+           {
+           $error_msg .= ("The grad date was not in a valid format (YYYY-MM-DD).<BR>");
+           }
+         */
+
+        if (trim($this->withdraw) && validDate($this->withdraw) == -1)
+        {
+            $error_msg .= ("The withdrawal date was not in a valid format (YYYY-MM-DD).<BR>");
+        }
+        if (trim($this->grad_gpa) && !preg_match("/^\d{0,2}(\.\d{0,3})?$/", $this->grad_gpa))
+        {
+            $error_msg .= ("If you wish to provide a grad gpa, it must be in the form of a decimal number, with no more than two digits before ");
+            $error_msg .= ("the decimal, and no more than three digits after it.<BR>");
+        }
+        if (trim($this->phone_current) && !isValidPhoneNumber($this->phone_current))
+        {
+            $error_msg .= ("If you wish to provide a current phone number, it must be in a valid format (###-###-####), and include an area code.<BR>");
+        }
+        if (trim($this->phone_permanent) && !isValidPhoneNumber($this->phone_permanent))
+        {
+            $error_msg .= ("If you wish to provide a permanent phone number, it must be in a valid format (###-###-####), and include an area code.<BR>");
+        }
+        if (trim($this->fax_current) && !isValidPhoneNumber($this->fax_current))
+        {
+            $error_msg .= ("If you wish to provide a current fax number, it must be in a valid format (###-###-####), and include an area code.<BR>");
+        }
+        if (trim($this->fax_permanent) && !isValidPhoneNumber($this->fax_permanent))
+        {
+            $error_msg .= ("If you wish to provide a permanent fax number, it must be in a valid format (###-###-####), and include an area code.<BR>");
+        }
+        if (trim($this->emergency_home_phone) && !isValidPhoneNumber($this->emergency_home_phone))
+        {
+            $error_msg .= ("If you wish to provide an emergency home phone number, it must be in a valid format (###-###-####), include an area code.<BR>");
+        }
+        if (trim($this->emergency_work_phone) && !isValidPhoneNumber($this->emergency_work_phone))
+        {
+            $error_msg .= ("If you wish to provide an emergency work phone number, it must be in a valid format (###-###-####), include an area code.<BR>");
+        }
+        if (trim($this->emergency_home_fax) && !isValidPhoneNumber($this->emergency_home_fax))
+        {
+            $error_msg .= ("If you wish to provide an emergency home fax number, it must be in a valid format (###-###-####), include an area code.<BR>");
+        }
+        if (trim($this->emergency_work_fax) && !isValidPhoneNumber($this->emergency_work_fax))
+        {
+            $error_msg .= ("If you wish to provide an emergency work fax number, it must be in a valid format (###-###-####), include an area code.<BR>");
+        }
+        if (trim($this->emergency_email) && !isValidEmail($this->emergency_email))
+        {
+            $error_msg .= ("If you wish to provide an emergency e-mail address, it must be a valid one.<BR>");
+        }
+
+        if ($error_msg)
+        {
+            // Cut off the last <BR>
+            $error_msg = substr($error_msg, 0, -4);
+            return $error_msg;
+        }
+        else
+        {
+            return null;
+        }
+    } // }}}
+    // {{{ function getRecordedChangesFaculty()
+    // This function is used to check if any changes have been made, and if so, records them and returns them as a string
+    function getRecordedChangesFaculty()
+    {
+        $storedStudent = new EditStudent('');
+        $storedStudent->loadValues($this->record_id);
+
+        if ($this->_recordChange($storedStudent->emergency_name, $this->emergency_name))
+        {
+            $change .= "Emergency Name, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_relationship, $this->emergency_relationship))
+        {
+            $change .= "Emergency Relationship, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_home_phone, $this->emergency_home_phone))
+        {
+            $change .= "Emergency Home Phone, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_home_fax, $this->emergency_home_fax))
+        {
+            $change .= "Emergency Home Fax, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_work_phone, $this->emergency_work_phone))
+        {
+            $change .= "Emergency Work Phone, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_work_fax, $this->emergency_work_fax))
+        {
+            $change .= "Emergency Work Fax, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_email, $this->emergency_email))
+        {
+            $change .= "Emergency E-mail, ";
+        }
+
+        if ($this->_recordChange($storedStudent->start_year, $this->start_year))
+        {
+            $change .= "Start Year, ";
+        }
+
+        // Hard stuff ahead.  Check if semesters are different.
+        if (is_array($storedStudent->semesters) XOR is_array($this->semesters))
+        {
+            $change .= ("Semesters, ");
+        }
+        elseif (is_array($storedStudent->semesters) && is_array($this->semesters))
+        {
+            // Get all the keys for $storedStudent->semesters
+            $keys = array_keys($storedStudent->semesters);
+
+            foreach ($keys AS $k)
+            {
+                // This is dumb.  The function is called key_exists in 4.0.6, but array_key_exists in every PHP 4 above and below 4.0.6
+                if (phpversion() == '4.0.6' ? !key_exists($k, $this->semesters) : !array_key_exists($k, $this->semesters))
+                {
+                    // This student's semesters array doesn't even have this key, so the arrays are different.
+                    $change .= ("Semesters, ");
+                    break;
+                }
+
+                foreach ($storedStudent->semesters[$k] AS $ts)
+                {
+                    if (!in_array($ts, $this->semesters[$k]))
+                    {
+                        // This student's semesters array doesn't have this value, so the arrays are different.
+                        $change .= ("Semesters, ");
+                        break;
+                    }
+                }
+            }
+
+            if (!preg_match("/Semesters, /", $change))
+            {
+                // If we haven't yet found an error, get all the keys for $currentStudentValues->semesters
+                $keys = array_keys($this->semesters);
+
+                foreach ($keys AS $k)
+                {
+                    if (!array_key_exists($k, $storedStudent->semesters))
+                    {
+                        // This object's semesters array doesn't even have this key, so the arrays are different.
+                        $change .= ("Semesters, ");
+                        break;
+                    }
+
+                    foreach ($this->semesters[$k] AS $iss)
+                    {
+                        if (!in_array($iss, $storedStudent->semesters[$k]))
+                        {
+                            // This object's semesters array doesn't have this value, so the arrays are different.
+                            $change .= ("Semesters, ");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($change)
+        {
+            $change = substr($change, 0, -2);
+            return $change;
+        }
+        else
+        {
+            return null;
+        }
+    } // }}}
+    // {{{ function getRecordedChanges()
+    // This function is used to check if any changes have been made, and if so, records them and returns them as a string
+    function getRecordedChanges()
+    {
+        $storedStudent = new EditStudent('');
+        $storedStudent->loadValues($this->record_id);
+
+        if ($this->_recordChange($storedStudent->first_name, $this->first_name))
+        {
+            $change .= "First Name, ";
+        }
+
+        if ($this->_recordChange($storedStudent->last_name, $this->last_name))
+        {
+            $change .= "Last Name, ";
+        }
+
+        if ($this->_recordChange($storedStudent->middle_name, $this->middle_name))
+        {
+            $change .= "Middle Name, ";
+        }
+
+        if ($this->_recordChange($storedStudent->preferred_name, $this->preferred_name))
+        {
+            $change .= "Preferred Name, ";
+        }
+
+        if ($this->_recordChange($storedStudent->birth, $this->birth))
+        {
+            $change .= "Birth Date, ";
+        }
+
+        if ($this->_recordChange($storedStudent->gender, $this->gender))
+        {
+            $change .= "Gender, ";
+        }
+
+        if ($this->_recordChange($storedStudent->email, $this->email))
+        {
+            $change .= "Primary E-mail Adress, ";
+        }
+
+        if ($this->_recordChange($storedStudent->email2, $this->email2))
+        {
+            $change .= "Secondary E-mail, ";
+        }
+
+        if ($this->_recordChange($storedStudent->fax_current, $this->fax_current))
+        {
+            $change .= "Current Fax, ";
+        }
+
+        if ($this->_recordChange($storedStudent->fax_permanent, $this->fax_permanent))
+        {
+            $change .= "Permanent Fax, ";
+        }
+
+        if ($this->_recordChange($storedStudent->street_address_current, $this->street_address_current))
+        {
+            $change .= "Current Street Address, ";
+        }
+
+        if ($this->_recordChange($storedStudent->street_address_permanent, $this->street_address_permanent))
+        {
+            $change .= "Permanent Street Address, ";
+        }
+
+        if ($this->_recordChange($storedStudent->street_address_current2, $this->street_address_current2))
+        {
+            $change .= "Current Street Address 2, ";
+        }
+
+        if ($this->_recordChange($storedStudent->street_address_permanent2, $this->street_address_permanent2))
+        {
+            $change .= "Permanent Street Address 2, ";
+        }
+
+        if ($this->_recordChange($storedStudent->street_address_current3, $this->street_address_current3))
+        {
+            $change .= "Current Street Address 3, ";
+        }
+
+        if ($this->_recordChange($storedStudent->street_address_permanent3, $this->street_address_permanent3))
+        {
+            $change .= "Permanent Street Address 3, ";
+        }
+
+        if ($this->_recordChange($storedStudent->province_current, $this->province_current))
+        {
+            $change .= "Current Province/State, ";
+        }
+
+        if ($this->_recordChange($storedStudent->province_permanent, $this->province_permanent))
+        {
+            $change .= "Permanent Province/State, ";
+        }
+
+        if ($this->_recordChange($storedStudent->country_current, $this->country_current))
+        {
+            $change .= "Current Country, ";
+        }
+
+        if ($this->_recordChange($storedStudent->country_permanent, $this->country_permanent))
+        {
+            $change .= "Permanent Country, ";
+        }
+
+        if ($this->_recordChange($storedStudent->region_current, $this->region_current))
+        {
+            $change .= "Current Region, ";
+        }
+
+        if ($this->_recordChange($storedStudent->region_permanent, $this->region_permanent))
+        {
+            $change .= "Permanent Region, ";
+        }
+
+        if ($this->_recordChange($storedStudent->city_current, $this->city_current))
+        {
+            $change .= "Current City, ";
+        }
+
+        if ($this->_recordChange($storedStudent->city_permanent, $this->city_permanent))
+        {
+            $change .= "Permanent City, ";
+        }
+
+        if ($this->_recordChange($storedStudent->postal_code_current, $this->postal_code_current))
+        {
+            $change .= "Current Postal Code, ";
+        }
+
+        if ($this->_recordChange($storedStudent->postal_code_permanent, $this->postal_code_permanent))
+        {
+            $change .= "Permanent Postal Code, ";
+        }
+
+        if ($this->_recordChange($storedStudent->which_address, $this->which_address))
+        {
+            $change .= "Address Being Used, ";
+        }
+
+        if ($this->_recordChange($storedStudent->phone_current, $this->phone_current))
+        {
+            $change .= "Current Phone, ";
+        }
+
+        if ($this->_recordChange($storedStudent->phone_permanent, $this->phone_permanent))
+        {
+            $change .= "Permanent Phone, ";
+        }
+
+        if ($this->_recordChange($storedStudent->current, $this->current))
+        {
+            $change .= "Current Flag, ";
+        }
+
+        if ($this->_recordChange($storedStudent->high_school, $this->high_school))
+        {
+            $change .= "High School, ";
+        }
+
+        if ($this->_recordChange($storedStudent->citizen, $this->citizen))
+        {
+            $change .= "Citizen, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_name, $this->emergency_name))
+        {
+            $change .= "Emergency Name, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_relationship, $this->emergency_relationship))
+        {
+            $change .= "Emergency Relationship, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_home_phone, $this->emergency_home_phone))
+        {
+            $change .= "Emergency Home Phone, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_home_fax, $this->emergency_home_fax))
+        {
+            $change .= "Emergency Home Fax, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_work_phone, $this->emergency_work_phone))
+        {
+            $change .= "Emergency Work Phone, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_work_fax, $this->emergency_work_fax))
+        {
+            $change .= "Emergency Work Fax, ";
+        }
+
+        if ($this->_recordChange($storedStudent->emergency_email, $this->emergency_email))
+        {
+            $change .= "Emergency E-mail, ";
+        }
+
+        if ($this->_recordChange($storedStudent->advisor, $this->advisor))
+        {
+            $change .= "Advisor, ";
+        }
+
+        if ($this->_recordChange($storedStudent->coop_advisor, $this->coop_advisor))
+        {
+            $change .= "Co-op Advisor, ";
+        }
+
+        if ($this->_recordChange($storedStudent->academic_year, $this->academic_year))
+        {
+            $change .= "Academic Year, ";
+        }
+
+        if ($this->_recordChange($storedStudent->grad_gpa, $this->grad_gpa))
+        {
+            $change .= "Grad GPA, ";
+        }
+
+        if ($this->_recordChange($storedStudent->admit, $this->admit))
+        {
+            $change .= "Admittance Date, ";
+        }
+        
+        if ($this->_recordChange($storedStudent->convocation_month, $this->convocation_month))
+        {
+            $change .= "Convocation Month, ";
+        }
+
+        if ($this->_recordChange($storedStudent->convocation_year, $this->convocation_year))
+        {
+            $change .= "Convocation Year, ";
+        }
+        
+        if ($this->_recordChange($storedStudent->grad, $this->grad))
+        {
+            $change .= "Graduation Date, ";
+        }
+                                                                                
+        /* :EXPIRY: Expires on: Undecided
+                    Entered by: Shaun
+                    Entered on: May-30-2003
+                     
+           -See above expiry entered by shaun for explanation.
+        
+        if ($this->_recordChange($storedStudent->grad, $this->grad))
+        {
+            $change .= "Graduation Date, ";
+        }
+        */
+        
+        if ($this->_recordChange($storedStudent->withdraw, $this->withdraw))
+        {
+            $change .= "Withdrawal Date, ";
+        }
+
+        if ($this->_recordChange($storedStudent->discipline_id, $this->discipline_id))
+        {
+            $change .= "Discipline, ";
+        }
+
+        if ($this->_recordChange($storedStudent->start_year, $this->start_year))
+        {
+            $change .= "Start Year, ";
+        }
+
+        if ($this->_recordChange($storedStudent->grad_year, $this->grad_year))
+        {
+            $change .= "Grad Year, ";
+        }
+        // Hard stuff ahead.  Check if semesters are different.
+        if ((is_array($storedStudent->semesters) XOR is_array($this->semesters)) AND !is_null($this->start_date))
+        {
+            $change .= ("Semesters, ");
+        }
+        elseif (is_array($storedStudent->semesters) && is_array($this->semesters))
+        {
+            // Get all the keys for $storedStudent->semesters
+            $keys = array_keys($storedStudent->semesters);
+
+            foreach ($keys AS $k)
+            {
+                if (!array_key_exists($k, $this->semesters))
+                {
+                    // This student's semesters array doesn't even have this key, so the arrays are different.
+                    $change .= ("Semesters, ");
+                    break;
+                }
+
+                foreach ($storedStudent->semesters[$k] AS $ts)
+                {
+                    if (!in_array($ts, $this->semesters[$k]))
+                    {
+                        // This student's semesters array doesn't have this value, so the arrays are different.
+                        $change .= ("Semesters, ");
+                        break;
+                    }
+                }
+            }
+
+            if (!preg_match("/Semesters, /", $change))
+            {
+                // If we haven't yet found an error, get all the keys for $currentStudentValues->semesters
+                $keys = array_keys($this->semesters);
+
+                foreach ($keys AS $k)
+                {
+                    if (!array_key_exists($k, $storedStudent->semesters))
+                    {
+                        // This object's semesters array doesn't even have this key, so the arrays are different.
+                        $change .= ("Semesters, ");
+                        break;
+                    }
+
+                    foreach ($this->semesters[$k] AS $iss)
+                    {
+                        if (!in_array($iss, $storedStudent->semesters[$k]))
+                        {
+                            // This object's semesters array doesn't have this value, so the arrays are different.
+                            $change .= ("Semesters, ");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Find what elligibility flags were changed
+        $termname = array(1 => "Fall", 2 => "Spring", 3 => "Summer");
+        
+        // Lets not screw up the original arrays, ok?
+        $new = $this->eligible_flags; $old = $storedStudent->eligible_flags;
+
+        // Get the changed years
+        $years = array_unique(array_merge(array_keys((array)$new),array_keys((array)$old)));
+        for ($i=0, sort($years), $end=count($years); $i<$end; $i++) if(!is_numeric($years[$i])) unset($years[$i]);
+        
+        if (count($years) > 0){ 
+            // Iterate through the years, see what changed
+            foreach($years as $year){
+                
+                // Check for new flags
+                if (count($new[$year]) > 0){
+                    foreach($new[$year] as $term => $set){
+                        if ($set === 'true') $new[$year][$term] = true;
+                        if ($new[$year][$term] && !$old[$year][$term]) $change .= "Flag 'Eligible ({$termname[$term]} $year)' Set, ";
+                    }
+                }
+                // Check for flag removal
+                if(count($old[$year]) > 0){
+                    foreach($old[$year] as $term => $set){
+                        if ($set && !$new[$year][$term]) $change .= "Flag 'Eligible ({$termname[$term]} $year)' Unset, "; 
+                    }
+                }
+            }
+        }
+      
+        // Find what general flags were changed.
+        $new = array_merge((array)$this->general_flags, (array)$this->profile_flags);
+        $old = array_merge((array)$storedStudent->general_flags, (array)$storedStudent->profile_flags);
+        $changes = array_diff_both($new, $old); // See function in misc/functions.inc under Array Functions 
+        
+        // Get all the ID's of the flags that were changed.
+        $id_list = array_merge($changes['add'], $changes['del']);
+        
+        // Remove any non-numeric elements (boolean, char, null) due to the array casts above.
+        for ($i=0, sort($id_list), $end=count($id_list); $i<$end; $i++) if(!is_numeric($id_list[$i])) unset($id_list[$i]);
+       
+        if(!empty($id_list)){
+            // Get the names to go with the ID's we have changed.
+            $flag_sql = "SELECT student_flags_id as id, description
+                         FROM student_flags
+                         WHERE student_flags_id IN (" . implode(",", $id_list) . ")";
+            $result = $GLOBALS['dbh']->Execute($flag_sql);
+            while ($row = $result->FetchRow()){ $names[$row['id']] = $row['description']; }
+            
+            // Build the string.
+            if(!empty($changes['add'])){
+                foreach ($changes['add'] as $add){
+                    if(is_numeric($add)){ // Another empty check
+                        $change .= "Flag '{$names[$add]}' Set, ";
+                    }
+                }
+            }
+            if(!empty($changes['del'])){
+                foreach ($changes['del'] as $del){
+                    if(is_numeric($del)){ // Another empty check
+                        $change .= "Flag '{$names[$del]}' Unset, ";
+                    }
+                }           
+            }
+        }
+
+        if ($change)
+        {
+            $change = substr($change, 0, -2);
+            return $change;
+        }
+        else
+        {
+            return null;
+        }
+    } // }}}
+    // {{{ function _recordChange($initialValue, $checkValue) 
+    // This is a private function used to check if two items need to be marked as changed (a change from an empty field to non-empty is not recorded)
+    function _recordChange($initialValue, $checkValue)
+    {
+        if (!trim($initialValue))
+        {
+            // A blank value may or may not have been changed.  Either way, it doesn't need to be recorded.
+            return false;
+        }
+        elseif ($initialValue != $checkValue)
+        {
+            // There's a difference.  We MUST record it.
+            return true;
+        }
+    } // }}}
+    // {{{ function checkChangesFaculty($currentStudentValues, $editedStudent)
+    /* 
+     This function is used to check for differences between the values held by this class and those in the database. 
+     We use this to check for concurrent editing problems.
+    */
+    function checkChangesFaculty($currentStudentValues, $editedStudent)
+    {
+        // $stack is used for error logging down below.  This way we can determine where the errors occurred.
+        $stack = array();
+
+        // First create the $changes[] variable, these are the values that the current user tried to save.
+        $changes_array["start_year"] = $editedStudent->start_year;
+        
+        $changes_array["emergency_name"] = $editedStudent->emergency_name;
+        $changes_array["emergency_relationship"] = $editedStudent->emergency_relationship;
+        $changes_array["emergency_home_phone"] = $editedStudent->emergency_home_phone;
+        $changes_array["emergency_home_fax"] = $editedStudent->emergency_home_fax;
+        $changes_array["emergency_work_phone"] = $editedStudent->emergency_work_phone;
+        $changes_array["emergency_work_fax"] = $editedStudent->emergency_work_fax;
+        $changes_array["emergency_email"] = $editedStudent->emergency_email;
+
+        // Record the notes, and ones that have been deleted
+        if (is_array($editedStudent->note_ids))
+        {
+            foreach($editedStudent->note_ids AS $ni)
+            {
+                $changes_array["note_ids"][] = $ni;
+            }
+        }
+        else
+        {
+            $changes_array["note_ids"] = 'none';
+        }
+
+        if (is_array($editedStudent->delete_note_ids))
+        {
+            foreach($editedStudent->delete_note_ids AS $ni)
+            {
+                $changes_array["delete_note_ids"][] = $ni;
+            }
+        }
+        else
+        {
+            $changes_array["delete_note_ids"] = 'none';
+        }
+
+        // Record semesters
+        if (is_array($editedStudent->semesters))
+        {
+            foreach (array_keys($editedStudent->semesters) as $year_key)
+            {
+                foreach (array_keys($editedStudent->semesters[$year_key]) as $term_key)
+                {
+                    $changes_array["semesters"][$year_key][$term_key] = $editedStudent->semesters[$year_key][$term_key];
+                }
+            }
+        }
+
+        // Get the contact_id of whoever made this change.
+        $changes_array["change_by"] = $currentStudentValues->change_by_1;
+
+        // Start out the changes_made value as false
+        $changes_array["changes_made"] = false;
+
+
+        // Now check and see if we've actually got a discrepancy.  If so, set a variable in changes_array so we know this.
+        if ($this->start_year != $currentStudentValues->start_year)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Start Year, ");
+        }
+
+        if ($this->emergency_name != $currentStudentValues->emergency_name)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Name, ");
+        }
+
+        if ($this->emergency_relationship != $currentStudentValues->emergency_relationship)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Relationship, ");
+        }
+
+        if ($this->emergency_home_phone != $currentStudentValues->emergency_home_phone)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Home Phone, ");
+        }
+
+        if ($this->emergency_home_fax != $currentStudentValues->emergency_home_fax)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Home Fax, ");
+        }
+
+        if ($this->emergency_work_phone != $currentStudentValues->emergency_work_phone)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Work Phone, ");
+        }
+
+        if ($this->emergency_work_fax != $currentStudentValues->emergency_work_fax)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Work Fax, ");
+        }
+
+        if ($this->emergency_email != $currentStudentValues->emergency_email)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact E-mail, ");
+        }
+
+        // Hard stuff ahead.  Check if semesters are different.
+        if (is_array($this->semesters) XOR is_array($currentStudentValues->semesters) AND $this->start_year != null)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Semesters, ");
+        }
+        elseif (is_array($this->semesters) && is_array($currentStudentValues->semesters))
+        {
+            // Get all the keys for $this->semesters
+            $keys = array_keys($this->semesters);
+
+            foreach ($keys AS $k)
+            {
+                // This is dumb.  The function is called key_exists in 4.0.6, but array_key_exists in every PHP 4 above and below 4.0.6
+                if (!array_key_exists($k, $currentStudentValues->semesters))
+                {
+                    // The currentStudentValues semesters array doesn't even have this key, so the arrays are different.
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Semesters, ");
+                    break;
+                }
+
+                foreach ($this->semesters[$k] AS $ts)
+                {
+                    if (!in_array($ts, $currentStudentValues->semesters[$k]))
+                    {
+                        // The currentStudentValues semesters array doesn't have this value, so the arrays are different.
+                        $changes_array["changes_made"] = true;
+                        $errors .= ("Semesters, ");
+                        break;
+                    }
+                }
+            }
+
+            if (!$changes_array["changes_made"])
+            {
+                // If we haven't yet found an error, get all the keys for $currentStudentValues->semesters
+                $keys = array_keys($currentStudentValues->semesters);
+
+                foreach ($keys AS $k)
+                {
+                    if (!array_key_exists($k, $this->semesters))
+                    {
+                        // This object's semesters array doesn't even have this key, so the arrays are different.
+                        $changes_array["changes_made"] = true;
+                        $errors .= ("Semesters, ");
+                        break;
+                    }
+
+                    foreach ($currentStudentValues->semesters[$k] AS $iss)
+                    {
+                        if (!in_array($iss, $this->semesters[$k]))
+                        {
+                            // This object's semesters array doesn't have this value, so the arrays are different.
+                            $changes_array["changes_made"] = true;
+                            $errors .= ("Semesters, ");
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        // Check the notes last.
+        if (is_array($this->note_ids) XOR is_array($currentStudentValues->note_ids))
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Notes, ");
+        }
+        elseif (is_array($this->note_ids) && is_array($currentStudentValues->note_ids))
+        {
+            foreach ($this->note_ids AS $ni)
+            {
+                if (!in_array($ni, $currentStudentValues->note_ids))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Notes, ");
+                    break;
+                }
+            }
+            
+            foreach ($currentStudentValues->note_ids AS $ni)
+            {
+                if (!in_array($ni, $this->note_ids))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Notes, ");
+                    break;
+                }
+            }
+        }
+
+        // If we've encountered errors, save them to be displayed on the next page.
+        if ($errors)
+        {
+            $errors = substr($errors, 0, -2);
+            $changes_array["errors_encountered"] = $errors;
+        }
+
+        /*
+         This is commented out for now, because we no longer need this functionality (it was for debugging)
+         If someone wants to re-enable this functionality, they should push each error message (where we set
+         $errors to something) on to a stack named $stack.
+        */
+        // If we've caught an error (someone else has been editing this file), then log it.
+        if($changes_array["changes_made"]) 
+        {
+            // Make these variables global so we can access them and record an error.
+            global $auth, $HTTP_USER_AGENT, $REMOVE_ADDR;
+
+            $fp = fopen(PATH_LOGS . "edit_student.log", "a");
+
+            //logs $record_id and $currentStudentValues->department_id to search for bugs
+
+            $str = ("\n*********************************************************\n");
+            $sql = ("
+                SELECT CURRENT_DATE AS date, CURRENT_TIME AS time
+                ");
+            $result = $GLOBALS['dbh']->Execute($sql);
+            while ($row = $result->FetchRow())
+            {
+                $date = $row["date"];
+                $time = $row["time"];
+            }
+
+            $str .= ($date . " : " . $time . " : " . $auth->name . " : " . $REMOTE_ADDR . "\n");
+            if(trim($QUERY_STRING))
+            {
+                $query = stripslashes($QUERY_STRING);
+                $str .= "\tURL = " . $query . "\n";
+            }
+            $str .= "\tBROWSER/PLATFORM = " . $HTTP_USER_AGENT . "\n";
+
+            $str .= ("\trecord_id: " . $record_id . "\n");
+            $str .= ("\tstudent_department_row:" . $currentStudentValues->department_id . "\n");
+
+            $str .= ("\tError flags: ");
+            foreach ($stack as $value) 
+            {
+                $str .= $value . " ";
+            }
+            $str .= "\n";
+            $str .= ("*********************************************************\n");
+            $str .= ("\n");
+
+            fputs($fp, $str);
+        }
+
+        // Return the array we've created.
+        return $changes_array;
+    } // }}}
+    // {{{ function checkChanges($currentStudentValues, $editedStudent) 
+    /* 
+     This function is used to check for differences between the values held by this class and those in the database. 
+     We use this to check for concurrent editing problems.
+    */
+    function checkChanges($currentStudentValues, $editedStudent)
+    {
+        // $stack is used for error logging down below.  This way we can determine where the errors occurred.
+        $stack = array();
+
+        // First create the $changes[] variable, these are the values that the current user tried to save.
+        $changes_array["first_name"] = $editedStudent->first_name;
+        $changes_array["last_name"] = $editedStudent->last_name;
+        $changes_array["middle_name"] = $editedStudent->middle_name;
+        $changes_array["preferred_name"] = $editedStudent->preferred_name;
+        $changes_array["email"] = $editedStudent->email;
+        $changes_array["email2"] = $editedStudent->email2;
+
+        $changes_array["street_address_current"] = $editedStudent->street_address_current;
+        $changes_array["street_address_current2"] = $editedStudent->street_address_current2;
+        $changes_array["street_address_current3"] = $editedStudent->street_address_current3;
+        $changes_array["country_current"] = $editedStudent->country_current;
+        $changes_array["current_region_id"] = $editedStudent->region_current;
+        $changes_array["province_current"] = $editedStudent->province_current;
+        $changes_array["city_current"] = $editedStudent->city_current;
+        $changes_array["postal_code_current"] = $editedStudent->postal_code_current;
+        $changes_array["phone_current"] = $editedStudent->phone_current;
+
+        $changes_array["street_address_permanent"] = $editedStudent->street_address_permanent;
+        $changes_array["street_address_permanent2"] = $editedStudent->street_address_permanent2;
+        $changes_array["street_address_permanent3"] = $editedStudent->street_address_permanent3;
+        $changes_array["country_permanent"] = $editedStudent->country_permanent;
+        $changes_array["permanent_region_id"] = $editedStudent->region_permanent;
+        $changes_array["province_permanent"] = $editedStudent->province_permanent;
+        $changes_array["city_permanent"] = $editedStudent->city_permanent;
+        $changes_array["postal_code_permanent"] = $editedStudent->postal_code_permanent;
+        $changes_array["phone_permanent"] = $editedStudent->phone_permanent;
+
+        $changes_array["advisor"] = $editedStudent->advisor;
+        $changes_array["coop_advisor"] = $editedStudent->coop_advisor;
+        $changes_array["academic_year"] = $editedStudent->academic_year;
+        $changes_array["grad_gpa"] = $editedStudent->grad_gpa;
+        $changes_array["birth"] = $editedStudent->birth;
+        $changes_array["admit"] = $editedStudent->admit;
+        
+        $changes_array["convocation_month"] = $editedStudent->convocation_month;
+        $changes_array["convocation_year"] = $editedStudent->convocation_year;
+        
+        $changes_array["grad"] = $editedStudent->grad; 
+        
+        /* :EXPIRY: Expires on: Undecided
+                    Entered by: Shaun
+                    Entered on: May-30-2003
+                         
+            - See above expiry tag for explanation
+             
+        $changes_array["grad"] = $editedStudent->grad;
+        */
+        
+        $changes_array["withdraw"] = $editedStudent->withdraw;
+        $changes_array["discipline_id"] = $editedStudent->discipline_id;
+        $changes_array["high_school"] = $editedStudent->high_school;
+        $changes_array["start_year"] = $editedStudent->start_year;
+        $changes_array["citizen"] = $editedStudent->citizen;
+        $changes_array["grad_year"] = $editedStudent->grad_year;
+        $changes_array["gender"] = $editedStudent->gender;
+        $changes_array["photo"] = $editedStudent->photo;
+        $changes_array["deletephoto"] = $editedStudent->deletephoto;
+        
+        $changes_array["emergency_name"] = $editedStudent->emergency_name;
+        $changes_array["emergency_relationship"] = $editedStudent->emergency_relationship;
+        $changes_array["emergency_home_phone"] = $editedStudent->emergency_home_phone;
+        $changes_array["emergency_home_fax"] = $editedStudent->emergency_home_fax;
+        $changes_array["emergency_work_phone"] = $editedStudent->emergency_work_phone;
+        $changes_array["emergency_work_fax"] = $editedStudent->emergency_work_fax;
+        $changes_array["emergency_email"] = $editedStudent->emergency_email;
+
+        // Record all of the flags here (or 'none' if there are no longer any set).
+        if (is_array($editedStudent->general_flags))
+        {
+            foreach($editedStudent->general_flags AS $gf)
+            {
+                $changes_array["general_flags"][] = $gf;
+            }
+        }
+        else
+        {
+            $changes_array["general_flags"] = 'none';
+        }
+
+        // Eligible flags needs to be handled a little differently, so just directly copy the array.
+        if (is_array($editedStudent->eligible_flags))
+        {
+            $changes_array["eligible_flags"] = $editedStudent->eligible_flags;
+        }
+        else
+        {
+            $changes_array["eligible_flags"] = 'none';
+        }
+
+        if (is_array($editedStudent->profile_flags))
+        {
+            foreach($editedStudent->profile_flags AS $pf)
+            {
+                $changes_array["profile_flags"][] = $pf;
+            }
+        }
+        else
+        {
+            $changes_array["profile_flags"] = 'none';
+        }
+
+        // Record the notes, and ones that have been deleted
+        if (is_array($editedStudent->note_ids))
+        {
+            foreach($editedStudent->note_ids AS $ni)
+            {
+                $changes_array["note_ids"][] = $ni;
+            }
+        }
+        else
+        {
+            $changes_array["note_ids"] = 'none';
+        }
+
+        if (is_array($editedStudent->delete_note_ids))
+        {
+            foreach($editedStudent->delete_note_ids AS $ni)
+            {
+                $changes_array["delete_note_ids"][] = $ni;
+            }
+        }
+        else
+        {
+            $changes_array["delete_note_ids"] = 'none';
+        }
+
+        // Record semesters
+        if (is_array($editedStudent->semesters))
+        {
+            foreach (array_keys($editedStudent->semesters) as $year_key)
+            {
+                foreach (array_keys($editedStudent->semesters[$year_key]) as $term_key)
+                {
+                    $changes_array["semesters"][$year_key][$term_key] = $editedStudent->semesters[$year_key][$term_key];
+                }
+            }
+        }
+
+        // Get the contact_id of whoever made this change.
+        $changes_array["change_by"] = $currentStudentValues->change_by_1;
+
+        // Start out the changes_made value as false
+        $changes_array["changes_made"] = false;
+
+
+        // Now check and see if we've actually got a discrepancy.  If so, set a variable in changes_array so we know this.
+        if ($this->first_name != $currentStudentValues->first_name)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("First Name, ");
+        }
+
+        if ($this->last_name != $currentStudentValues->last_name)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Last Name, ");
+        }
+
+        if ($this->middle_name != $currentStudentValues->middle_name)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Middle Name, ");
+        }
+
+        if ($this->preferred_name != $currentStudentValues->preferred_name)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Preferred Name, ");
+        }
+
+        if ($this->email != $currentStudentValues->email)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Primary E-mail, ");
+        }
+
+        if ($this->email2 != $currentStudentValues->email2)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Secondary E-mail, ");
+        }
+
+        if ($this->street_address_current != $currentStudentValues->street_address_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Street Address, ");
+        }
+
+        if ($this->street_address_current2 != $currentStudentValues->street_address_current2)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Street Address, ");
+        }
+
+        if ($this->street_address_current3 != $currentStudentValues->street_address_current3)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Street Address, ");
+        }
+
+        if ($this->country_current != $currentStudentValues->country_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Country, ");
+        }
+
+        if ($this->region_current != $currentStudentValues->region_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Region, ");
+        }
+
+        if ($this->province_current != $currentStudentValues->province_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Province, ");
+        }
+
+        if ($this->city_current != $currentStudentValues->city_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current City, ");
+        }
+
+        if ($this->postal_code_current != $currentStudentValues->postal_code_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Postal Code, ");
+        }
+
+        if ($this->phone_current != $currentStudentValues->phone_current)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Current Phone, ");
+        }
+
+        if ($this->street_address_permanent != $currentStudentValues->street_address_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Street Address, ");
+        }
+
+        if ($this->street_address_permanent2 != $currentStudentValues->street_address_permanent2)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Street Address, ");
+        }
+
+        if ($this->street_address_permanent3 != $currentStudentValues->street_address_permanent3)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Street Address, ");
+        }
+
+        if ($this->country_permanent != $currentStudentValues->country_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Country, ");
+        }
+
+        if ($this->region_permanent != $currentStudentValues->region_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Region, ");
+        }
+
+        if ($this->province_permanent != $currentStudentValues->province_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Province, ");
+        }
+
+        if ($this->city_permanent != $currentStudentValues->city_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent City, ");
+        }
+
+        if ($this->postal_code_permanent != $currentStudentValues->postal_code_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Postal Code, ");
+        }
+
+        if ($this->phone_permanent != $currentStudentValues->phone_permanent)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Permanent Phone, ");
+        }
+
+        if ($this->advisor != $currentStudentValues->advisor)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Advisor, ");
+        }
+
+        if ($this->coop_advisor != $currentStudentValues->coop_advisor)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Co-op Advisor, ");
+        }
+                                                        
+        if ($this->academic_year != $currentStudentValues->academic_year)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Academic Year, ");
+        }
+
+        if ($this->grad_gpa != $currentStudentValues->grad_gpa)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Grad GPA, ");
+        }
+
+        if ($this->birth != $currentStudentValues->birth)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Birthdate, ");
+        }
+
+        if ($this->admit != $currentStudentValues->admit)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Admission Date, ");
+        }
+        
+        if ($this->convocation_month != $currentStudentValues->convocation_month)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Convocation Month, ");
+        }
+
+        if ($this->convocation_year != $currentStudentValues->convocation_year)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Convocation Year, ");
+        }
+        
+        /* :EXPIRY: Expires on: Undecided
+                    Entered by: Shaun
+                    Entered on: May-30-2003
+                    
+            - Same as above
+        
+        if ($this->grad != $currentStudentValues->grad)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Grad Date, ");
+        }
+        */
+        
+        if ($this->withdraw != $currentStudentValues->withdraw)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Withdraw Date, ");
+        }
+
+        if ($this->discipline_id != $currentStudentValues->discipline_id)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Discipline, ");
+        }
+
+        if ($this->high_school != $currentStudentValues->high_school)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("High School, ");
+        }
+
+        if ($this->start_year != $currentStudentValues->start_year)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Start Year, ");
+        }
+
+        if ($this->citizen != $currentStudentValues->citizen)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Citizenship, ");
+        }
+
+        if ($this->grad_year != $currentStudentValues->grad_year)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Graduation Year, ");
+        }
+
+        if ($this->gender != $currentStudentValues->gender)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Gender, ");
+        }
+
+        if ($this->photo != $currentStudentValues->photo)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Photo, ");
+        }
+
+        if ($this->deletephoto != $currentStudentValues->deletephoto)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Photo, ");
+        }
+        
+        if ($this->emergency_name != $currentStudentValues->emergency_name)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Name, ");
+        }
+
+        if ($this->emergency_relationship != $currentStudentValues->emergency_relationship)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Relationship, ");
+        }
+
+        if ($this->emergency_home_phone != $currentStudentValues->emergency_home_phone)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Home Phone, ");
+        }
+
+        if ($this->emergency_home_fax != $currentStudentValues->emergency_home_fax)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Home Fax, ");
+        }
+
+        if ($this->emergency_work_phone != $currentStudentValues->emergency_work_phone)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Work Phone, ");
+        }
+
+        if ($this->emergency_work_fax != $currentStudentValues->emergency_work_fax)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact Work Fax, ");
+        }
+
+        if ($this->emergency_email != $currentStudentValues->emergency_email)
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Emergency Contact E-mail, ");
+        }
+
+        // Hard stuff ahead.  Check if semesters are different.
+        if (is_array($this->semesters) XOR is_array($currentStudentValues->semesters))
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Semesters, ");
+        }
+        elseif (is_array($this->semesters) && is_array($currentStudentValues->semesters))
+        {
+            // Get all the keys for $this->semesters
+            $keys = array_keys($this->semesters);
+
+            foreach ($keys AS $k)
+            {
+                // This is dumb.  The function is called key_exists in 4.0.6, but array_key_exists in every PHP 4 above and below 4.0.6
+                if (phpversion() == '4.0.6' ? !key_exists($k, $currentStudentValues->semesters) : !array_key_exists($k, $currentStudentValues->semesters))
+                {
+                    // The currentStudentValues semesters array doesn't even have this key, so the arrays are different.
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Semesters, ");
+                    break;
+                }
+
+                foreach ($this->semesters[$k] AS $ts)
+                {
+                    if (!in_array($ts, $currentStudentValues->semesters[$k]))
+                    {
+                        // The currentStudentValues semesters array doesn't have this value, so the arrays are different.
+                        $changes_array["changes_made"] = true;
+                        $errors .= ("Semesters, ");
+                        break;
+                    }
+                }
+            }
+
+            if (!$changes_array["changes_made"])
+            {
+                // If we haven't yet found an error, get all the keys for $currentStudentValues->semesters
+                $keys = array_keys($currentStudentValues->semesters);
+
+                foreach ($keys AS $k)
+                {
+                    if (!array_key_exists($k, $this->semesters))
+                    {
+                        // This object's semesters array doesn't even have this key, so the arrays are different.
+                        $changes_array["changes_made"] = true;
+                        $errors .= ("Semesters, ");
+                        break;
+                    }
+
+                    foreach ($currentStudentValues->semesters[$k] AS $iss)
+                    {
+                        if (!in_array($iss, $this->semesters[$k]))
+                        {
+                            // This object's semesters array doesn't have this value, so the arrays are different.
+                            $changes_array["changes_made"] = true;
+                            $errors .= ("Semesters, ");
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        // Check if any of the flags arrays are different.
+        if (is_array($this->general_flags) XOR is_array($currentStudentValues->general_flags))
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("General Flags, ");
+        }
+        elseif (is_array($this->general_flags) && is_array($currentStudentValues->general_flags))
+        {
+            foreach ($currentStudentValues->general_flags AS $gf)
+            {
+                if (!in_array($gf, $this->general_flags))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("General Flags, ");
+                    break;
+                }
+            }
+            foreach ($this->general_flags AS $gf)
+            {
+                if (!in_array($gf, $currentStudentValues->general_flags))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("General Flags, ");
+                    break;
+                }
+            }
+        }
+
+        if (is_array($this->profile_flags) XOR is_array($currentStudentValues->profile_flags))
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Profile Flags, ");
+        }
+        elseif (is_array($this->profile_flags) && is_array($currentStudentValues->profile_flags))
+        {
+            foreach ($currentStudentValues->profile_flags AS $pf)
+            {
+                if (!in_array($pf, $this->profile_flags))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Profile Flags, ");
+                    break;
+                }
+            }
+            foreach ($this->profile_flags AS $pf)
+            {
+                if (!in_array($pf, $currentStudentValues->profile_flags))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Profile Flags, ");
+                    break;
+                }
+            }
+        }
+
+        // Treat this array like the semesters one.
+        if (is_array($this->eligible_flags) XOR is_array($currentStudentValues->eligible_flags))
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Eligible Flags, ");
+        }
+        elseif (is_array($this->eligible_flags) && is_array($currentStudentValues->eligible_flags))
+        {
+            // Get all the keys for $this->eligible_flags
+            $keys = array_keys($this->eligible_flags);
+
+            foreach ($keys AS $k)
+            {
+                if (!array_key_exists($k, $currentStudentValues->eligible_flags))
+                {
+                    // The currentStudentValues eligible_flags array doesn't even have this key, so the arrays are different.
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Eligible Flags, ");
+                    break;
+                }
+
+                foreach ($this->eligible_flags[$k] AS $ts)
+                {
+                    if (!in_array($ts, $currentStudentValues->eligible_flags[$k]))
+                    {
+                        // The currentStudentValues eligible_flags array doesn't have this value, so the arrays are different.
+                        $changes_array["changes_made"] = true;
+                        $errors .= ("Eligible Flags, ");
+                        break;
+                    }
+                }
+            }
+
+            if (!$changes_array["changes_made"])
+            {
+                // If we haven't yet found an error, get all the keys for $currentStudentValues->eligible_flags
+                $keys = array_keys($currentStudentValues->eligible_flags);
+
+                foreach ($keys AS $k)
+                {
+                    if (!array_key_exists($k, $this->eligible_flags))
+                    {
+                        // This object's eligible_flags array doesn't even have this key, so the arrays are different.
+                        $changes_array["changes_made"] = true;
+                        $errors .= ("Eligible Flags, ");
+                        break;
+                    }
+
+                    foreach ($currentStudentValues->eligible_flags[$k] AS $iss)
+                    {
+                        if (!in_array($iss, $this->eligible_flags[$k]))
+                        {
+                            // This object's eligible_flags array doesn't have this value, so the arrays are different.
+                            $changes_array["changes_made"] = true;
+                            $errors .= ("Eligible Flags, ");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check the notes last.
+        if (is_array($this->note_ids) XOR is_array($currentStudentValues->note_ids))
+        {
+            $changes_array["changes_made"] = true;
+            $errors .= ("Notes, ");
+        }
+        elseif (is_array($this->note_ids) && is_array($currentStudentValues->note_ids))
+        {
+            foreach ($this->note_ids AS $ni)
+            {
+                if (!in_array($ni, $currentStudentValues->note_ids))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Notes, ");
+                    break;
+                }
+            }
+            
+            foreach ($currentStudentValues->note_ids AS $ni)
+            {
+                if (!in_array($ni, $this->note_ids))
+                {
+                    $changes_array["changes_made"] = true;
+                    $errors .= ("Notes, ");
+                    break;
+                }
+            }
+        }
+
+        // If we've encountered errors, save them to be displayed on the next page.
+        if ($errors)
+        {
+            $errors = substr($errors, 0, -2);
+            $changes_array["errors_encountered"] = $errors;
+        }
+
+        /*
+         This is commented out for now, because we no longer need this functionality (it was for debugging)
+         If someone wants to re-enable this functionality, they should push each error message (where we set
+         $errors to something) on to a stack named $stack.
+        */
+        // If we've caught an error (someone else has been editing this file), then log it.
+        if($changes_array["changes_made"]) 
+        {
+            // Make these variables global so we can access them and record an error.
+            global $auth, $HTTP_USER_AGENT, $REMOVE_ADDR;
+
+            $fp = fopen(PATH_LOGS . "edit_student.log", "a");
+
+            //logs $record_id and $currentStudentValues->department_id to search for bugs
+
+            $str = ("\n*********************************************************\n");
+            $sql = ("
+                SELECT CURRENT_DATE AS date, CURRENT_TIME AS time
+                ");
+            $result = $GLOBALS['dbh']->Execute($sql);
+            while ($row = $result->FetchRow())
+            {
+                $date = $row["date"];
+                $time = $row["time"];
+            }
+
+            $str .= ($date . " : " . $time . " : " . $auth->name . " : " . $REMOTE_ADDR . "\n");
+            if(trim($QUERY_STRING))
+            {
+                $query = stripslashes($QUERY_STRING);
+                $str .= "\tURL = " . $query . "\n";
+            }
+            $str .= "\tBROWSER/PLATFORM = " . $HTTP_USER_AGENT . "\n";
+
+            $str .= ("\trecord_id: " . $record_id . "\n");
+            $str .= ("\tstudent_department_row:" . $currentStudentValues->department_id . "\n");
+
+            $str .= ("\tError flags: ");
+            foreach ($stack as $value) 
+            {
+                $str .= $value . " ";
+            }
+            $str .= "\n";
+            $str .= ("*********************************************************\n");
+            $str .= ("\n");
+
+            fputs($fp, $str);
+        }
+
+        // Return the array we've created.
+        return $changes_array;
+    } // }}}
+    // {{{ function saveStudentInfo()
+    /*
+     This function is now responsible for saving all of this object's fields into the database.  It currently returns null, but if an error
+     occurred while trying to save to the database, this function would return a string describing the error.
+    */
+    function saveStudentInfo()
+    {
+        global $auth;
+
+        // We need to appropriately set the changes recorded variables.
+        $mostRecentChanges = $this->getRecordedChanges();
+
+        // Prepare the fields that will need to be set to NULL if they don't have a value.
+        $this->birth = ($this->birth != -1 ? "'" . $this->birth . "'" : "NULL");
+        $this->province_current = ($this->province_current ? "'" . $this->province_current . "'" : "NULL");
+        $this->province_permanent = ($this->province_permanent ? "'" . $this->province_permanent . "'" : "NULL");
+        $this->country_current = ($this->country_current ? "'" . $this->country_current . "'" : "NULL");
+        $this->country_permanent = ($this->country_permanent ? "'" . $this->country_permanent . "'" : "NULL");
+        $this->region_current = ($this->region_current ? "'" . $this->region_current . "'" : "NULL");
+        $this->region_permanent = ($this->region_permanent ? "'" . $this->region_permanent . "'" : "NULL");
+        
+        // Save relevant data into the student table.
+        $sql = ("
+            UPDATE student 
+            SET first_name='" . addslashes($this->first_name) . "', 
+                last_name='" . addslashes($this->last_name) . "', 
+                preferred_name='" . addslashes($this->preferred_name) . "',
+                middle_name='" . addslashes($this->middle_name) . "',
+                street_address_current='" . addslashes($this->street_address_current) . "',
+                street_address_current2='" . addslashes($this->street_address_current2) . "',
+                street_address_current3='" . addslashes($this->street_address_current3) . "',
+                city_current='" . addslashes($this->city_current) . "',
+                province_current=" . $this->province_current . ", 
+                country_current=" . $this->country_current . ",
+                current_region_id=" . $this->region_current . ",
+                postal_code_current='" . addslashes($this->postal_code_current) . "', 
+                street_address_permanent='" . addslashes($this->street_address_permanent) . "', 
+                street_address_permanent2='" . addslashes($this->street_address_permanent2) ."',
+                street_address_permanent3='" . addslashes($this->street_address_permanent3) . "',
+                city_permanent='" . addslashes($this->city_permanent) . "', 
+                province_permanent=" . $this->province_permanent . ",
+                country_permanent=" . $this->country_permanent . ",
+                permanent_region_id=" . $this->region_permanent . ",
+                postal_code_permanent='" . addslashes($this->postal_code_permanent) . "', 
+                email='" . addslashes($this->email) . "',
+                email2='" . addslashes($this->email2) . "',
+                high_school='" . addslashes($this->high_school) . "',
+                emergency_email='" . addslashes($this->emergency_email) . "', 
+                emergency_work_fax='" . addslashes($this->emergency_work_fax) . "', 
+                emergency_home_fax='" . addslashes($this->emergency_home_fax) . "', 
+                emergency_work_phone='" . addslashes($this->emergency_work_phone) . "', 
+                emergency_home_phone='" . addslashes($this->emergency_home_phone) . "', 
+                emergency_relationship='" . addslashes($this->emergency_relationship) . "', 
+                emergency_name='" . addslashes($this->emergency_name) . "', 
+                phone_current='" . addslashes($this->phone_current) . "', 
+                phone_permanent='" . addslashes($this->phone_permanent) . "', 
+                fax_current='" . addslashes($this->fax_current) . "',
+                fax_permanent='" . addslashes($this->fax_permanent) . "',
+                citizen='" . addslashes($this->citizen) . "',
+                gender='" . addslashes($this->gender) . "', 
+                birth=" . $this->birth . "
+            WHERE student_number='" . addslashes($this->student_number) . "'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+
+        if ($mostRecentChanges)
+        {
+            $sql = ("
+                UPDATE student_department
+                SET changes_recorded_3=changes_recorded_2,
+                    changes_recorded_2=changes_recorded_1,
+                    changes_recorded_1='" . addslashes($mostRecentChanges) . "',
+                    change_by_3=change_by_2,
+                    change_by_2=change_by_1,
+                    change_by_1='" . getContactID($auth->department, $auth->login) . "',
+                    change_date_3=change_date_2,
+                    change_date_2=change_date_1,
+                    change_date_1=NOW()
+                WHERE record_id='" . $this->record_id . "'
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+
+        // Delete all of the old semesters table records for this student.
+        $sql = ("
+            DELETE FROM semesters_table 
+            WHERE record_id='" . $this->record_id . "'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+
+        // Save the semesters into the semesters_table table
+
+        // If they've changed the start year, we need to account for this, by adding ($start_year - $year_offset) to the year we are saving in the database.
+        if ($this->semesters && is_array($this->semesters) && $this->start_year != "NULL")
+        {
+            $year_keys = array_keys($this->semesters);
+            foreach ($year_keys as $yk)
+            {
+                // If we don't yet have the offset, set it.
+                if (!isset($year_offset))
+                {
+                    $year_offset = $this->start_year - $yk;
+                }
+                $term_keys = array_keys($this->semesters[$yk]);
+                foreach ($term_keys as $tk)
+                {
+                    if ($this->semesters[$yk][$tk])
+                    {
+                        $sql = ("
+                            INSERT INTO semesters_table
+                            (term_id, year, semesters_id, record_id)
+                            VALUES (
+                            '" . $tk . "',
+                            '" . ($yk + $year_offset) . "',
+                            '" . $this->semesters[$yk][$tk] . "',
+                            '" . $this->record_id . "'
+                            )
+                            ");
+                        $GLOBALS['dbh']->Execute($sql);
+                    }
+                }
+            }
+        }
+
+        // Save relevant data into the student_department table.
+        $sql = ("
+            UPDATE student_department 
+            SET advisor='" . addslashes(stripslashes($this->advisor)) . "', 
+                coop_advisor='" . addslashes(stripslashes($this->coop_advisor)) . "',
+                discipline_id='" . addslashes(stripslashes($this->discipline_id)) . "', 
+                grad_year=" . ($this->grad_year ? "'" . $this->grad_year . "'" : "NULL") . ",
+                start_year=" . ($this->start_year ? "'" . $this->start_year . "'" : "NULL") . ",
+                grad_gpa=" . ($this->grad_gpa ? "'" . $this->grad_gpa . "'" : "NULL") . ",
+                academic_year=" . ($this->academic_year ? "'" . $this->academic_year . "'" : "NULL") . ",
+                withdraw=" . ($this->withdraw != -1 ? "'" . $this->withdraw . "'" : "NULL") . ",
+                admit=" . ($this->admit != -1 ? "'" . $this->admit . "'" : "NULL") . ",
+                convocation_month=". ($this->convocation_month ? "'" . $this->convocation_month . "'" : "NULL") . ",
+                convocation_year=". ($this->convocation_year ? "'" . $this->convocation_year . "'" : "NULL") . ",
+                grad=" . ($this->grad != -1 ? "'" . $this->grad . "'" : "NULL") . "
+            WHERE record_id='" . $this->record_id . "'
+            ");
+        
+        /* :EXPIRY: Expires on: Undecided
+                    Entered by: Shaun
+                    Entered on: May-30-2003
+                                                                         
+            - The following line is from the above sql query.  It is no longer needed as we are not using grad anymore,
+              but we are keeping it for historical purposes.
+        
+        grad=" . ($this->grad != -1 ? "'" . $this->grad . "'" : "NULL") . "
+        */
+        
+        $GLOBALS['dbh']->Execute($sql);
+
+        // Delete the photo if instructed to
+        if ($this->deletephoto == true)
+        {
+            $photo_sql = ("
+                UPDATE student 
+                SET photo=NULL 
+                WHERE student_number='" . $this->student_number . "'
+                ");
+            $GLOBALS['dbh']->Execute($photo_sql);
+            unlink(PHOTO_DIR . $this->photo);
+        }
+
+        if ($this->new_photo != "none" && $this->new_photo)
+        {
+            // If we've been given a file, then save it into the database.
+            if (file_exists(PHOTO_DIR . $this->student_number . ".jpg"))
+            {
+                unlink(PHOTO_DIR . $this->student_number . ".jpg");
+            }
+            if (file_exists(PHOTO_DIR . $this->student_number . ".gif"))
+            {
+                unlink(PHOTO_DIR . $this->student_number . ".gif");
+            }
+            copy($this->new_photo, PHOTO_DIR . $this->student_number . ".jpg");
+            unlink($this->new_photo);
+
+            $photo_sql = ("
+                UPDATE student 
+                SET photo='" . $this->student_number . ".jpg' 
+                WHERE student_number='" . $this->student_number . "'
+                ");
+            $GLOBALS['dbh']->Execute($photo_sql);
+            exec("perl student_info/shrink.pl ". $this->student_number ." jpg ". PHOTO_DIR);
+        }
+
+        // Delete all of the previous flags, then insert the new ones.
+        $sql = ("
+            DELETE FROM student_flags_join
+            WHERE record_id='" . $this->record_id . "'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+
+        // Save the general flags into the student_flags_join table.
+        if ($this->general_flags && is_array($this->general_flags))
+        {
+            foreach ($this->general_flags as $gf)
+            {
+                $sql = ("
+                    INSERT INTO student_flags_join
+                    (student_flags_id, record_id)
+                    VALUES (
+                    '" . $gf . "',
+                    '" . $this->record_id . "'
+                    )
+                    ");
+                $GLOBALS['dbh']->Execute($sql);
+            }
+        }
+
+        // Save the profile flags into the student_flags_join table.
+        if ($this->profile_flags && is_array($this->profile_flags))
+        {
+            foreach ($this->profile_flags as $pf)
+            {
+                $sql = ("
+                    INSERT INTO student_flags_join
+                    (student_flags_id, record_id)
+                    VALUES (
+                    '" . $pf . "',
+                    '" . $this->record_id . "'
+                    )
+                    ");
+                $GLOBALS['dbh']->Execute($sql);
+            }
+        }
+
+        // Start handling eligible placed flags. 
+        
+        $sql = ("
+            SELECT ep.term_id, ep.year
+            FROM eligible_placed ep
+            WHERE ep.record_id = '".$this->record_id."'
+            AND (ep.year BETWEEN '".(date('Y')-1)."' AND '".(date('Y')+1)."')
+            AND ep.student_flags_id = '". ELIGIBLE_FLAG ."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+
+        // make a copy of the eligible flags, so we can make temporary changes to it
+        $c_eligible_flags = $this->eligible_flags;
+
+        while(list($term_id,$year) = $result->FetchRow())
+        {
+            // An eligible flag has been unset
+            if (!$c_eligible_flags[$year][$term_id])
+            {
+                $this->disableJobApplications($this->student_number, $term_id, $year);
+            }
+            else
+            {
+                $c_eligible_flags[$year][$term_id] = 0;
+            }
+        }
+
+        $sql = ("
+            DELETE FROM eligible_placed
+            WHERE record_id='" . $this->record_id . "'
+            AND student_flags_id='" . ELIGIBLE_FLAG . "'
+            AND year BETWEEN ".(date('Y')-1)." AND ".(date('Y')+1)."
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+
+        if ($c_eligible_flags && is_array($c_eligible_flags))
+        {
+            $year_keys = array_keys($c_eligible_flags);
+
+            foreach ($year_keys as $yk)
+            {
+                $term_keys = array_keys($c_eligible_flags[$yk]);
+                foreach ($term_keys as $tk)
+                {
+                    // An eleigible flag has been set. 
+                    if ($c_eligible_flags[$yk][$tk])
+                    {
+                        $this->enableJobApplications($this->student_number, $tk, $yk);
+                    }
+
+                    if ($this->eligible_flags[$yk][$tk])
+                    {
+                        $sql = ("
+                            INSERT INTO eligible_placed
+                            (student_flags_id, term_id, year, record_id)
+                            VALUES (
+                            '" . ELIGIBLE_FLAG . "',
+                            '" . $tk . "',
+                            '" . $yk . "',
+                            '" . $this->record_id . "'
+                            )
+                            ");
+                        $GLOBALS['dbh']->Execute($sql);
+
+                        if (!wasEverEligible($this->record_id, $tk, $yk)) {
+                            setEverEligible($this->record_id, $tk, $yk);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Save any new notes.
+        if (trim($this->new_note))
+        {
+            $sql = ("
+                INSERT INTO student_notes
+                (record_id, notes, contact_id, date_entered)
+                VALUES (
+                '" . $this->record_id . "',
+                '" . addslashes(trim($this->new_note)) . "',
+                '" . $auth->contact_id . "',
+                NOW()
+                )
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+
+        // Delete any of the notes marked for deletion.
+        if ($this->delete_note_ids && is_array($this->delete_note_ids))
+        {
+            foreach ($this->delete_note_ids as $dni)
+            {
+                $sql = ("
+                    DELETE FROM student_notes
+                    WHERE student_notes_id='" . $dni . "'
+                    ");
+                $GLOBALS['dbh']->Execute($sql);
+            }
+        }
+
+        return null;
+    } // }}}
+    // {{{ function saveStudentInfoFaculty()
+    /*
+     This function is now responsible for saving all of this object's fields into the database when edit is performed 
+     by faculty member.  It currently returns null, but if an error
+     occurred while trying to save to the database, this function would return a string describing the error.
+    */
+    function saveStudentInfoFaculty()
+    {
+        global $auth;
+
+        // We need to appropriately set the changes recorded variables.
+        $mostRecentChanges = $this->getRecordedChangesFaculty();
+
+        // Save relevant data into the student table.
+        $sql = ("
+            UPDATE student 
+            SET emergency_email='" . addslashes($this->emergency_email) . "', 
+                emergency_work_fax='" . addslashes($this->emergency_work_fax) . "', 
+                emergency_home_fax='" . addslashes($this->emergency_home_fax) . "', 
+                emergency_work_phone='" . addslashes($this->emergency_work_phone) . "', 
+                emergency_home_phone='" . addslashes($this->emergency_home_phone) . "', 
+                emergency_relationship='" . addslashes($this->emergency_relationship) . "', 
+                emergency_name='" . addslashes($this->emergency_name) . "' 
+            WHERE student_number='" . addslashes($this->student_number) . "'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+
+        if ($mostRecentChanges)
+        {
+            $sql = ("
+                UPDATE student_department
+                SET changes_recorded_3=changes_recorded_2,
+                    changes_recorded_2=changes_recorded_1,
+                    changes_recorded_1='" . addslashes($mostRecentChanges) . "',
+                    change_by_3=change_by_2,
+                    change_by_2=change_by_1,
+                    change_by_1='" . getContactID($auth->department, $auth->login) . "',
+                    change_date_3=change_date_2,
+                    change_date_2=change_date_1,
+                    change_date_1=NOW()
+                WHERE record_id='" . $this->record_id . "'
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+
+        // Delete all of the old semesters table records for this student.
+        $sql = ("
+            DELETE FROM semesters_table 
+            WHERE record_id='" . $this->record_id . "'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+
+        // Save the semesters into the semesters_table table
+
+        // If they've changed the start year, we need to account for this, by adding ($start_year - $year_offset) to the year we are saving in the database.
+        if ($this->semesters && is_array($this->semesters) && $this->start_year != "NULL")
+        {
+            $year_keys = array_keys($this->semesters);
+            foreach ($year_keys as $yk)
+            {
+                // If we don't yet have the offset, set it.
+                if (!isset($year_offset))
+                {
+                    $year_offset = $this->start_year - $yk;
+                }
+                $term_keys = array_keys($this->semesters[$yk]);
+                foreach ($term_keys as $tk)
+                {
+                    if ($this->semesters[$yk][$tk])
+                    {
+                        $sql = ("
+                            INSERT INTO semesters_table
+                            (term_id, year, semesters_id, record_id)
+                            VALUES (
+                            '" . $tk . "',
+                            '" . ($yk + $year_offset) . "',
+                            '" . $this->semesters[$yk][$tk] . "',
+                            '" . $this->record_id . "'
+                            )
+                            ");
+                        $GLOBALS['dbh']->Execute($sql);
+                    }
+                }
+            }
+        }
+
+        // Save any new notes.
+        if (trim($this->new_note))
+        {
+            $sql = ("
+                INSERT INTO student_notes
+                (record_id, notes, contact_id, date_entered)
+                VALUES (
+                '" . $this->record_id . "',
+                '" . addslashes(trim($this->new_note)) . "',
+                '" . $auth->contact_id . "',
+                NOW()
+                )
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+
+        // Delete any of the notes marked for deletion.
+        if ($this->delete_note_ids && is_array($this->delete_note_ids))
+        {
+            foreach ($this->delete_note_ids as $dni)
+            {
+                $sql = ("
+                    DELETE FROM student_notes
+                    WHERE student_notes_id='" . $dni . "'
+                    ");
+                $GLOBALS['dbh']->Execute($sql);
+            }
+        }
+
+        return null;
+    } // }}}
+    // {{{  function enableJobApplications($student_number, $term_id, $year) 
+    function enableJobApplications($student_number, $term_id, $year) {
+
+        //update status in applications table so that employers can view available students
+
+        $app_sql = ("
+                SELECT application_id, a.job_id 
+                FROM applications a 
+                INNER JOIN job_info ji 
+                ON a.job_id = ji.job_id 
+                WHERE student_number = '".$student_number."' AND year = '".$year."' AND term_id = '".$term_id."'
+                ");
+
+        $app_results = $GLOBALS['dbh']->Execute($app_sql);
+        if ($app_results->RecordCount() > 0)
+        {
+            $flag = 0;
+            while ($app_rows=$app_results->FetchRow())
+            {
+                reactivateStudentJobApplication($app_rows['job_id'],$student_number);
+            }
+        }
+    } // }}}
+    // {{{ function disableJobApplications($student_number, $term_id, $year)
+    function disableJobApplications($student_number, $term_id, $year) {
+
+        // don't disable job applications where the student was placed in
+        $history_sql = ("
+            SELECT job_id 
+            FROM history
+            WHERE student_number = '".$student_number."' AND term_id = '".$term_id."' AND year = '".$year."'
+            AND job_id IS NOT NULL AND job_id != 0
+            ");
+        $history_result = $GLOBALS['dbh']->Execute($history_sql);
+        while (list($job_id) = $history_result->FetchRow())
+        {
+            $exclude_job_id[] = $job_id;
+        }
+
+        $app_sql = ("
+                SELECT application_id
+                FROM applications a 
+                INNER JOIN job_info ji 
+                ON a.job_id = ji.job_id 
+                WHERE a.student_number = '".$student_number."' AND ji.year = '".$year."' AND ji.term_id = '".$term_id."'
+                AND a.app_status = '".APP_ACTIVATED_ONLINE."'
+                ");
+        if (sizeof($exclude_job_id) && is_array($exclude_job_id))
+        {
+            $exclude_job_id = implode(",",$exclude_job_id);
+            $app_sql .= ("
+                AND ji.job_id NOT IN (".$exclude_job_id.")
+                ");
+        }
+
+        $app_results = $GLOBALS['dbh']->Execute($app_sql);
+        while(list($application_id) = $app_results->FetchRow())
+        {
+            $update_sql = ("
+                UPDATE applications
+                SET app_status = '".APP_UNAVAILABLE."'
+                WHERE application_id = '".$application_id."'
+                ");
+            $GLOBALS['dbh']->Execute($update_sql);
+        }
+    } // }}}
+} // }}}
+?>

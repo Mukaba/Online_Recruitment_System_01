@@ -1,0 +1,432 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: Placement.class                                                    |
+ +------------------------------------------------------------------------------+
+ | Description: This class handles all the variables and functions required to  |
+ |              place a student in a posted job. It depends on SkeletonHistory  |
+ |              for inherited variables and functions. This class also deals    |
+ |              with history container matters, so we need to include those     |
+ |              functions as well.                                              |
+ +------------------------------------------------------------------------------+
+
+ function setChooseStudentFormValues($student_number, $student_name, $term_id, $year) 
+ function validateChooseStudentFormValues() 
+ function setStudentDepartmentValues($record_id)
+ function setJobValues($job_id)
+ function setContainerInfoTermValues($start_date, $work_term_length, $keep_eligible_flag)
+ function setContainerInfoHoursValues($start_date, $end_date, $work_term_hours_per_week, $keep_eligible_flag)
+ function validateJobValues()
+ function validateContainerInfoTermValues()
+ function validateContainerInfoHoursValues()
+ function validateStudentNumber()
+ function hasAppliedToJobs()
+ function hasAppliedToJob()
+ function isJobFilled()
+ function setJobFilled()
+ function setJobsStudentStatus()
+
+*/
+
+include("placement/SkeletonHistory.class");
+include_once("history/container_functions.inc");
+
+class Placement extends SkeletonHistory 
+{
+    // the following set methods represent variables being set from page to page, and we capture those variables using these set methods.
+    function setPlaceByStudentFormValues($student_number, $student_name, $term_id, $year) 
+    {
+        if ($student_number)
+        {
+            $this->setStudentNumber($student_number);
+        }
+        elseif ($student_name) 
+        {
+            $arrName = explode(",",$student_name);
+            $last_name = trim($arrName[0]);
+            $first_name = trim($arrName[1]);
+
+            $this->setFirstName($first_name);
+            $this->setLastName($last_name);
+        }
+
+        $this->setTermID($term_id);
+        $this->setYear($year);
+    }
+
+    function validatePlaceByStudentFormValues() 
+    {
+        $error_array[] = $this->validateStudentNumber();
+        $error_array[] = $this->validateFirstName();
+        $error_array[] = $this->validateLastName();
+
+        $error_array[] = $this->validateTermID();
+        $error_array[] = $this->validateYear();
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+        
+        return $error_array;
+    }
+
+    function setPlaceByTermFormValues($student_number, $term_id, $year) 
+    {
+        $this->setStudentNumber($student_number);
+        $this->setTermID($term_id);
+        $this->setYear($year);
+    }
+
+    function validatePlaceByTermFormValues()
+    {
+        //we don't use the normal validateStudentNumber() function because when we place by term, we can place students that
+        //are outside of our group/department. 
+        if (!$this->student_number)
+        {
+            $error_array[] = "No student number was provided. This is required for placing a student.";
+        }
+        elseif (!isValidStudentNumber($this->student_number))
+        {
+            $error_array[] = "The provided student number (".$this->student_number.") is not valid.";
+        }
+
+        $error_array[] = $this->validateTermID();
+        $error_array[] = $this->validateYear();
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+    function setStudentDepartmentValues($record_id) 
+    {
+        $sql = ("
+            SELECT s.student_number, s.first_name, s.last_name, sd.department_id, sd.discipline_id, d.discipline_name, d.history_containers_min_days_for_wt
+            FROM student_department sd
+            INNER JOIN student s
+            ON sd.student_number = s.student_number
+            LEFT JOIN discipline d
+            ON sd.discipline_id = d.discipline_id
+            WHERE record_id = '".addslashes($record_id)."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $this->setStudentNumber($row['student_number']);
+        $this->setFirstName($row['first_name']);
+        $this->setLastName($row['last_name']);
+        $this->setRecordID($record_id);
+        $this->setStudentDepartmentID($row['department_id']);
+        $this->setDisciplineID($row['discipline_id']);
+        $this->setDisciplineName($row['discipline_name']);
+        $this->setHistoryContainersMinDaysForWT($row['history_containers_min_days_for_wt']);
+        $this->setContainerMode(useContainers($this->student_number,$this->student_department_id));
+    }
+
+    function setJobValues($job_id) 
+    {
+        $sql = ("
+            SELECT ji.employer_id, ji.employer_department_id, ed.department_name, ec.company_name, ji.start_date, ji.end_date, ji.contact_id, ji.job_code
+            , ji.term_id, ji.year
+            FROM job_info AS ji
+            LEFT JOIN employer_department ed
+            ON ji.employer_department_id = ed.department_id
+            LEFT JOIN employer_company ec
+            ON ed.employer_id = ec.employer_id
+            WHERE ji.job_id = '".addslashes($job_id)."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        if ($result->RecordCount()) 
+        {
+            $row = $result->FetchRow();
+
+            $this->setJobID($job_id);
+            $this->setContactID($row['contact_id']);
+            $this->setCompanyName($row['company_name']);
+            $this->setEmployerID($row['employer_id']);
+            $this->setDivisionName($row['department_name']);
+            $this->setDivisionID($row['employer_department_id']);
+            $this->setStartDate($row['start_date']);
+            $this->setEndDate($row['end_date']);
+            $this->setJobCode($row['job_code']);
+        }
+    }
+
+    function setContainerInfoTermValues($start_date, $work_term_length, $work_term_hours_per_week, $keep_eligible_flag) 
+    {
+        $this->setStartDate($start_date);
+        $this->setWorkTermLength($work_term_length);
+        $this->setWorkTermHoursPerWeek($work_term_hours_per_week);
+        $this->setKeepEligibleFlag($keep_eligible_flag);
+    }
+
+    function setContainerInfoHoursValues($start_date, $end_date, $work_term_hours_per_week, $keep_eligible_flag) 
+    {
+        $this->setStartDate($start_date);
+        $this->setEndDate($end_date);
+        $this->setWorkTermHoursPerWeek($work_term_hours_per_week);
+        $this->setKeepEligibleFlag($keep_eligible_flag);
+    }
+
+    function validateJobValues() 
+    {
+        $error_array = array();
+
+        $error_array[] = $this->validateJobID();
+
+        if ($this->isJobFilled()) 
+        {
+            $error_array[] = "This job has already been filled by other student(s). Please check the number of positions available for this job.";
+        }
+
+        if (!$this->hasAppliedToJob()) 
+        {
+            $error_array[] = "The student has never applied to this job. Please check the student's job application.";
+        }
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+
+    // checks to make sure all required fields are entered and correct ($start_date, $end_date, $work_term_length)
+    // if an error is found, it'll send back an error message array.
+    function validateContainerInfoTermValues() 
+    {
+        $error_array = array();
+
+        if (!$this->start_date)
+        {
+            $error_array[] = "You must enter a start date for this placement record.";
+        }
+        else
+        {
+            $error_array[] = $this->validateStartDate();
+        }
+
+        if (!$this->work_term_length)
+        {
+            $error_array[] = "You must provide how many months the student will be working for this placement.";
+        }
+        else
+        {
+            $error_array[] = $this->validateWorkTermLength();
+        }
+
+        if (!$this->work_term_hours_per_week)
+        {
+            $error_array[] = "You must provide how many hours per week the student will be working for this placement.";
+        }
+        else
+        {
+            $error_array[] = $this->validateWorkTermHoursPerWeek();
+        }
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+
+    // checks to make sure all required fields are entered and correct ($start_date, $end_date, $work_term_hours_per_week)
+    // if an error is found, it'll send back an error message array.
+    function validateContainerInfoHoursValues() 
+    {
+        $error_array = array();
+
+        if (!$this->start_date)
+        {
+            $error_array[] = "You must enter a start date for this placement record.";
+        }
+        else
+        {
+            $error_array[] = $this->validateStartDate();
+        }
+
+        if (!$this->end_date)
+        {
+            $error_array[] = "You must enter an end date for this placement record.";
+        }
+        else
+        {
+            $error_array[] = $this->validateEndDate();
+        }
+
+        if ($this->start_date && $this->end_date)
+        {
+            $error_array[] = $this->validateStartAndEndDate();
+        }
+
+        if (!$this->work_term_hours_per_week)
+        {
+            $error_array[] = "You must provide how many hours per week the student will be working for this placement.";
+        }
+        else
+        {
+            $error_array[] = $this->validateWorkTermHoursPerWeek();
+        }
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+    //overwriting parent's validate student number method. This is because when we place a student in an own job, we should only be allowed to place students
+    //who are in our department group.
+    function validateStudentNumber() 
+    {
+        global $departments_in_group;
+        // preparing a string for a sql statement that looks like: WHERE department_id IN ('1','2');
+        $departments_in_str = "'".implode("', '",$departments_in_group)."'";
+        
+        if (isset($this->student_number) && !isValidStudentNumber($this->student_number)) 
+        {
+            return "The given student number is not valid. Check to make sure this student number exists in your department/group.";
+        }
+    }
+
+    // function that checks to make sure the student has applied to at least 1 job this term and year. 
+    function hasAppliedToJobs() 
+    {
+        $sql = ("
+            SELECT ji.job_code
+            FROM job_info AS ji
+            INNER JOIN applications AS a 
+            ON ji.job_id = a.job_id
+            WHERE a.student_number='".$this->student_number."'
+            AND ji.term_id='".$this->term_id."' AND ji.year='".$this->year."'
+            ");
+        $results=$GLOBALS['dbh']->Execute($sql);
+        return $results->RecordCount();
+    }
+
+    // function that checks to make sure the student has applied to the specific job. Again, this is an overloaded function.  
+    function hasAppliedToJob() 
+    {
+        if (func_num_args() == 1)
+        {
+            $job_id = func_get_arg(0);
+        }                                                                                                                                            
+        else
+        {
+            $job_id = $this->job_id;
+        }
+
+        $sql = ("
+            SELECT ji.job_id
+            FROM job_info AS ji
+            INNER JOIN applications AS a 
+            ON ji.job_id = a.job_id
+            WHERE a.student_number='".$this->student_number."'
+            AND ji.job_id = '".$job_id."'
+            ");
+        $results=$GLOBALS['dbh']->Execute($sql);
+        return $results->RecordCount();
+
+    }
+
+    // This is an overloaded function, if you provide one parameter, it'll use that as the job_id. If no parameters are given, the object will use
+    // its own job_id. This function will check if a job is filled or not. 
+    function isJobFilled() 
+    {
+        if (func_num_args() == 1)
+        {
+            $job_id = func_get_arg(0);
+        }                                                                                                                                            
+        else
+        {
+            $job_id = $this->job_id;
+        }
+        // check number of positions the job has
+        $sql = ("
+            SELECT num_positions
+            FROM job_info AS ji
+            WHERE ji.job_id = '".$job_id."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+        $num_positions = $row['num_positions'];
+
+        // see how many of those positions have been filled by students so far
+        $sql = ("
+            SELECT COUNT(DISTINCT student_number) AS num_records
+            FROM history AS h
+            WHERE h.job_id = '".$job_id."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+        $num_records = $row['num_records'];
+
+        // positions still left, job is not filled
+        if ($num_records < $num_positions || !$num_records)
+        {
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    function setJobFilled() 
+    {
+        if ($this->isJobFilled())
+        {
+            $sql = ("
+                UPDATE job_info
+                SET filled = '1'
+                WHERE job_id = '".$this->job_id."'
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+
+            $sql = ("
+                UPDATE interview_job_join
+                SET filled = '1'
+                WHERE job_id = '".$this->job_id."'
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+    }
+
+    function setJobsStudentStatus() 
+    {
+        $sql = ("
+            UPDATE job_info 
+            SET student_status = '".STUDENT_HIRED_UVIC."'
+            WHERE job_id = '".$this->job_id."'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+    }
+}
+
+?>

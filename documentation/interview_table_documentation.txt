@@ -1,0 +1,610 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: interview_table_documentation.txt                                  |
++------------------------------------------------------------------------------+
+ 
+This file's purpose is to document all of the tables currently used in Mamook[tm] by the
+interview module.
+
+This document was created on Mar 20, 2003
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+
+---------------------------------------------------------------------------------
+
+Table Name: interview
+
+Purpose: This table is used to store most of an interview's information.
+
+
+	Column Name: job_id
+
+	Purpose: This is the id number used to keep track of all the
+	different interviews.  This is the primary key for the table,
+	and is drawn out of the table 'job_info' so as not to conflict
+	with actual job's.  This is the primary key for the table.
+
+	Column Name: interview_type_id
+
+	Purpose: This is the id number that corresponds to the type
+	type of interview this is.  Eg.  If this interview was a
+	switching interview, which has an id number of '5', then
+	this field would hold the value '5'.
+
+	Column Name: interview_place_id
+
+	Purpose: This is the id number that corresponds to the place
+	this interview is being held at.  Currently there are only
+	two places, either on-campus or off-campus.  If the interview
+	were being held on campus, and that corresponded with an id number 
+	of '1', this field would hold the value '1'.
+
+	Column Name: interview_medium_id
+
+	Purpose: This is the id number that corresponds to the medium
+	being used to conduct this interview.  If the interview was
+	a phone interview, which has an id number of '2', this field
+	would hold a value of '2'.
+
+	Column Name: notes
+
+	Purpose: This field holds any notes that co-op staff may want
+	students to be able to see when signing up for this interview.
+
+	Column Name: presentation
+
+	Purpose: This field holds a boolean value that determines
+	whether or not there is a presentation to go along with this interview.
+	If there IS a presentation given by this company, then this
+	field holds a value other than 0.  Otherwise, it holds a 0.
+
+	Column Name: date_created
+
+	Purpose: This field holds the date and time that this interview
+	was entered into the database.
+
+	Column Name: creator
+
+	Purpose: This field holds the login id of the person that
+	entered this interview into the database.
+
+	Column Name: cancelled
+
+	Purpose: This field holds a boolean value that corresponds
+	to whether or not this interview has been cancelled.  If the
+	interview has not been cancelled, this field holds a 0, otherwise
+	it holds a non-zero value.
+
+	Column Name: contact
+
+	Purpose: This field holds the contact id number of the co-op
+	staff member that is the contact for this job.
+
+	Contact Name: student_visible
+
+	Purpose: This field holds a boolean value that corresponds
+	to whether or not this interview can be seen by students.
+	Before this job is posted, this field will always hold a 0,
+	which means the job isn't viewable by students.  After being
+	posted, there are multiple factors that determine whether or
+	not the job will be student viewable.  If it is, this field
+	will hold a non-zero value.
+
+	Column Name: emailed_employer
+
+	Purpose: This field holds a boolean value that corresponds
+	to whether or not this interview's schedule has been
+	emailed to the employer.  If it hasn't, this field will
+	hold a 0, otherwise it will hold a non-zero value.
+
+	Column Name: emailed_newsgroup
+
+	Purpose: This field holds a boolean value that corresponds
+	to whether or not this interview's shortlist has been
+	emailed to the newsgroup.  If it hasn't, this field will
+	hold a 0, otherwise it will hold a non-zero value.
+
+	Column Name: emailed_secretary
+
+	Purpose: This field is used to keep track of whether or not
+	the secretary has been emailed and let know that all of the
+	students for this interview have signed up.
+
+    Column Name: staff_notes
+
+    Purpose: This column contains notes that the staff have written for one
+    another pertaining to this interview.
+
+    Column Name: use_room_number
+
+    Purpose: This field indicates whether to give the employer the phone number for the room
+    that the telephone interview is in, rather than the default contact number.  A 1 in this
+    field indicates that the employer SHOULD be given the phone number.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_edit
+
+Purpose: This table is used to keep track of statistics related to
+interviews being edited.
+
+
+	Column Name: job_id
+
+	Purpose: This field holds the job_id of the interview that was being edited.
+
+	Column Name: date_edited
+
+	Purpose: This field holds the date and time that the interview section (given
+	by the menu_edited field below) was edited on.  This information is stored in
+	the form of a timestamp, and has the format YYYYMMDDHHMMSS.
+
+	Column Name: editor
+
+	Purpose: This is the login id of the person that made the change.
+
+	Column Name: menu_edited
+
+	Purpose: This field describes what part of the interview was edited.
+	It can have a value of 'Job Info', 'Date/Time', 'Students Shortlisted',
+	'Location', each of which represents a part of the interview they
+	can edit.  It can also carry the value 'Button' which represents
+	one of the buttons displayed along the bottom of the interview screen
+	such as 'Remove from posting' or 'Post Interview'.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_interviewer
+
+Purpose: This table is used to keep track of the interviewers 
+for a given interview.
+
+
+	Column Name: interviewer_id
+
+	Purpose: This is the id number used to keep track of the 
+	different interviewers.  This is the primary key for the
+	table.
+
+	Column Name: interviewer_name
+
+	Purpose: This is the name of the interviewer.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_job_join
+
+Purpose: This table is used to join interviews to jobs in the cases of one
+interview corresponding to multiple jobs (so if BC Hydro has 4 different jobs
+but is only conducting one set of interviews, this table will link the interview
+to those 4 jobs).
+
+
+    Column Name: interview_job_id
+
+    Purpose: This is the job_id that corresponds to the interview's information
+    in the job_info table.  This is a pretty bad design, but interviews were 
+    created before jobs, with some small oversights as to how jobs would later
+    be implemented.
+
+    Column Name: job_id
+
+    Purpose: This is one of the job_id of one of the jobs that this interview is
+    for.
+
+    ** The next four columns are redundant, and shouldn't really be in this table,
+    ** as this table should serve only as a join table.  These columns are here due
+    ** to poor implementation of the student and history modules.
+       
+    Column Name: term_id
+
+    Purpose: This is the term_id of the interview/job
+
+    Column Name: year
+
+    Purpose: This is the year of the interview/job
+
+    Column Name: job_code
+
+    Purpose: This is the job_code of the job
+
+    Column Name: filled
+
+    Purpose: This field represents whether or not the specific job, represented by
+    the job_id of this tuple, has been filled.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_location
+
+Purpose: This table holds all of the information that pertains
+to the location of a given interview.
+
+
+	Column Name: job_id
+
+	Purpose: This is the id number of the interview that this record's
+	information pertains to.  This is the primary key for the table.
+
+	Column Name: street_address_1
+
+	Purpose: This is the first street address for the interview 
+	that corresponds with the id number given above.
+
+	Column Name: street_address_2
+
+	Purpose: This is the second street address for the interview
+	that corresponds with the id number given above.
+
+	Column Name: city
+	
+	Purpose: This field holds the name of the city that this interview
+	is in.
+
+	Column Name: province
+
+	Purpose: This field holds the name of the province that this
+	interview is in.  
+
+	Column Name: country
+
+	Purpose: This field holds the name of the country that this
+	interview is in.
+
+	Column Name: directions
+
+	Purpose: This field holds any directions to the interview
+	that may be needed.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_medium
+
+Purpose: This table holds the various mediums that an interview
+can be conducted using.
+
+
+	Column Name: interview_medium_id
+
+	Purpose: This field the id number used to keep track of
+	all the various interview mediums.  This is the primary
+	key for the table.
+
+	Column Name: description
+
+	Purpose: This field holds the name or description of
+	the interview medium.  Eg.  'Phone' or 'Video Conference'.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_phone
+
+Purpose: This table is used to keep track of the phone numbers
+for students that have specified them for a certain interview.
+
+
+	Column Name: time_id
+
+	Purpose: This is the id number of the time slot that this
+	student is signed up for.  This id number relates back to
+	a record in the table 'interview_time'.  This is a primary
+	key in this table.
+
+	Column Name: phone
+
+	Purpose: This field holds the students phone number for 
+	this timeslot.  
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_place
+
+Purpose: This table holds the various places that an interview
+can be held at.  This table name is a little deceptive.  There
+are currently only two entries in this table, one for on-campus
+and one for off-campus.
+
+	
+	Column Name: interview_place_id
+
+	Purpose: This is the id number used to keep track of the
+	various interview places.  This is the primary key for
+	the table.
+
+	Column Name: description
+
+	Purpose: This is the actually description of the interview
+	place.  Currently there are only two entries in this table
+	and their description's are 'On-Campus' and 'Off-Campus'.
+
+---------------------------------------------------------------------------------
+
+Table Name: interview_time
+
+Purpose: This table holds the actual timeslots, and any information 
+pertaining to them, for interviews in the database (that are defined
+in the interview table). 
+
+
+	Column Name: time_id
+
+	Purpose: This is the id number used to keep track of
+	each individual time slot for any given interview.
+	This is the primary key for the table.
+	
+	Column Name: job_id
+
+	Purpose: This is the id number that corresponds to
+	the interview (in the interview table) that this
+	timeslot belongs to.
+
+	Column Name: int_date
+
+	Purpose: This is the date that this timeslot occurs
+	on.
+
+	Column Name: int_time
+
+	Purpose: This is the starting time for this interview
+	timeslot, given in 24 hour format.
+
+	Column Name: end_time
+
+	Purpose: This is the ending time for this interview
+	timeslot, given in 24 hour format.
+
+	Column Name: interviewer_id
+
+	Purpose: This is the id number that corresponds to
+	the interviewer in the 'interview_interviewer' table
+	that is interviewing this interview timeslot.
+
+	Column Name: switch
+
+	Purpose: This field is a boolean value used to 
+	determine whether or not this is a switching interview.
+	To elaborate: When an interview is switching, it will 
+	have two separate interviews occuring at each timeslot.  
+	To account for this, there are made one timeslot with 
+	a switch value of '0', and one with a switch value of 
+	'1' for every slot in the timetable.
+
+	Column Name: student_number
+
+	Purpose: This field holds the student number of
+	the student that has signed up for this interview
+	timeslot, or nothing if no student has signed up
+	yet.
+
+	Column Name: int_type
+
+	Purpose: This field is used to define exactly what
+	type of timeslot this is.  This can have a value
+	of 1 through 4 with meaning's of each given below:
+	1 - interview
+	2 - break
+	3 - lunch
+	4 - interview, but don't show timeslot to students.
+	The fourth option is not currently used, but may be
+	in the future.
+
+	Column Name: int_room_id
+	
+	Purpose: This field holds the id number that
+	corresponds to the room (in the 'room' table)
+	that this timeslots interview is being carried
+	out in.  
+
+	Column Name: int_wait_room_id
+
+	Purpose: Likewise, this field holds the id
+	number of that corresponds to the room that
+	students being interviewed during this timeslot
+	should wait in.
+
+	Column Name: Sequential
+
+	Purpose: This field is used to determine if this timeslot is 
+	part of the first interviewers schedule, or the second, etc.
+	When editing sequential interviews, the user only gets to directly
+	edit the first interviewers schedule, and the other interview
+	schedules are automatically updated.
+
+---------------------------------------------------------------------------------
+	
+Table Name: interview_type
+
+Purpose: This table keeps track of the various types of
+interviews we can have.  Currently there are four different
+types of interviews.
+
+
+	Column Name: interview_type_id
+
+	Purpose: This is the id number used to keep track of the
+	different interview types.  This is the primary key for
+	the table.
+
+	Column Name: description
+
+	Purpose: This is the name of the interview type.  For a more
+	in depth description of what each type of interview entails,
+	see the online help.
+
+---------------------------------------------------------------------------------
+
+Table Name: login_info
+
+Purpose: This table is used to keep track of various information about
+people logging into the system.
+
+
+	Column Name: login_id
+
+	Purpose: This field stores the login id of the person that
+	this record pertains to.  This is the primary key for the
+	table, even though it is not set that way.  
+
+	Column Name: contact_id
+
+	Purpose: This field stores the contact id of the person
+	that this record pertains to.
+
+	Column Name: student_number
+
+	Purpose: This field stores the student number of the
+	person that this record pertains to.
+
+	Column Name: last_datetime_in
+
+	Purpose: This field stores the last date and time that
+	this person logged in.
+
+	Column Name: num_logins
+
+	Purpose: This field keeps track of the number of times
+	that this person has logged in.
+
+	Column Name: last_browser
+
+	Purpose: This field keeps track of the most recent browser
+	that this person logged in using.
+
+	Column Name: last_platform
+
+	Purpose: This field keeps track of the most recent platform
+	that this person logged in using.
+
+	Column Name: last_IP_address
+
+	Purpose: This field keeps track of the most recent IP
+	address that this person logged in from.
+
+---------------------------------------------------------------------------------
+
+Table Name: presentation
+
+Purpose: This field is used to store all information pertaining
+to employer presentations.
+
+
+	Column Name: job_id
+
+	Purpose: This is the id number that corresponds to the interview
+	that this presentation is for (currently, presentations are 
+	attached to interviews).  This is the primary key for the
+	table.
+
+	Column Name: pres_date
+
+	Purpose: This field holds the date that this presentation
+	takes place on.
+
+	Column Name: pres_time
+
+	Purpose: This field holds the time that this presentation
+	takes place on.
+
+	Column Name: pres_loc
+
+	Purpose: This field holds the room or address that this 
+	presentation is taking place at.
+
+	Column Name: pres_notes
+
+	Purpose: This field holds any additional notes that pertain
+	to this presentation.
+
+	Column Name: end_time
+
+	Purpose: This field holds the time that this presentation
+	will end at.
+
+    Column Name: viewable_by_all
+
+    Purpose: This field denotes whether or not the presentation is viewable
+    by all of the students, or only those that are shortlisted for the 
+    corresponding interview.  A 1 in this field means that all students 
+    can view the presentation.
+
+---------------------------------------------------------------------------------
+
+Table Name: contact_job
+
+Purpose: This table is used to connect a contact into an interview.  
+
+
+	Column Name: contact_id
+
+	Purpose: This is the id number of the contact that is associated with the
+	job corresponding to the job id below.  
+
+	Column Name: job_id
+
+	Purpose: This is the id number of the job that is associated with the
+	contact corresponding to the contact id above.
+
+---------------------------------------------------------------------------------
+ 
+Table Name: students_shortlisted
+
+Purpose: This table keeps track of all the students that
+are shortlisted for a given interview.
+
+
+	Column Name: job_id
+
+	Purpose: This field stores the id number that pertains
+	to the interview that the student_below is shortlisted
+	for.
+
+	Column Name: student_number
+
+	Purpose: This is the student number one of the students
+	shortlisted for the interview designated by the id 
+	number above.
+
+	Column Name: last_visited
+
+	Purpose: This field holds the last date and time that
+	the student, designated by the student number above,
+	visited the sign-up sheet for the interview, designated
+	by the job id given above.  If the interview has been
+	posted or updated more recently than the date and time 
+	in this field, then the student is notified that the 
+	interview is new or updated.
+
+---------------------------------------------------------------------------------

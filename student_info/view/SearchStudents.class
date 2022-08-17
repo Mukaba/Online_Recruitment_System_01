@@ -1,0 +1,819 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: SearchStudents.class                                               |
+ +------------------------------------------------------------------------------+
+ | Description: This class stores all search variables, from the student        |
+ | advanced search page. A class is used to ease the passing of multiple        |
+ | variables through forms.                                                     |
+ |                                                                              |
+ |                                                                              |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+    class SearchStudents 
+    {
+        // Declare All Variables
+
+        // General Info
+        var $student_num_search_type;
+        var $student_num;
+        var $first_name;
+        var $last_name;
+        var $gender;
+        var $department;
+        var $discipline_id;
+        var $academic_year_equality;
+        var $academic_year;
+        var $grad_year_equality;
+        var $grad_year;
+        var $start_year_equality;
+        var $start_year;
+        var $primary_email_search_type;
+        var $primary_email;
+        var $secondary_email_search_type;
+        var $secondary_email;
+        var $advisor;
+        var $coop_advisor;
+        var $citizen;
+        var $current_city;
+        var $current_province;
+        var $current_region;
+        var $current_country;
+        var $permanent_city;
+        var $permanent_province;
+        var $permanent_region;
+        var $permanent_country;
+        var $high_school;
+        var $work_terms_completed_equality;
+        var $work_terms_completed;
+        var $grad_gpa_equality;
+        var $grad_gpa;
+
+        // Search by date
+        var $admit_equality;
+        var $admit;
+        var $birth_equality;
+        var $birth;
+        var $convocation_equality;
+        
+        var $grad;
+        /* :EXPIRY: Expires on: Undecided
+                    Entered by: Shaun
+                    Entered on: May-30-2003
+        
+            - this variable is kept for historical purposes.  we switched to a two field convocation date but we are keeping the grad date in the 
+              db.
+            - we needed to keep all the grad-related info in the classes to make sure the data is carried through and restored in the db.
+        
+        var $grad;
+        */
+        
+        var $convocation_month;
+        var $convocation_year;
+        
+        var $withdraw_equality;
+        var $withdraw;
+        
+        // Student Flags
+        var $flags = array();
+        var $nflags = array();
+        var $current_flag;
+       
+        // Eligible/Placed Flags
+        var $eligible_placed_used = array();
+        var $eligible_placed_flags = array();
+        var $eligible_placed_term = array();
+        var $eligible_placed_year = array();
+        
+        var $not_eligible_placed_used = array();
+        var $not_eligible_placed_flags = array();
+        var $not_eligible_placed_term = array();
+        var $not_eligible_placed_year = array();
+
+        // Student Schedule
+        var $semester_id;
+        var $semester_term;
+        var $semester_year;
+
+        // Display Columns
+        var $column;
+
+        // Order by
+        var $order;
+
+
+        // Constructor
+        function SearchStudents($searchStudents = NULL) 
+        {
+            if ($searchStudents && is_string($searchStudents))
+            {
+                // We've been passed a packed searchStudents object.  Unpack it and then proceed as normal.
+                $searchStudents = unpackObject($searchStudents);
+            }
+
+            if ($searchStudents) 
+            {
+                $this->current_flag = $searchStudents->current_flag;
+                $this->student_num_search_type = $searchStudents->student_num_search_type;
+                $this->student_num = $searchStudents->student_num;
+                $this->first_name = $searchStudents->first_name;
+                $this->last_name = $searchStudents->last_name;
+                $this->gender = $searchStudents->gender;
+                $this->department = $searchStudents->department;
+                $this->discipline_id = $searchStudents->discipline_id;
+                $this->academic_year_equality = $searchStudents->academic_year_equality;
+                $this->academic_year = $searchStudents->academic_year;
+                $this->grad_year_equality = $searchStudents->grad_year_equality;
+                $this->grad_year = $searchStudents->grad_year;
+                $this->start_year_equality = $searchStudents->start_year_equality;
+                $this->start_year = $searchStudents->start_year;
+                $this->primary_email_search_type = $searchStudents->primary_email_search_type; 
+                $this->primary_email = $searchStudents->primary_email;
+                $this->secondary_email_search_type = $searchStudents->secondary_email_search_type;
+                $this->secondary_email = $searchStudents->secondary_email;
+                $this->coop_advisor = $searchStudents->coop_advisor;
+                $this->advisor = $searchStudents->advisor;
+                $this->citizen = $searchStudents->citizen;
+                $this->current_city = $searchStudents->current_city;
+                $this->current_province = $searchStudents->current_province;
+                $this->current_region = $searchStudents->current_region;
+                $this->current_country = $searchStudents->current_country;
+                $this->permanent_city = $searchStudents->permanent_city;
+                $this->permanent_province = $searchStudents->permanent_province;
+                $this->permanent_region = $searchStudents->permanent_region;
+                $this->permanent_country = $searchStudents->permanent_country;
+                $this->high_school = $searchStudents->high_school;
+                $this->work_terms_completed_equality = $searchStudents->work_terms_completed_equality; 
+                $this->work_terms_completed = $searchStudents->work_terms_completed;
+                $this->grad_gpa_equality = $searchStudents->grad_gpa_equality;
+                $this->grad_gpa = $searchStudents->grad_gpa;
+
+                $this->admit_equality = $searchStudents->admit_equality;
+                $this->admit = $searchStudents->admit;
+                $this->birth_equality = $searchStudents->birth_equality;
+                $this->birth = $searchStudents->birth;
+                $this->convocation_equality = $searchStudents->convocation_equality;
+                
+                $this->convocation_month = $searchStudents->convocation_month;
+                $this->convocation_year = $searchStudents->convocation_year;
+                
+                
+                $this->grad = $searchStudents->grad;
+                /* :EXPIRY: Date to Expire: Undetermined
+                            Entered by:     Shaun
+                            Date Entered:   Jun-2-2003
+                
+                    - See above expiry comment for details.
+                                
+                $this->grad = $searchStudents->grad;
+                */
+                
+                $this->withdraw_equality = $searchStudents->withdraw_equality;
+                $this->withdraw = $searchStudents->withdraw;
+                
+                $this->flags = $searchStudents->flags;
+                $this->nflags = $searchStudents->nflags;
+
+                $this->eligible_placed_used = $searchStudents->eligible_placed_used;
+                $this->eligible_placed_flags = $searchStudents->eligible_placed_flags;
+                $this->eligible_placed_term = $searchStudents->eligible_placed_term;
+                $this->eligible_placed_year = $searchStudents->eligible_placed_year;
+                
+                $this->not_eligible_placed_used = $searchStudents->not_eligible_placed_used;
+                $this->not_eligible_placed_flags = $searchStudents->not_eligible_placed_flags;
+                $this->not_eligible_placed_term = $searchStudents->not_eligible_placed_term;
+                $this->not_eligible_placed_year = $searchStudents->not_eligible_placed_year;
+
+                $this->semester_id = $searchStudents->semester_id;
+                $this->semester_term = $searchStudents->semester_term;
+                $this->semester_year = $searchStudents->semester_year;
+
+                $this->column = $searchStudents->column;
+                $this->order = $searchStudents->order;
+            }
+        }
+
+        function setVariables($student_num_search_type, $student_num, $first_name, $last_name, $gender, $department, $discipline_id, $academic_year_equality
+                             , $academic_year, $grad_year_equality, $grad_year, $start_year_equality, $start_year, $primary_email_search_type, $primary_email
+                             , $secondary_email_search_type, $secondary_email, $coop_advisor, $advisor, $citizen, $current_city, $current_province, $current_region, $current_country
+                             , $permanent_city, $permanent_province, $permanent_region, $permanent_country, $high_school, $grad_gpa_equality, $grad_gpa, $work_terms_completed_equality
+                             , $work_terms_completed, $admit_equality, $admit, $birth_equality, $birth, $convocation_equality, $convocation_month, $convocation_year, $grad, $withdraw_equality, $withdraw
+                             , $flags, $nflags, $eligible_placed_used, $eligible_placed_flags, $eligible_placed_term, $eligible_placed_year
+                             , $not_eligible_placed_used, $not_eligible_placed_flags, $not_eligible_placed_term, $not_eligible_placed_year, $semester_id
+                             , $semester_term, $semester_year, $column, $order, $current_flag
+                             )
+        {	
+            $this->student_num_search_type = removeSlashes(trim($student_num_search_type));
+            $this->student_num = removeSlashes(trim($student_num));
+            $this->first_name = removeSlashes(trim($first_name));
+            $this->last_name = removeSlashes(trim($last_name));
+            $this->gender = removeSlashes(trim($gender));
+            $this->department = removeSlashes(trim($department));
+            $this->academic_year_equality = removeSlashes(trim($academic_year_equality));
+            $this->academic_year = removeSlashes(trim($academic_year));
+            $this->grad_year_equality = removeSlashes(trim($grad_year_equality));
+            $this->grad_year = removeSlashes(trim($grad_year));
+            $this->start_year_equality = removeSlashes(trim($start_year_equality));
+            $this->start_year = removeSlashes(trim($start_year));
+            $this->primary_email_search_type = removeSlashes(trim($primary_email_search_type)); 
+            $this->primary_email = removeSlashes(trim($primary_email));
+            $this->secondary_email_search_type = removeSlashes(trim($secondary_email_search_type));
+            $this->secondary_email = removeSlashes(trim($secondary_email));
+            $this->coop_advisor = removeSlashes(trim($coop_advisor));
+            $this->advisor = removeSlashes(trim($advisor));
+            $this->citizen = removeSlashes(trim($citizen));
+            $this->current_city = removeSlashes(trim($current_city));
+            $this->current_province = removeSlashes(trim($current_province));
+            $this->current_region = removeSlashes(trim($current_region));
+            $this->current_country = removeSlashes(trim($current_country));
+            $this->permanent_city = removeSlashes(trim($permanent_city));
+            $this->permanent_province = removeSlashes(trim($permanent_province));
+            $this->permanent_region = removeSlashes(trim($permanent_region));
+            $this->permanent_country = removeSlashes(trim($permanent_country));
+            $this->high_school = removeSlashes(trim($high_school));
+            $this->work_terms_completed_equality = removeSlashes(trim($work_terms_completed_equality));
+            $this->work_terms_completed = removeSlashes(trim($work_terms_completed));
+            $this->grad_gpa_equality = removeSlashes(trim($grad_gpa_equality));
+            $this->grad_gpa = removeSlashes(trim($grad_gpa));
+
+            $this->admit_equality = removeSlashes(trim($admit_equality));
+            $this->admit = removeSlashes(trim($admit));
+            $this->birth_equality = removeSlashes(trim($birth_equality));
+            $this->birth = removeSlashes(trim($birth));
+            $this->convocation_equality = removeSlashes(trim($convocation_equality));
+            
+            $this->grad = removeSlashes(trim($grad));
+            $this->convocation_month = removeSlashes(trim($convocation_month));
+            $this->convocation_year = removeSlashes(trim($convocation_year));
+             
+            /* :EXPIRY: Expires on: Undecided
+                        Entered by: Shaun
+                        Entered on: May-30-2003
+            
+                - See above Expiry comment for details
+            
+            $this->grad = removeSlashes(trim($grad));
+            */
+            
+            $this->withdraw_equality = removeSlashes(trim($withdraw_equality));
+            $this->withdraw = removeSlashes(trim($withdraw));
+            
+            $this->flags = removeSlashes(trim_elements($flags));
+            $this->nflags = removeSlashes(trim_elements($nflags));
+
+            $this->eligible_placed_used = removeSlashes(trim_elements($eligible_placed_used));
+            $this->eligible_placed_flags = removeSlashes(trim_elements($eligible_placed_flags));
+            $this->eligible_placed_term = removeSlashes(trim_elements($eligible_placed_term));
+            $this->eligible_placed_year = removeSlashes(trim_elements($eligible_placed_year));
+            
+            $this->not_eligible_placed_used = removeSlashes(trim_elements($not_eligible_placed_used));
+            $this->not_eligible_placed_flags = removeSlashes(trim_elements($not_eligible_placed_flags));
+            $this->not_eligible_placed_term = removeSlashes(trim_elements($not_eligible_placed_term));
+            $this->not_eligible_placed_year = removeSlashes(trim_elements($not_eligible_placed_year));
+
+            $this->semester_id = removeSlashes(trim($semester_id));
+            $this->semester_term = removeSlashes(trim($semester_term));
+            $this->semester_year = removeSlashes(trim($semester_year));
+
+            $this->discipline_id = removeSlashes(trim_elements($discipline_id));
+            
+            $this->column = removeSlashes(trim_elements($column));
+            $this->order = removeSlashes(trim_elements($order));
+
+            $this->current_flag = removeSlashes(trim_elements($current_flag));
+        }
+
+        function checkInputs()
+        {
+            global $departments_in_group;
+
+            $error_array = array();
+
+            // FYI: If you see a regular expression like /^\d+$/ . The ^ means starts with, while $ means ends with. So this
+            //      regular expression means we want some integer. It must only contain numbers from start to end. 
+
+            // Searches for anything that is NOT alphanumeric in the student number. 
+            if (strlen($this->student_num) && !preg_match("/^\w+$/",$this->student_num))
+            {
+                array_push($error_array,"The student number you have entered contains characters that are not numbers or letters. Please re-enter a student number.");
+            }
+
+            if (strlen($this->student_num) && !$this->student_num_search_type)
+            {
+                array_push($error_array,"Please specify if you want your student number to starts with or ends in the value you have provided.");
+            }
+
+            if (!strlen($this->student_num) && $this->student_num_search_type)
+            {
+                array_push($error_array,"Please enter a student number for your search.");
+            }
+
+            if (strlen($this->student_num_search_type) && ($this->student_num_search_type != "starts_with" && 
+                $this->student_num_search_type != "ends_with"))
+            {
+                array_push($error_array,"An error has occurred with the student number search type. Please contact administrator.");
+            }
+
+            if ($this->first_name && preg_match("/%/",$this->first_name))
+            {
+                array_push($error_array,"The first name you have entered contains characters that are not numbers or letters. Please re-enter a first name.");
+            }
+
+            if ($this->last_name && preg_match("/%/",$this->last_name))
+            {
+                array_push($error_array,"The last name you have entered contains characters that are not numbers or letters. Please re-enter a last name.");
+            }
+
+            if ($this->gender && $this->gender != "M" && $this->gender != "F")
+            {
+                array_push($error_array,"The gender you have provided is invalid. Please re-enter a gender.");
+            }
+
+            if (strlen($this->department))
+            {
+                if (!preg_match("/^\d+$/",$this->department))
+                {
+                    array_push($error_array,"The department you have provided is invalid. Please re-enter a department.");
+                }
+
+                if (!in_array($this->department,$departments_in_group) && $this->department != 0)
+                {
+                    array_push($error_array,"You do not have access to search for the department you have provided. Please re-enter a department.");
+                }
+            }
+/*
+            if (strlen($this->discipline_id))
+            {
+                if (!preg_match("/^\d+$/",$this->discipline_id))
+                {
+                    array_push($error_array,"The discipline you have provided is invalid. Please re-enter a discipline .");
+                }
+            }
+*/
+            if (strlen($this->academic_year) && !preg_match("/^\d+$/",$this->academic_year))
+            {
+                array_push($error_array,"The academic year you have provided is not number. Please re-enter an academic year.");
+                $error = 1;
+            }
+
+            if (strlen($this->academic_year) && !$this->academic_year_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the academic year.");
+            }
+
+            if (!strlen($this->academic_year) && $this->academic_year_equality)
+            {
+                array_push($error_array,"Please enter an academic year for your search.");
+            }
+
+            if (strlen($this->academic_year_equality) && ($this->academic_year_equality != "<" && 
+                $this->academic_year_equality != "=" && $this->academic_year_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the academic year equality. Please contact administrator.");
+            }
+
+            if (strlen($this->grad_year) && !preg_match("/^\d{4}$/",$this->grad_year))
+            {
+                array_push($error_array,"The graduating year you have provided is not of the format YYYY. Please re-enter a graduating year.");
+            }
+
+            if (strlen($this->grad_year) && !$this->grad_year_equality)
+            {
+                array_push($error_array,"Please specify if you want the graduating year to be before, on, or after the graduating year you have entered.");
+            }
+
+            if (!strlen($this->grad_year) && $this->grad_year_equality)
+            {
+                array_push($error_array,"Please enter a graduating year for your search.");
+            }
+
+            if (strlen($this->grad_year_equality) && ($this->grad_year_equality != "<" && 
+                $this->grad_year_equality != "=" && $this->grad_year_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the graduating year equality. Please contact administrator.");
+            }
+
+            if (strlen($this->start_year) && !preg_match("/^\d{4}$/",$this->start_year))
+            {
+                array_push($error_array,"The start year you have provided is not of the format YYYY. Please re-enter a start year.");
+            }
+
+            if (strlen($this->start_year) && !$this->start_year_equality)
+            {
+                array_push($error_array,"You must specify whether you want the start year to be before, on, or after the value you have provided.");
+            }
+
+            if (!strlen($this->start_year) && $this->start_year_equality)
+            {
+                array_push($error_array,"Please enter a start year for your search.");
+            }
+
+            if (strlen($this->start_year_equality) && ($this->start_year_equality != "<" && 
+                $this->start_year_equality != "=" && $this->start_year_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the start year equality. Please contact administrator.");
+            }
+
+            // Make sure the e-mail address does not contain the following characters: + ? * ^ $ ( ) [ ] { } | \ / ` ! # % & = " '
+            if (strlen($this->primary_email) && preg_match("/[\+|\?|\*|\^|\$|\(|\)|\[|\]|\{|\}|\||\\|\/|`|!|#|%|&|=|\"|']/",$this->primary_email))
+            {
+                array_push($error_array,"The primary e-mail address you entered contains invalid characters. Please re-enter a primary e-mail address.");
+            }
+
+            if (strlen($this->primary_email) && !$this->primary_email_search_type)
+            {
+                array_push($error_array,"Please specify whether you want the primary e-mail address to start with or contain the e-mail you have entered.");
+            }
+
+            if (!strlen($this->primary_email) && $this->primary_email_search_type)
+            {
+                array_push($error_array,"Please enter a primary e-mail address for your search.");
+            }
+
+            if (strlen($this->primary_email_search_type) && ($this->primary_email_search_type != "starts_with" &&
+                $this->primary_email_search_type != "contains"))
+            {
+                array_push($error_array,"An error has occurred with the primary email search type. Please contact administrator.");
+            }
+
+            if (strlen($this->secondary_email) && preg_match("/[\+|\?|\*|\^|\$|\(|\)|\[|\]|\{|\}|\||\\|\/|`|!|#|%|&|=|\"|']/",$this->secondary_email))
+            {
+                array_push($error_array,"The secondary e-mail address you entered contains invalid characters. Please re-enter a secondary e-mail address.");
+            }
+
+            if (strlen($this->secondary_email) && !$this->secondary_email_search_type)
+            {
+                array_push($error_array,"Please specify whether you want the secondary e-mail address to start with or contain the secondary e-mail you have entered.");
+            }
+
+            if (!strlen($this->secondary_email) && $this->secondary_email_search_type)
+            {
+                array_push($error_array,"Please enter a secondary e-mail address for your search.");
+            }
+            
+            if (strlen($this->secondary_email_search_type) && ($this->secondary_email_search_type != "starts_with" &&
+                $this->secondary_email_search_type != "contains"))
+            {
+                array_push($error_array,"An error has occurred with the secondary email search type. Please contact administrator.");
+            }
+
+            if ($this->citizen && preg_match("/%/",$this->citizen))
+            {
+                array_push($error_array,"The citizenship you have entered contains characters that are not numbers or letters. Please re-enter a citizenship");
+            }
+            
+            if ($this->current_city && preg_match("/%/",$this->current_city))
+            {
+                array_push($error_array,"The current city you have entered contains invalid characters. Please re-enter a current city.");
+            }
+
+            if (strlen($this->current_province) && !preg_match("/^\d+$/",$this->current_province))
+            {
+                array_push($error_array,"The current province you have entered is invalid. Please re-enter a current province.");
+            }
+
+            if (strlen($this->current_country) && !preg_match("/^\d+$/",$this->current_country))
+            {
+                array_push($error_array,"The current country you have entered is invalid. Please re-enter a current country.");
+            }
+
+            if ($this->permanent_city && preg_match("/%/",$this->permanent_city))
+            {
+                array_push($error_array,"The permanent city you have entered contains invalid characters. Please re-enter a permanent city.");
+            }
+
+            if (strlen($this->permanent_province) && !preg_match("/^\d+$/",$this->permanent_province))
+            {
+                array_push($error_array,"The permanent province you have entered is invalid. Please re-enter a permanent province.");
+            }
+
+            if (strlen($this->permanent_country) && !preg_match("/^\d+$/",$this->permanent_country))
+            {
+                array_push($error_array,"The permanent country you have entered is invalid. Please re-enter a permanent country.");
+            }
+
+            if ($this->high_school && preg_match("/%/",$this->high_school))
+            {
+                array_push($error_array,"The high school you have entered contains invalid characters. Please re-enter a high school.");
+            }
+            
+            if (strlen($this->work_terms_completed) && !preg_match("/^\d+$/",$this->work_terms_completed))
+            {
+                array_push($error_array,"The number of work terms completed you have provided is not a whole number. Please re-enter a number of work terms completed.");
+            }
+
+            if (strlen($this->work_terms_completed) && !$this->work_terms_completed_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the number of work terms completed.");
+            }
+
+            if (!strlen($this->work_terms_completed) && $this->work_terms_completed_equality)
+            {
+                array_push($error_array,"Please enter a number of work terms completed for your search.");
+            }
+
+            if (strlen($this->work_terms_completed_equality) && ($this->work_terms_completed_equality != "<" && 
+                $this->work_terms_completed_equality != "=" && $this->work_terms_completed_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the number of work terms completed equality. Please contact administrator.");
+            }
+
+            if (strlen($this->grad_gpa) && !is_numeric($this->grad_gpa))
+            {
+                array_push($error_array,"The number of grad GPA you have provided is not number. Please re-enter a grad GPA.");
+            }
+
+            if (strlen($this->grad_gpa) && !$this->grad_gpa_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the grad GPA you have entered.");
+            }
+
+            if (!strlen($this->grad_gpa) && $this->grad_gpa_equality)
+            {
+                array_push($error_array,"Please enter a grad GPA for your search.");
+            }
+            
+            if (strlen($this->grad_gpa_equality) && ($this->grad_gpa_equality != "<" && 
+                $this->grad_gpa_equality != "=" && $this->grad_gpa_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the grad GPA equality. Please contact administrator.");
+            }
+
+            // regular expression detects dates that do not follow YYYY-MM-DD format. 
+            if (strlen($this->admit) && !preg_match("/^(\d{4})-(\d{2})-(\d{2})$/",$this->admit))
+            {
+                array_push($error_array,"You have entered an admit date that is not of the format (YYYY-MM-DD). Please re-enter an admit date.");
+            }
+            
+            if (strlen($this->admit) && !$this->admit_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the admit date.");
+            }
+
+            if (!strlen($this->admit) && $this->admit_equality)
+            {
+                array_push($error_array,"Please enter an admit date for your search.");
+            }
+            
+            if (strlen($this->admit_equality) && ($this->admit_equality != "<" && 
+                $this->admit_equality != "=" && $this->admit_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the admit date equality. Please contact administrator.");
+            }
+
+            if (strlen($this->birth) && !preg_match("/^(\d{4})-(\d{2})-(\d{2})$/",$this->birth))
+            {
+                array_push($error_array,"You have entered a birth date that is not of the format (YYYY-MM-DD). Please re-enter a birth date.");
+            }
+            
+            if (strlen($this->birth) && !$this->birth_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the birth date.");
+            }
+
+            if (!strlen($this->birth) && $this->birth_equality)
+            {
+                array_push($error_array,"Please enter a birth date for your search.");
+            }
+            
+            if (strlen($this->birth_equality) && ($this->birth_equality != "<" && 
+                $this->birth_equality != "=" && $this->birth_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the birth date equality. Please contact administrator.");
+            }
+
+/* :EXPIRY: Expires on: Undecided
+                        Entered by: Shaun
+                        Entered on: May-30-2003
+                
+                - See above expiry tag for details
+            
+            if (strlen($this->grad) && !preg_match("/^(\d{4})-(\d{2})-(\d{2})$/",$this->grad))
+            {
+                array_push($error_array,"You have entered a graduation date that is not of the format (YYYY-MM-DD). Please re-enter a graduation date.");
+            }
+                          
+            if (strlen($this->grad) && !$this->grad_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the graduation date.");
+            }
+
+            if (!strlen($this->grad) && $this->grad_equality)
+            {
+                array_push($error_array,"Please enter a graduation date for your search.");
+            }
+*/
+
+            if ( (strlen($this->convocation_month) || strlen($this->convocation_year)) && !$this->convocation_equality )
+            {
+                array_push($error_array,"Please specify if you want Before, On, or After the convocation date.");
+            }
+
+            if ( !(strlen($this->convocation_month) || strlen($this->convocation_year)) && $this->convocation_equality )
+            {
+                array_push($error_array,"Please enter a convocation month or year for your search.");
+            }
+
+            if (strlen($this->convocation_equality) && ($this->convocation_equality != "<" && 
+                        $this->convocation_equality != "=" && $this->convocation_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the convocation date equality. Please contact administrator.");
+            }
+
+            if (strlen($this->withdraw) && !preg_match("/^(\d{4})-(\d{2})-(\d{2})$/",$this->withdraw))
+            {
+                array_push($error_array,"You have entered a withdraw date that is not of the format (YYYY-MM-DD). Please re-enter a withdraw date.");
+            }
+            
+            if (strlen($this->withdraw) && !$this->withdraw_equality)
+            {
+                array_push($error_array,"Please specify if you want less than, equal to, or greater than the withdraw date.");
+            }
+
+            if (!strlen($this->withdraw) && $this->withdraw_equality)
+            {
+                array_push($error_array,"Please enter a withdraw date for your search.");
+            }
+
+            if (strlen($this->withdraw_equality) && ($this->withdraw_equality != "<" && 
+                $this->withdraw_equality != "=" && $this->withdraw_equality != ">"))
+            {
+                array_push($error_array,"An error has occurred with the withdraw date equality. Please contact administrator.");
+            }
+
+            if ($this->flags && !is_array($this->flags))
+            {
+                array_push($error_array,"An error has occurred with the \"yes\" student flags. Please contact administrators.");
+            }
+
+            if (is_array($this->flags) && sizeof($this->flags) > 0)
+            {
+                $error_flag = 0;
+                foreach ($this->flags as $value)
+                {
+                    if (!preg_match("/^\d+$/",$value))
+                    {
+                        $error_flag = 1;
+                    }
+                }
+
+                if ($error_flag)
+                {
+                    array_push($error_array,"An invalid \"yes\" student flag has been entered, please re-enter the student flag.");
+                }
+                $error_flag = 0;
+                $value = NULL;
+            }
+            
+            if ($this->nflags && !is_array($this->nflags))
+            {
+                array_push($error_array,"An error has occurred with the \"no\" student flags. Please contact administrators.");
+            }
+
+            if (is_array($this->nflags) && sizeof($this->nflags) > 0)
+            {
+                $error_flag = 0;
+                foreach ($this->nflags as $value)
+                {
+                    if (!preg_match("/^\d+$/",$value))
+                    {
+                        $error_flag = 1;
+                    }
+                }
+
+                if ($error_flag)
+                {
+                    array_push($error_array,"An invalid \"no\" student flag has been entered, please re-enter the student flag.");
+                }
+                $error_flag = 0;
+                $value = NULL;
+            }
+
+            if (sizeof($this->eligible_placed_used) && is_array($this->eligible_placed_used))
+            {
+                foreach ($this->eligible_placed_used as $index => $value)
+                {
+                    if (!strlen($this->eligible_placed_flags[$index]))
+                    {
+                        array_push($error_array,"Please specify whether you want to search for eligible or placed students.");
+                    }
+                    
+                    if (strlen($this->eligible_placed_flags[$index]) && !preg_match("/^\d+$/",$this->eligible_placed_flags[$index]))
+                    {
+                        array_push($error_array,"The eligible for/placed for flag is invalid. Please re-enter an eligible/placed flag.");
+                    }
+
+                    if (!strlen($this->eligible_placed_term[$index]))
+                    {
+                        array_push($error_array,"Please enter a term for your eligible/placed flag search.");
+                    }
+
+                    if (!strlen($this->eligible_placed_year[$index]))
+                    {
+                        array_push($error_array,"Please enter a year for your eligible/placed flag search.");
+                    }
+
+                    elseif(!preg_match("/^\d{4}$/",$this->eligible_placed_year[$index]))
+                    {
+                        array_push($error_array,"The year you have entered for the eligible/placed flag search must be in a YYYY format.");
+                    }
+                }
+            }
+
+            if (sizeof($this->not_eligible_placed_used) && is_array($this->not_eligible_placed_used))
+            {
+                foreach ($this->not_eligible_placed_used as $index => $value)
+                {
+                    if (!strlen($this->not_eligible_placed_flags[$index]))
+                    {
+                        array_push($error_array,"Please specify whether you want to search for students that are not eligible or placed.");
+                    }
+                    
+                    if (strlen($this->not_eligible_placed_flags[$index]) && !preg_match("/^\d+$/",$this->not_eligible_placed_flags[$index]))
+                    {
+                        array_push($error_array,"The \"not eligible/placed\" flag is invalid. Please re-enter a not eligible/placed flag.");
+                    }
+
+                    if (!strlen($this->not_eligible_placed_term[$index]))
+                    {
+                        array_push($error_array,"Please enter a term for your not eligible/placed flag search.");
+                    }
+
+                    if (!strlen($this->not_eligible_placed_year[$index]))
+                    {
+                        array_push($error_array,"Please enter a year for your not eligible/placed flag search.");
+                    }
+
+                    elseif(!preg_match("/^\d{4}$/",$this->not_eligible_placed_year[$index]))
+                    {
+                        array_push($error_array,"The year you have entered for the not eligible/placed flag search must be in a YYYY format.");
+                    }
+                }
+            }
+
+            if (strlen($this->semester_id) || strlen($this->semester_term) || strlen($this->semester_year))
+            {
+                if (!strlen($this->semester_id))
+                {
+                    array_push($error_array,"Please enter a semester for the student schedule search.");
+                }
+                
+                if (!strlen($this->semester_term))
+                {
+                    array_push($error_array,"Please enter a term for the student schedule search.");
+                }
+                
+                if (!strlen($this->semester_year))
+                {
+                    array_push($error_array,"Please enter a year for the student schedule search.");
+                }
+                
+                elseif(!preg_match("/^\d{4}$/",$this->semester_year))
+                {
+                    array_push($error_array,"The semester's year is invalid. It must be of the form YYYY. Please re-enter the student schedule's year.");
+                }
+            }
+
+            if (is_array($this->column) && sizeof($this->column) > 0)
+            {
+                foreach($this->column as $index => $value)
+                {
+                    if (preg_match("/\*/",$value))
+                    {
+                        array_push($error_array,"Column number ".$index." has invalid characters. Please contact administrators.");
+                    }
+                }
+            }
+
+            else
+            {
+                array_push($error_array,"An error has occurred with the columns you wish to display. Please contact administrators.");
+            }
+
+            return $error_array;
+        }
+   }
+?>

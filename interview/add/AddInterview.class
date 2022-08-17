@@ -1,0 +1,101 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: AddInterview.class                                                 |
+ +------------------------------------------------------------------------------+
+ | Description: *  class AddInterview, extends interview, hold temporary        |
+ | input data to simplify data passing *              between pages * *         |
+ | Entered by Robin, 2000-09-21 12:56 PM                                        |
+ +------------------------------------------------------------------------------+
+
+*/
+
+include('interview/add/interview.class');
+
+class AddInterview extends interview
+{	
+	
+	var $intdays;			
+	var $num_interviewers;
+	var $num_time_slots;			
+
+	function AddInterview($interview)
+	{
+		$this->interview($interview);
+		$this->intdays = $interview->intdays;
+		$this->num_interviewers = $interview->num_interviewers;	
+		$this->num_time_slots = $interview->num_time_slots;	
+		
+	}
+
+	function set_value_1($job_code, $company_name, $employer_email, $students, $intdays, $interview_medium, $presentation, $interview_type, $num_interviewers, $contact, $interview_place )
+	{
+		$this->job_code = removeSlashes( trim($job_code) );
+		$this->company_name = removeSlashes( trim($company_name) );
+		$this->employer_email = removeSlashes( trim($employer_email) );
+		$this->students = removeSlashes( trim($students) );
+		$this->intdays = $intdays;
+		$this->interview_medium = $interview_medium;
+		$this->presentation = $presentation;
+		$this->interview_type = $interview_type;
+
+		//note need some other check here : old if ($switching == 0) && $simultaneous == 0
+		if ($interview_type == 1)
+			$this->num_interviewers = 1;
+		elseif ($interview_type == 4 || $interview_type == 3)
+			$this->num_interviewers = $num_interviewers;
+		else
+			$this->num_interviewers = 2; 		
+		$this->contact = $contact;
+		
+		$this->interview_place = $interview_place;
+	}
+	
+	function set_value_2($interviewers, $locations, $wait_locations, $notes, $staff_notes,  $pres_date, $pres_time, $pres_len, $pres_loc, $pres_notes, $pres_viewable_by_all, $use_room_number)
+	{
+		$this->interviewers = removeSlashes( $interviewers );
+		$this->locations = removeSlashes( $locations );
+		$this->wait_locations = removeSlashes( $wait_locations );
+		$this->notes = removeSlashes( trim($notes) );
+		$this->staff_notes = removeSlashes( trim($staff_notes) );
+		$this->pres_date = $pres_date;
+		$this->pres_time = $pres_time;
+		$this->pres_len = $pres_len;
+		$this->pres_loc = removeSlashes ( trim($pres_loc) );
+		$this->pres_notes = removeSlashes ( trim($pres_notes) );
+		$this->pres_viewable_by_all = $pres_viewable_by_all;
+		$this->use_room_number = $use_room_number;
+	}	
+	
+	function set_value_3($address1, $address2, $city,  $province, $country, $direction )
+	{
+		$this->address1 = removeSlashes( trim($address1) );
+		$this->address2 = removeSlashes( trim($address2) );
+		$this->city = removeSlashes( trim($city) );
+		$this->province = removeSlashes( trim($province) );
+		$this->country = removeSlashes( trim($country) );
+		$this->direction = removeSlashes( trim($direction) );
+	}
+}
+
+?>

@@ -1,0 +1,1172 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: SearchContact.class                                                |
+ +------------------------------------------------------------------------------+
+ | Description: This file is used to declare the class that holds all of the    |
+ | search criteria for contacts, divisions, and companies.  This is used in     |
+ | order to ease passing search criteria and other information between forms.   |
+ | This class IS in fact different from the incarnation in contact/view/.       |
+ | Chris has seperated the searching functionality for contacts and companies/  |
+ | divisions.  This class handles the CONTACT searching functionality.          |
+ +------------------------------------------------------------------------------+
+
+*/
+
+class SearchContact
+{
+    // Declare all of the contact search variables now, do the rest later.
+
+    //var $search_contact_department_id;		//int used to return all contacts at a specific department.
+    var $search_contact_first_name;			    //string
+    var $search_contact_last_name;			    //string
+    var $search_contact_email_as;			    //string, "start" or "containing"
+    var $search_contact_email;                  //string
+    var $search_contact_phone_as;               //string, "start" or "containing"
+    var $search_contact_phone;                  //string
+    var $search_contact_cellphone_as;               //string, "start" or "containing"
+    var $search_contact_cellphone;                  //string
+    var $search_contact_fax_as;                 //string, "start" or "containing"
+    var $search_contact_fax;                    //string
+    var $search_contact_area;                   //int
+    var $search_contact_country;                //int
+    var $search_contact_provstate;              //int
+    var $search_contact_region;                 //int
+    var $search_contact_city;                   //string
+    var $search_contact_postal_code;            //string
+    var $search_contact_action;                 //int
+    var $search_contact_action_by;              //int
+    var $search_contact_action_as;              //string, "on", "before", or "after"
+    var $search_contact_action_on;              //string, date format
+    var $search_contact_action_between1;        //string, date format
+    var $search_contact_action_between2;        //string, date format
+    var $search_contact_action_bf_as;           //string, "on", "before", or "after"
+    var $search_contact_action_bf_on;           //string, date format
+    var $search_contact_action_bf_between1;     //string, date format
+    var $search_contact_action_bf_between2;     //string, date format
+    var $search_contact_flags_boolean;          //string, "and", or "or"
+    var $search_contact_flags;                  //array of ints
+    var $search_contact_nflags;                  //array of ints
+    var $search_contact_department_name;        //string
+    var $search_contact_status_status;          //array of ints
+    var $search_contact_status_department;      //array of ints
+
+    var $search_company_criteria;               //string, enables company fields to be searched.
+    var $search_department_criteria;            //string, enables department fields to be searched.
+
+    // Company criteria used for searching.
+
+    var $search_company_name;                   //string
+    var $search_company_website_as;             //string - "start" or "containing"
+    var $search_company_website;                //string
+    var $search_company_area;                   //int
+    var $search_company_country;                //int
+    var $search_company_provstate;              //int
+    var $search_company_region;                 //int
+    var $search_company_city;                   //string
+    var $search_company_postal_code;            //string
+    var $search_company_phone_as;               //string, "start" or "containing"
+    var $search_company_phone;                  //string
+    var $search_company_fax_as;                 //string, "start" or "containing"
+    var $search_company_fax;                    //string
+    var $search_company_email_as;               //string, "start" or "containing"
+    var $search_company_email;                  //string
+    var $search_company_yes_industry;           //array of ints
+    var $search_company_no_industry;            //array of ints
+    var $search_company_type;                   //array of ints
+    var $search_company_size;                   //array of ints
+    var $search_company_flags_boolean;          //string, "and", or "or"
+    var $search_company_flags;                  //array of ints
+
+    // Department criteria used for searching on contacts.
+
+    var $search_department_name;                //string
+    var $search_department_website_as;          //string - "start" or "containing"
+    var $search_department_website;             //string
+    var $search_department_area;                //int
+    var $search_department_country;             //int
+    var $search_department_provstate;           //int
+    var $search_department_region;              //int
+    var $search_department_city;                //string
+    var $search_department_postal_code;         //string
+    var $search_department_phone_as;            //string, "start" or "containing"
+    var $search_department_phone;               //string
+    var $search_department_fax_as;              //string, "start" or "containing"
+    var $search_department_fax;                 //string
+    var $search_department_email_as;            //string, "start" or "containing"
+    var $search_department_email;               //string
+    var $search_department_yes_industry;        //array of ints
+    var $search_department_no_industry;         //array of ints
+    var $search_department_size;                //array of ints
+    var $search_department_flags_boolean;       //string, "and", or "or"
+    var $search_department_flags;               //array of ints
+
+    // Variables used for special cases of searches, typically from quickmenus
+
+    var $search_employer_id;                    //int
+    var $search_division_id;                    //int
+
+    // Variable used to determine if we're performing a search on companies, divisions, or both.
+
+    var $search_comp_or_div;                    //string
+
+    /*
+     Criteria used to determine what to display on the screen, and how to order it.
+     Used by all three levels of searching.
+     */
+
+    var $search_display;                        //array
+    var $search_order;                          //array
+
+    function SearchContact($searchContact = NULL)
+    {
+        // If someone provides a string of the object's instance, the object needs to be unserialized
+        // and urldecoded before we can use the object. The following block will unpack the object for
+        // use. 
+
+        if ($searchContact && is_string($searchContact))
+        {
+            $searchContact = unpackObject(($searchContact));
+            
+            $searchContact->search_contact_flags = unpackObject(($searchContact->search_contact_flags));
+            $searchContact->search_contact_nflags = unpackObject(($searchContact->search_contact_nflags));
+            $searchContact->search_contact_status_status = unpackObject(($searchContact->search_contact_status_status));
+            $searchContact->search_contact_status_department = unpackObject(($searchContact->search_contact_status_department));
+            $searchContact->search_company_yes_industry = unpackObject(($searchContact->search_company_yes_industry));
+            $searchContact->search_company_no_industry = unpackObject(($searchContact->search_company_no_industry));
+            $searchContact->search_company_type = unpackObject(($searchContact->search_company_type));
+            $searchContact->search_company_size = unpackObject(($searchContact->search_company_size));
+            $searchContact->search_company_flags = unpackObject(($searchContact->search_company_flags));
+            $searchContact->search_department_yes_industry = unpackObject(($searchContact->search_department_yes_industry));
+            $searchContact->search_department_no_industry = unpackObject(($searchContact->search_department_no_industry));
+            $searchContact->search_department_size = unpackObject(($searchContact->search_department_size));
+            $searchContact->search_department_flags = unpackObject(($searchContact->search_department_flags));
+            $searchContact->search_display = unpackObject(($searchContact->search_display));
+            $searchContact->search_order = unpackObject(($searchContact->search_order));
+        }
+        if ($searchContact)
+        {
+            $this->search_contact_first_name = $searchContact->search_contact_first_name;
+            $this->search_contact_last_name = $searchContact->search_contact_last_name;
+            $this->search_contact_email_as = $searchContact->search_contact_email_as;
+            $this->search_contact_email = $searchContact->search_contact_email;
+            $this->search_contact_phone_as = $searchContact->search_contact_phone_as;
+            $this->search_contact_phone = $searchContact->search_contact_phone;
+            $this->search_contact_cellphone_as = $searchContact->search_contact_cellphone_as;
+            $this->search_contact_cellphone = $searchContact->search_contact_cellphone;
+            $this->search_contact_fax = $searchContact->search_contact_fax;
+            $this->search_contact_fax_as = $searchContact->search_contact_fax_as;
+            $this->search_contact_company_name = $searchContact->search_contact_company_name;
+            $this->search_contact_department_name = $searchContact->search_contact_department_name;
+            $this->search_contact_area = $searchContact->search_contact_area;
+            $this->search_contact_country = $searchContact->search_contact_country;
+            $this->search_contact_provstate = $searchContact->search_contact_provstate;
+            $this->search_contact_region = $searchContact->search_contact_region;	
+            $this->search_contact_city = $searchContact->search_contact_city;	
+            $this->search_contact_postal_code = $searchContact->search_contact_postal_code;
+            $this->search_contact_action = $searchContact->search_contact_action;
+            $this->search_contact_action_by = $searchContact->search_contact_action_by;
+            $this->search_contact_action_as = $searchContact->search_contact_action_as;
+            $this->search_contact_action_on = $searchContact->search_contact_action_on;
+            $this->search_contact_action_between1 = $searchContact->search_contact_action_between1;
+            $this->search_contact_action_between2 = $searchContact->search_contact_action_between2;
+            $this->search_contact_action_bf_as = $searchContact->search_contact_action_bf_as;
+            $this->search_contact_action_bf_on = $searchContact->search_contact_action_bf_on;
+            $this->search_contact_action_bf_between1 = $searchContact->search_contact_action_bf_between1;
+            $this->search_contact_action_bf_between2 = $searchContact->search_contact_action_bf_between2;
+            $this->search_contact_flags_boolean = $searchContact->search_contact_flags_boolean;
+            $this->search_contact_flags = $searchContact->search_contact_flags;
+            $this->search_contact_nflags = $searchContact->search_contact_nflags;
+            $this->search_contact_status_status = $searchContact->search_contact_status_status;
+            $this->search_contact_status_department = $searchContact->search_contact_status_department;
+
+            $this->search_company_criteria = $searchContact->search_company_criteria;
+            $this->search_department_criteria = $searchContact->search_department_criteria;
+
+            $this->search_company_name = $searchContact->search_company_name;
+            $this->search_company_website_as = $searchContact->search_company_website_as;
+            $this->search_company_website = $searchContact->search_company_website;
+            $this->search_company_area = $searchContact->search_company_area;
+            $this->search_company_country = $searchContact->search_company_country;
+            $this->search_company_provstate = $searchContact->search_company_provstate;
+            $this->search_company_region = $searchContact->search_company_region;
+            $this->search_company_city = $searchContact->search_company_city;
+            $this->search_company_postal_code = $searchContact->search_company_postal_code;
+            $this->search_company_phone_as = $searchContact->search_company_phone_as;
+            $this->search_company_phone = $searchContact->search_company_phone;
+            $this->search_company_fax = $searchContact->search_company_fax;
+            $this->search_company_fax_as = $searchContact->search_company_fax_as;
+            $this->search_company_email_as = $searchContact->search_company_email_as;
+            $this->search_company_email = $searchContact->search_company_email;
+            $this->search_company_yes_industry = $searchContact->search_company_yes_industry;
+            $this->search_company_no_industry = $searchContact->search_company_no_industry;
+            $this->search_company_size = $searchContact->search_company_size;
+            $this->search_company_type = $searchContact->search_company_type;
+            $this->search_company_flags_boolean = $searchContact->search_company_flags_boolean;
+            $this->search_company_flags = $searchContact->search_company_flags;
+
+            $this->search_department_name = $searchContact->search_department_name;
+            $this->search_department_website_as = $searchContact->search_department_website_as;
+            $this->search_department_website = $searchContact->search_department_website;
+            $this->search_department_area = $searchContact->search_department_area;
+            $this->search_department_country = $searchContact->search_department_country;
+            $this->search_department_provstate = $searchContact->search_department_provstate;
+            $this->search_department_region = $searchContact->search_department_region;
+            $this->search_department_city = $searchContact->search_department_city;
+            $this->search_department_postal_code = $searchContact->search_department_postal_code;
+            $this->search_department_phone_as = $searchContact->search_department_phone_as;
+            $this->search_department_phone = $searchContact->search_department_phone;
+            $this->search_department_fax = $searchContact->search_department_fax;
+            $this->search_department_fax_as = $searchContact->search_department_fax_as;
+            $this->search_department_email_as = $searchContact->search_department_email_as;
+            $this->search_department_email = $searchContact->search_department_email;
+            $this->search_department_yes_industry = $searchContact->search_department_yes_industry;
+            $this->search_department_no_industry = $searchContact->search_department_no_industry;
+            $this->search_department_size = $searchContact->search_department_size;
+            $this->search_department_flags_boolean = $searchContact->search_department_flags_boolean;
+            $this->search_department_flags = $searchContact->search_department_flags;
+
+            $this->search_comp_or_div = $searchContact->search_comp_or_div;
+
+            $this->search_display = $searchContact->search_display;
+            $this->search_order = $searchContact->search_order;
+            
+            $this->search_employer_id = $searchContact->search_employer_id;
+            $this->search_division_id = $searchContact->search_division_id;
+        }
+    }
+    function set_contact_values_1($contact_search_first_name, $contact_search_last_name, $contact_search_email_as, $contact_search_email
+            , $contact_search_phone_as, $contact_search_phone, $contact_search_cellphone_as, $contact_search_cellphone
+            , $contact_search_fax_as, $contact_search_fax, $contact_search_company_name
+            , $contact_search_division_name, $contact_search_area, $contact_search_country, $contact_search_provstate, $contact_search_region
+            , $contact_search_city, $contact_search_postal_code, $contact_search_action, $contact_search_action_by, $contact_search_action_as
+            , $contact_search_action_on, $contact_search_action_between1, $contact_search_action_between2, $contact_search_action_bf_as
+            , $contact_search_action_bf_on, $contact_search_action_bf_between1, $contact_search_action_bf_between2, $contact_search_flags_boolean
+            , $contact_search_flags, $contact_search_nflags, $contact_search_department_name, $contact_search_status_status, $contact_search_status_department
+            , $contact_search_display, $contact_search_order, $search_company_criteria, $search_department_criteria
+            )
+    {
+        $this->search_contact_first_name = trim(removeSlashes($contact_search_first_name));
+        $this->search_contact_last_name = trim(removeSlashes($contact_search_last_name));
+        $this->search_contact_email_as = trim(removeSlashes($contact_search_email_as));
+        $this->search_contact_email = trim(removeSlashes($contact_search_email));
+        $this->search_contact_phone_as = trim(removeSlashes($contact_search_phone_as));
+        $this->search_contact_phone = trim(removeSlashes($contact_search_phone));
+        $this->search_contact_cellphone_as = trim(removeSlashes($contact_search_cellphone_as));
+        $this->search_contact_cellphone = trim(removeSlashes($contact_search_cellphone));
+        $this->search_contact_fax_as = trim(removeSlashes($contact_search_fax_as));
+        $this->search_contact_fax = trim(removeSlashes($contact_search_fax));
+        $this->search_company_name = trim(removeSlashes($contact_search_company_name));
+        $this->search_department_name = trim(removeSlashes($contact_search_division_name));
+
+        $this->search_contact_area = trim(removeSlashes($contact_search_area));
+        $this->search_contact_country = trim(removeSlashes($contact_search_country));
+        $this->search_contact_provstate = trim(removeSlashes($contact_search_provstate));
+        $this->search_contact_region = trim(removeSlashes($contact_search_region));
+        $this->search_contact_city = trim(removeSlashes($contact_search_city));
+        $this->search_contact_postal_code = trim(removeSlashes($contact_search_postal_code));
+        $this->search_contact_action = trim(removeSlashes($contact_search_action));
+        $this->search_contact_action_by = trim(removeSlashes($contact_search_action_by));
+        $this->search_contact_action_as = trim(removeSlashes($contact_search_action_as));
+        $this->search_contact_action_on = trim(removeSlashes($contact_search_action_on));
+        $this->search_contact_action_between1 = trim(removeSlashes($contact_search_action_between1));
+        $this->search_contact_action_between2 = trim(removeSlashes($contact_search_action_between2));
+        $this->search_contact_action_bf_as = trim(removeSlashes($contact_search_action_bf_as));
+        $this->search_contact_action_bf_on = trim(removeSlashes($contact_search_action_bf_on));
+        $this->search_contact_action_bf_between1 = trim(removeSlashes($contact_search_action_bf_between1));
+        $this->search_contact_action_bf_between2 = trim(removeSlashes($contact_search_action_bf_between2));
+        $this->search_contact_flags_boolean = trim(removeSlashes($contact_search_flags_boolean));
+        $this->search_contact_flags = trim_array(removeSlashes($contact_search_flags));
+        $this->search_contact_nflags = trim_array(removeSlashes($contact_search_nflags));
+
+        if (is_array($this->search_contact_flags) && sizeof($this->search_contact_flags) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_contact_flags as $key => $value)
+            {
+                $this->search_contact_flags[$key] = trim($value);
+            }
+        }
+
+        if (is_array($this->search_contact_nflags) && sizeof($this->search_contact_nflags) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_contact_nflags as $key => $value)
+            {
+                $this->search_contact_nflags[$key] = trim($value);
+            }
+        }
+        $this->search_contact_department_name = trim(removeSlashes($contact_search_department_name));
+
+        $this->search_contact_status_status = trim_array(removeSlashes($contact_search_status_status));
+        if (is_array($this->search_contact_status_status) && sizeof($this->search_contact_status_status) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+
+            foreach($this->search_contact_status_status as $key => $value)
+            {
+                $this->search_contact_status_status[$key] = trim($value);
+            }
+        }
+
+        $this->search_contact_status_department = trim_array(removeSlashes($contact_search_status_department));
+        if (is_array($this->search_contact_status_department) && sizeof($this->contact_status_department) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+
+            foreach($this->search_contact_status_department as $key => $value)
+            {
+                $this->search_contact_status_department[$key] = trim($value);
+            }
+        }
+
+        $this->search_display = removeSlashes(trim_elements($contact_search_display));
+        $this->search_order = removeSlashes(trim_elements($contact_search_order));
+        $this->search_company_criteria = trim(removeSlashes($search_company_criteria));
+        $this->search_department_criteria = trim(removeSlashes($search_department_criteria));
+    }
+
+    function set_contact_values_2($search_company_name, $search_company_website_as, $search_company_website, $search_company_area
+            , $search_company_country, $search_company_provstate, $search_company_region, $search_company_city, $search_company_postal_code
+            , $search_company_phone_as, $search_company_phone, $search_company_fax_as, $search_company_fax, $search_company_email_as
+            , $search_company_email, $search_company_yes_industry, $search_company_no_industry, $search_company_size, $search_company_type
+            , $search_company_flags_boolean, $search_company_flags, $search_department_name, $search_department_website_as
+            , $search_department_website, $search_department_area, $search_department_country, $search_department_provstate
+            , $search_department_region, $search_department_city, $search_department_postal_code, $search_department_phone_as
+            , $search_department_phone, $search_department_fax_as, $search_department_fax, $search_department_email_as
+            , $search_department_email, $search_department_yes_industry, $search_department_no_industry, $search_department_size
+            , $search_comp_or_div, $search_department_flags_boolean, $search_department_flags
+            )
+    {
+        $this->search_company_name = trim(removeSlashes($search_company_name));
+        $this->search_company_website_as = trim(removeSlashes($search_company_website_as));
+        $this->search_company_website = trim(removeSlashes($search_company_website));
+        $this->search_company_area = trim(removeSlashes($search_company_area));
+        $this->search_company_country = trim(removeSlashes($search_company_country));
+        $this->search_company_provstate = trim(removeSlashes($search_company_provstate));
+        $this->search_company_region = trim(removeSlashes($search_company_region));
+        $this->search_company_city = trim(removeSlashes($search_company_city));
+        $this->search_company_postal_code = trim(removeSlashes($search_company_postal_code));
+        $this->search_company_phone_as = trim(removeSlashes($search_company_phone_as));
+        $this->search_company_phone = trim(removeSlashes($search_company_phone));
+        $this->search_company_fax_as = trim(removeSlashes($search_company_fax_as));
+        $this->search_company_fax = trim(removeSlashes($search_company_fax));
+        $this->search_company_email_as = trim(removeSlashes($search_company_email_as));
+        $this->search_company_email = trim(removeSlashes($search_company_email));
+
+        $this->search_company_yes_industry = trim_array(removeSlashes($search_company_yes_industry));
+        if (is_array($this->search_company_yes_industry) && sizeof($this->search_company_yes_industry) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_company_yes_industry as $key => $value)
+            {
+                $this->search_company_yes_industry[$key] = trim($value);
+            }
+        }
+
+        $this->search_company_no_industry = trim_array(removeSlashes($search_company_no_industry));
+        if (is_array($this->search_company_no_industry) && sizeof($this->search_company_no_industry) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_company_no_industry as $key => $value)
+            {
+                $this->search_company_no_industry[$key] = trim($value);
+            }
+        }
+
+        $this->search_company_size = trim_array(removeSlashes($search_company_size));
+        if (is_array($this->search_company_size) && sizeof($this->search_company_size) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_company_size as $key => $value)
+            {
+                $this->search_company_size[$key] = trim($value);
+            }
+        }
+
+        $this->search_company_type = trim_array(removeSlashes($search_company_type));
+        if (is_array($this->search_company_type) && sizeof($this->search_company_type) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_company_type as $key => $value)
+            {
+                $this->search_company_type[$key] = trim($value);
+            }
+        }
+
+        $this->search_company_flags_boolean = trim(removeSlashes($search_company_flags_boolean));
+
+        $this->search_company_flags = trim_array(removeSlashes($search_company_flags));
+        if (is_array($this->search_company_flags) && sizeof($this->search_company_flags) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_company_flags as $key => $value)
+            {
+                $this->search_company_flags[$key] = trim($value);
+            }
+        }
+
+        $this->search_department_name = trim(removeSlashes($search_department_name));
+        $this->search_department_website_as = trim(removeSlashes($search_department_website_as));
+        $this->search_department_website = trim(removeSlashes($search_department_website));
+        $this->search_department_area = trim(removeSlashes($search_department_area));
+        $this->search_department_country = trim(removeSlashes($search_department_country));
+        $this->search_department_provstate = trim(removeSlashes($search_department_provstate));
+        $this->search_department_region = trim(removeSlashes($search_department_region));
+        $this->search_department_city = trim(removeSlashes($search_department_city));
+        $this->search_department_postal_code = trim(removeSlashes($search_department_postal_code));
+        $this->search_department_phone_as = trim(removeSlashes($search_department_phone_as));
+        $this->search_department_phone = trim(removeSlashes($search_department_phone));
+        $this->search_department_fax_as = trim(removeSlashes($search_department_fax_as));
+        $this->search_department_fax = trim(removeSlashes($search_department_fax));
+        $this->search_department_email_as = trim(removeSlashes($search_department_email_as));
+        $this->search_department_email = trim(removeSlashes($search_department_email));
+
+        $this->search_department_yes_industry = trim_array(removeSlashes($search_department_yes_industry));
+        if (is_array($this->search_department_yes_industry) && sizeof($this->search_department_yes_industry) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_department_yes_industry as $key => $value)
+            {
+                $this->search_department_yes_industry[$key] = trim($value);
+            }
+        }
+
+        $this->search_department_no_industry = trim_array(removeSlashes($search_department_no_industry));
+        if (is_array($this->search_department_no_industry) && sizeof($this->search_department_no_industry) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_department_no_industry as $key => $value)
+            {
+                $this->search_department_no_industry[$key] = trim($value);
+            }
+        }
+
+        $this->search_department_size = trim_array(removeSlashes($search_department_size));
+        if (is_array($this->search_department_size) && sizeof($this->search_department_size) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_department_size as $key => $value)
+            {
+                $this->search_department_size[$key] = trim($value);
+            }
+        }
+
+        $this->search_department_flags_boolean = trim(removeSlashes($search_department_flags_boolean));
+
+        $this->search_department_flags = trim_array(removeSlashes($search_department_flags));
+        if (is_array($this->search_department_flags) && sizeof($this->search_department_flags) > 0)
+        {
+            $key = NULL;
+            $value = NULL;
+            
+            foreach($this->search_department_flags as $key => $value)
+            {
+                $this->search_department_flags[$key] = trim($value);
+            }
+        }
+    }
+    
+    // This function is used to setup searching specifically based on an employer_id (used through quickmenus).
+    function search_on_employer_id($employer_id)
+    {
+        if (!trim($employer_id) || !preg_match("/^\d+$/",$employer_id))
+        {
+            return false;
+        }
+
+        unset($this->search_division_id);
+        $this->search_employer_id = $employer_id;
+
+        return true;
+    }
+
+    // This function is used to setup searching specifically based on a division_id (used through quickmenus).
+    function search_on_division_id($division_id)
+    {
+        if (!trim($division_id) || !preg_match("/^\d+$/",$division_id))
+        {
+            return false;
+        }
+
+        unset($this->search_employer_id);
+        $this->search_division_id = $division_id;
+
+        return true;
+    }
+
+    // This function will perform validations on each of its fields to ensure sane values are being stored
+    // in the object. If some fields are invalid, the function will return an array containing error
+    // messages. 
+
+    function checkInputs() 
+    {
+        $error_array = array();
+
+        // Ensure first name does not contain a % or _ SQL wildcard character. 
+        if($this->search_contact_first_name && preg_match("/[%|_]/",$this->search_contact_first_name)) 
+        {
+            array_push($error_array,"The first name given contains invalid characters. Please re-enter first name.");
+        }
+        
+        if($this->search_contact_last_name && preg_match("/[%|_]/",$this->search_contact_last_name))
+        {
+            array_push($error_array,"The last name given contains invalid characters. Please re-enter last name.");
+        }
+        
+        if($this->search_contact_email_as && !($this->search_contact_email_as == "start" || $this->search_contact_email_as == "containing"
+            || $this->search_contact_email_as == "isblank"))
+        {
+            array_push($error_array,"The e-mail search type is incorrect. Please enter a valid e-mail search criteria.");
+        }
+        
+        // Ensure the contact email supplied does not contain + ? * ^ $ ( ) [ ] { } | \ / ` ! #  % & = " '
+        if(strlen($this->search_contact_email) && preg_match("/[\+|\?|\*|\^|\$|\(|\)|\[|\]|\{|\}|\||\\|\/|`|!|#|%|&|=|\"|']/",$this->search_contact_email))
+        {
+            array_push($error_array,"The e-mail address contains invalid characters. Please enter a valid e-mail address.");
+        }
+
+        if($this->search_contact_phone_as && !($this->search_contact_phone_as == "start" || $this->search_contact_phone_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a phone number that starts with or contains certain numbers. Please enter a valid phone search criteria.");
+        }
+
+        // Ensure phone number does not contain a % or _ SQL wildcard character. 
+        if(strlen($this->search_contact_phone) && preg_match("/[%|_]/",$this->search_contact_phone))
+        {
+            array_push($error_array,"The phone number provided contains invalid characters. Please re-enter phone number.");
+        }
+        if($this->search_contact_cellphone_as && !($this->search_contact_cellphone_as == "start" || $this->search_contact_cellphone_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a cellphone number that starts with or contains certain numbers. Please enter a valid cellphone search c
+                    riteria.");
+        }
+
+        // Ensure cellphone number does not contain a % or _ SQL wildcard character. 
+        if(strlen($this->search_contact_cellphone) && preg_match("/[%|_]/",$this->search_contact_cellphone))
+        {
+            array_push($error_array,"The cellphone number provided contains invalid characters. Please re-enter cellphone number.");
+        }
+        
+        if($this->search_contact_fax_as && !($this->search_contact_fax_as == "start" || $this->search_contact_fax_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a fax number to start with or contains a certain number. Please enter a valid fax search criteria.");
+        }
+
+        // Ensure fax number does not contain a % or _ SQL wildcard character. 
+        if(strlen($this->search_contact_fax) && preg_match("/[%|_]/",$this->search_contact_fax))
+        {
+            array_push($error_array,"The fax number provided contains invalid characters. Please re-enter fax number.");
+        }
+
+        // Ensure area has only digits. 
+        if(strlen($this->search_contact_area) && !preg_match("/^\d+$/",$this->search_contact_area))
+        {
+            array_push($error_array,"The provided location area is invalid, please re-enter a location area.");
+        }
+        
+        if(strlen($this->search_contact_country) && !preg_match("/^\d+$/",$this->search_contact_country))
+        {
+            array_push($error_array,"The provided location country is invalid, please re-enter a country.");
+        }
+
+        if(strlen($this->search_contact_provstate) && !preg_match("/^\d+$/",$this->search_contact_provstate))
+        {
+            array_push($error_array,"The provided province is invalid, please re-enter a province.");
+        }
+
+        if(strlen($this->search_contact_region) && !preg_match("/^\d+$/",$this->search_contact_region))
+        {
+            array_push($error_array,"The provided region is invalid, please re-enter a region.");
+        }
+
+        // Ensure city does not contain a % or a _ SQL wild card. 
+        if($this->search_contact_city && preg_match("/[%|_]/",$this->search_contact_city))
+        {
+            array_push($error_array,"The provided city contains invalid characters, please re-enter a city.");
+        }
+
+        // Ensure postal code does not contain a % or a _ SQL wild card. 
+        if($this->search_contact_postal_code && preg_match("/[%|_]/",$this->search_contact_postal_code))
+        {
+            array_push($error_array,"The provided postal code contains invalid characters, please re-enter a postal code.");
+        }
+        
+        // Ensure action only has digits. 
+        if(strlen($this->search_contact_action) && !preg_match("/^\d+$/",$this->search_contact_action))
+        {
+            array_push($error_array,"The contact action provided is not valid, please re-enter a contact action.");
+        }
+
+        if(strlen($this->search_contact_action_by) && !preg_match("/^\d+$/",$this->search_contact_action_by))
+        {
+            array_push($error_array,"The provided contact 'action performed by' value is not valid, please re-enter this value.");
+        }
+        
+        if($this->search_contact_action_as && !($this->search_contact_action_as == 'before' || $this->search_contact_action_as == 'on'
+            || $this->search_contact_action_as == 'after'))
+        {
+            array_push($error_array,"The provided contact action 'last performed' value is not valid, please re-enter this value.");
+        }
+        
+        if($this->search_contact_action_on && !isValidDate($this->search_contact_action_on))
+        {
+            array_push($error_array,"The contact action date provided has to be of the format (YYYY-MM-DD), please re-enter this date.");
+        }
+       
+        if ($this->search_contact_action_between1 && $this->search_contact_action_between2)
+        {
+            // Ensure both dates are actual dates
+            if(!isValidDate($this->search_contact_action_between1) || !isValidDate($this->search_contact_action_between2))
+            {
+                array_push($error_array,"The date entered for the Action Last Performed Between field contains an invalid date. Please re-enter the date using the YYYY-MM-DD format.");
+            }
+
+            // Check to see if first date is bigger than second date. If so, throw an error. 
+            elseif(strtotime($this->search_contact_action_between1) > strtotime($this->search_contact_action_between2))
+            {
+                array_push($error_array,"The first date entered in the Action Last Performed Between field is larger than the second date entered. Please re-enter a date which is less than ".$this->search_contact_action_between2.".");
+            }
+        }
+        elseif ($this->search_contact_action_between1 && !isValidDate($this->search_contact_action_between1))
+        {
+            array_push($error_array,"The date entered for the Action Last Performed Between field contains an invalid date. Please re-enter the date using the YYYY-MM-DD format.");
+        }
+        elseif ($this->search_contact_action_between2 && !isValidDate($this->search_contact_action_between2))
+        {
+            array_push($error_array,"The contact action date provided has to be of the format (YYYY-MM-DD), please re-enter this date.");
+        }
+
+        if ($this->search_contact_action_on && ($this->search_contact_action_between1 || $this->search_contact_action_between2))
+        {
+            array_push($error_array,"The Action Last Performed fields are mutually exclusive date fields. Please only fill in dates for Action Last Performed or Action Last Performed Between.");
+        }
+
+        if($this->search_contact_flags_boolean && !($this->search_contact_flags_boolean == 'and' 
+            || $this->search_contact_flags_boolean == 'or'))
+        {
+            array_push($error_array,"The contact flags criteria that allows you to find 'contacts with any or all of the flags checked' is invalid, please contact administrator.");
+        }
+
+        if($this->search_contact_action_bf_as && !($this->search_contact_action_bf_as == 'before' || $this->search_contact_action_bf_as == 'on'
+            || $this->search_contact_action_bf_as == 'after'))
+        {
+            array_push($error_array,"The provided contact action bring forward date 'last performed' value is not valid, please re-enter this value.");
+        }
+        
+        if($this->search_contact_action_bf_on && !isValidDate($this->search_contact_action_bf_on))
+        {
+            array_push($error_array,"The contact action bring forward date provided has to be of the format (YYYY-MM-DD), please re-enter this date.");
+        }
+       
+        if ($this->search_contact_action_bf_between1 && $this->search_contact_action_bf_between2)
+        {
+            // Ensure both dates are actual dates
+            if(!isValidDate($this->search_contact_action_bf_between1) || !isValidDate($this->search_contact_action_bf_between2))
+            {
+                array_push($error_array,"The date entered for the contact action Bring Forward Date field contains an invalid date. Please re-enter the date using the YYYY-MM-DD format.");
+            }
+
+            // Check to see if first date is bigger than second date. If so, throw an error. 
+            elseif(strtotime($this->search_contact_action_bf_between1) > strtotime($this->search_contact_action_bf_between2))
+            {
+                array_push($error_array,"The first date entered in the contact action Bring Forward Date Between field is larger than the second date entered. Please re-enter a date which is less than ".$this->search_contact_action_bf_between2.".");
+            }
+        }
+        elseif ($this->search_contact_action_bf_between1 && !isValidDate($this->search_contact_action_bf_between1))
+        {
+            array_push($error_array,"The date entered for the contact action Bring Forward Date Between field contains an invalid date. Please re-enter the date using the YYYY-MM-DD format.");
+        }
+        elseif ($this->search_contact_action_bf_between2 && !isValidDate($this->search_contact_action_bf_between2))
+        {
+            array_push($error_array,"The contact action bring forward date provided has to be of the format (YYYY-MM-DD), please re-enter this date.");
+        }
+
+        if ($this->search_contact_action_bf_on && ($this->search_contact_action_bf_between1 || $this->search_contact_action_bf_between2))
+        {
+            array_push($error_array,"The contact action Bring Forward Date fields are mutually exclusive date fields. Please only fill in dates for Bring Foward Date Performed or Bring Forward Date Between.");
+        }
+
+        // Ensure each element in the array contains only digits. 
+        if(is_array($this->search_contact_flags) && sizeof($this->search_contact_flags) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_contact_flags as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The contact flag(s) selected are invalid, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        // Ensure each element in the array contains only digits. 
+        if(is_array($this->search_contact_nflags) && sizeof($this->search_contact_nflags) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_contact_nflags as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The contact flag(s) selected are invalid, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if(strlen($this->search_contact_department_name) && preg_match("/%/",$this->search_contact_department_name))
+        {
+            array_push($error_array,"The department that the contact works for contains invalid characters, please re-enter a department name.");
+        }
+
+
+        if(is_array($this->search_contact_status_status) && sizeof($this->search_contact_status_status))
+        {
+            $value = NULL;
+            
+            foreach($this->search_contact_status_status as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The status flag(s) of the contacts are invalid, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if(is_array($this->search_contact_status_department) && sizeof($this->search_contact_status_department))
+        {
+            $value = NULL;
+            
+            foreach($this->search_contact_status_department as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The status of a contact in a department is invalid, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if(strlen($this->search_company_criteria) && $this->search_company_criteria != 'company')
+        {
+            array_push($error_array,"You have indicated that you wish the search for company criteria. However, an error has occurred. Please contact an administrator.");
+        }
+
+        if(strlen($this->search_department_criteria) && $this->search_department_criteria != 'department')
+        {
+            array_push($error_array,"You have indicated that you wish the search for division criteria. However, an error has occurred. Please contact an administrator.");
+        }
+
+        // Ensure company name does not contain % SQL wild card character. 
+        if(strlen($this->search_company_name) && preg_match("/%/",$this->search_company_name))
+        {
+            array_push($error_array,"The provided company name contains invalid characters, please re-enter a company name.");
+        }
+
+        if(strlen($this->search_company_website_as) && !($this->search_company_website_as == 'start' || 
+            $this->search_company_website_as == 'containing'))
+        {
+            array_push($error_array,"The company website search type is incorrect. Please enter a valid company website search criteria.");
+        }
+
+        if(strlen($this->search_company_website) && preg_match("/%/",$this->search_company_website))
+        {
+            array_push($error_array,"The company website provided contains invalid characters, please re-enter a company website.");
+        }
+
+        if(strlen($this->search_company_area) && !preg_match("/^\d+$/",$this->search_company_area))
+        {
+            array_push($error_array,"The provided company location area is invalid, please re-enter a company area.");
+        }
+        
+        if(strlen($this->search_company_country) && !preg_match("/^\d+$/",$this->search_company_country))
+        {
+            array_push($error_array,"The provided company location country is invalid, please re-enter a company country.");
+        }
+
+        if(strlen($this->search_company_provstate) && !preg_match("/^\d+$/",$this->search_company_provstate))
+        {
+            array_push($error_array,"The provided company province is invalid, please re-enter a comany province.");
+        }
+
+        if(strlen($this->search_company_region) && !preg_match("/^\d+$/",$this->search_company_region))
+        {
+            array_push($error_array,"The provided company region is invalid, please re-enter a company region.");
+        }
+
+        // Ensure city does not contain a % or a _ SQL wild card. 
+        if($this->search_company_city && preg_match("/[%|_]/",$this->search_company_city))
+        {
+            array_push($error_array,"The provided company city contains invalid characters, please re-enter a company city.");
+        }
+
+        // Ensure city does not contain a % or a _ SQL wild card. 
+        if($this->search_company_postal_code && preg_match("/[%|_]/",$this->search_company_postal_code))
+        {
+            array_push($error_array,"The provided company postal code contains invalid characters, please re-enter a company postal code.");
+        }
+
+        if($this->search_company_phone_as && !($this->search_company_phone_as == "start" || $this->search_company_phone_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a company phone number that starts with or contains certain numbers. Please enter a valid company phone search criteria.");
+        }
+
+        // Ensure city does not contain a % or a _ SQL wild card. 
+        if(strlen($this->search_company_phone) && preg_match("/[%|_]/",$this->search_company_phone))
+        {
+            array_push($error_array,"The company phone number provided contains invalid characters. Please re-enter a comany phone number.");
+        }
+        
+        if($this->search_company_fax_as && !($this->search_company_fax_as == "start" || $this->search_company_fax_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a company fax number to start with or contains a certain number. Please enter a valid company fax search criteria.");
+        }
+
+        // Ensure city does not contain a % or a _ SQL wild card. 
+        if(strlen($this->search_company_fax) && preg_match("/[%|_]/",$this->search_company_fax))
+        {
+            array_push($error_array,"The company fax number provided contains invalid characters. Please re-enter a company fax number.");
+        }
+
+        if($this->search_company_email_as && !($this->search_company_email_as == "start" || $this->search_company_email_as == "containing"))
+        {
+            array_push($error_array,"The company e-mail search type is incorrect. Please enter a valid company e-mail search criteria.");
+        }
+        
+        if(strlen($this->search_company_email) && preg_match("/[\+|\?|\*|\^|\$|\(|\)|\[|\]|\{|\}|\||\\|\/|`|!|#|%|&|=|\"|']/",$search_company_email))
+        {
+            array_push($error_array,"The company e-mail address contains invalid characters. Please enter a valid company e-mail address.");
+        }
+
+        if(is_array($this->search_company_yes_industry) && sizeof($this->search_company_yes_industry) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_company_yes_industry as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The company industry flag(s) that were checked off as 'yes' contains an error. Please contact an administrator."); 
+                    break;
+                }
+            }
+        }
+
+        if(is_array($this->search_company_no_industry) && sizeof($this->search_company_no_industry) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_company_no_industry as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The company industry flag(s) that were checked off as 'no' contains an error. Please contact an administrator."); 
+                    break;
+                }
+            }
+        }
+
+        if(is_array($this->search_company_type) && sizeof($this->search_company_type) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_company_type as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The company type flag(s) contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+        
+        if(is_array($this->search_company_size) && sizeof($this->search_company_size) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_company_size as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The company size flag(s) contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if($this->search_company_flags_boolean && !($this->search_company_flags_boolean == 'and' || $this->search_company_flags_boolean == 'or'))
+        {
+            array_push($error_array,"The company search search type is incorrect. Please contact an administrator.");
+        }
+
+        if(is_array($this->search_company_flags) && sizeof($this->search_company_flags) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_company_flags as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The company flag(s) contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        if(strlen($this->search_department_name) && preg_match("/%/",$this->search_department_name))
+        {
+            array_push($error_array,"The provided department name contains invalid characters, please re-enter a department name.");
+        }
+
+        if(strlen($this->search_department_website_as) && !($this->search_department_website_as == 'start' || $this->search_company_website_as == 'containing'))
+        {
+            array_push($error_array,"The department website search type is incorrect. Please enter a valid department website search criteria.");
+        }
+
+        if(strlen($this->search_department_website) && preg_match("/%/",$this->search_department_website))
+        {
+            array_push($error_array,"The department website provided contains invalid characters, please re-enter a department website.");
+        }
+
+        if(strlen($this->search_department_area) && !preg_match("/^\d+$/",$this->search_department_area))
+        {
+            array_push($error_array,"The provided department location area is invalid, please re-enter a department area.");
+        }
+        
+        if(strlen($this->search_department_country) && !preg_match("/^\d+$/",$this->search_department_country))
+        {
+            array_push($error_array,"The provided department location country is invalid, please re-enter a department country.");
+        }
+
+        if(strlen($this->search_department_provstate) && !preg_match("/^\d+$/",$this->search_department_provstate))
+        {
+            array_push($error_array,"The provided department province is invalid, please re-enter a department province.");
+        }
+
+        if(strlen($this->search_department_region) && !preg_match("/^\d+$/",$this->search_department_region))
+        {
+            array_push($error_array,"The provided department region is invalid, please re-enter a department region.");
+        }
+
+        // Ensure city does not contain a % or a _ SQL wild card. 
+        if($this->search_department_city && preg_match("/[%|_]/",$this->search_department_city))
+        {
+            array_push($error_array,"The provided department city contains invalid characters, please re-enter a department city.");
+        }
+
+        // Ensure postal code does not contain a % or a _ SQL wild card. 
+        if($this->search_department_postal_code && preg_match("/[%|_]/",$this->search_department_postal_code))
+        {
+            array_push($error_array,"The provided department postal code contains invalid characters, please re-enter a department postal code.");
+        }
+
+        if($this->search_department_phone_as && !($this->search_department_phone_as == "start" || $this->search_department_phone_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a department phone number that starts with or contains certain numbers. Please enter a valid department phone search criteria.");
+        }
+
+        // Ensure phone does not contain a % or a _ SQL wild card. 
+        if(strlen($this->search_department_phone) && preg_match("/[%|_]/",$this->search_department_phone))
+        {
+            array_push($error_array,"The department phone number provided contains invalid characters. Please re-enter a department phone number.");
+        }
+        
+        if($this->search_department_fax_as && !($this->search_department_fax_as == "start" || $this->search_department_fax_as == "containing"))
+        {
+            array_push($error_array,"You must specify whether you want a department fax number to start with or contains a certain number. Please enter a valid department fax search criteria.");
+        }
+
+        // Ensure fax does not contain a % or a _ SQL wild card. 
+        if(strlen($this->search_department_fax) && preg_match("/[%|_]/",$this->search_department_fax))
+        {
+            array_push($error_array,"The department fax number provided contains invalid characters. Please re-enter a department fax number.");
+        }
+
+        if($this->search_department_email_as && !($this->search_department_email_as == "start" || $this->search_department_email_as == "containing"))
+        {
+            array_push($error_array,"The department e-mail search type is incorrect. Please enter a valid department e-mail search criteria.");
+        }
+        
+        if(strlen($this->search_department_email) && preg_match("/[\+|\?|\*|\^|\$|\(|\)|\[|\]|\{|\}|\||\\|\/|`|!|#|%|&|=|\"|']/",$search_department_email))
+        {
+            array_push($error_array,"The department e-mail address contains invalid characters. Please enter a valid department e-mail address.");
+        }
+
+        if(is_array($this->search_department_yes_industry) && sizeof($this->search_department_yes_industry) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_department_yes_industry as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The department industry flag(s) that were checked off as 'yes' contains an error. Please contact an administrator."); 
+                    break;
+                }
+            }
+        }
+
+        if(is_array($this->search_department_no_industry) && sizeof($this->search_department_no_industry) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_department_no_industry as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The department industry flag(s) that were checked off as 'no' contains an error. Please contact an administrator."); 
+                    break;
+                }
+            }
+        }
+
+        if(is_array($this->search_department_size) && sizeof($this->search_department_size) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_department_size as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The department size flag(s) contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if($this->search_department_flags_boolean && !($this->search_department_flags_boolean == 'and' || $this->search_department_flags_boolean == 'or'))
+        {
+            array_push($error_array,"The department search search type is incorrect. Please contact an administrator.");
+        }
+
+        if(is_array($this->search_department_flags) && sizeof($this->search_department_flags) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_department_flags as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The department flag(s) contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if(strlen($this->search_employer_id) && !preg_match("/^\d+$/",$this->search_employer_id))
+        {
+            array_push($error_array,"The search value for a specific company is invalid, please contact an administrator.");
+        }
+        
+        if(strlen($this->search_division_id) && !preg_match("/^\d+$/",$this->search_division_id))
+        {
+            array_push($error_array,"The search value for a specific division is invalid, please contact an administrator.");
+        }
+
+        if(is_array($this->search_display) && sizeof($this->search_display) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_display as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The columns that you want displayed in your search results contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        if(is_array($this->search_order) && sizeof($this->search_order) > 0)
+        {
+            $value = NULL;
+            
+            foreach($this->search_order as $value)
+            {
+                if(!preg_match("/^\d+$/",$value))
+                {
+                    array_push($error_array,"The columns that you want ordered by in your search results contain invalid values, please contact an administrator.");
+                    break;
+                }
+            }
+        }
+
+        return $error_array;
+    }
+
+    // This function will serialize and urlencode all arrays within the object, and finally return
+    // an instance of itself which is urlencoded and serialized. 
+    function packSearchContact()
+    {
+        $tempSearchContact = new SearchContact($this);
+
+        $tempSearchContact->search_contact_flags = packObject(($tempSearchContact->search_contact_flags));
+        $tempSearchContact->search_contact_nflags = packObject(($tempSearchContact->search_contact_nflags));
+        $tempSearchContact->search_contact_status_status = packObject(($tempSearchContact->search_contact_status_status));
+        $tempSearchContact->search_contact_status_department = packObject(($tempSearchContact->search_contact_status_department));
+        $tempSearchContact->search_company_yes_industry = packObject(($tempSearchContact->search_company_yes_industry));
+        $tempSearchContact->search_company_no_industry = packObject(($tempSearchContact->search_company_no_industry));
+        $tempSearchContact->search_company_type = packObject(($tempSearchContact->search_company_type));
+        $tempSearchContact->search_company_size = packObject(($tempSearchContact->search_company_size));
+        $tempSearchContact->search_company_flags = packObject(($tempSearchContact->search_company_flags));
+        $tempSearchContact->search_department_yes_industry = packObject(($tempSearchContact->search_department_yes_industry));
+        $tempSearchContact->search_department_no_industry = packObject(($tempSearchContact->search_department_no_industry));
+        $tempSearchContact->search_department_size = packObject(($tempSearchContact->search_department_size));
+        $tempSearchContact->search_department_flags = packObject(($tempSearchContact->search_department_flags));
+        $tempSearchContact->search_display = packObject(($tempSearchContact->search_display));
+        $tempSearchContact->search_order = packObject(($tempSearchContact->search_order));
+
+        $tempSearchContact = packObject(($tempSearchContact));
+        return $tempSearchContact;
+    }
+}
+
+?>

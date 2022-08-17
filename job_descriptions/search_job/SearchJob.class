@@ -1,0 +1,241 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: SearchJob.class                                                    |
+ +------------------------------------------------------------------------------+
+ | Description: This file is used to declare the class that holds all of the    |
+ | search criteria for jobs.  This is used in order to ease passing search      |
+ | criteria and other information between forms.                                |
+ +------------------------------------------------------------------------------+
+
+*/
+
+class SearchJob
+{
+	// Declare all of the job search variables now.
+
+	// Admin side search variables
+
+	var $search_start_term;				//int
+	var $search_start_year;				//int
+
+	// Student side variables that aren't included in the ones above
+
+	var $search_show_term;				//int
+	var $search_show_year;				//int
+	var $search_start_as;				//string
+	var $search_future_jobs;			//int
+
+	// Shared variables
+
+	var $search_on_jobs;				//string
+	var $folder_id;				        //int  
+	var $search_status;				    //array of ints
+	var $search_area;				    //int
+	var $search_country;				//int
+	var $search_provstate;				//int
+	var $search_region;				    //int
+
+	var $search_job_codes;				//string
+	var $search_job_codes_m;			//string
+	var $apply_method;      			//array of int
+
+	var $search_company_name;			//string
+	var $search_company_name_m;			//string
+    
+    var $search_contact_id;             //string
+    var $search_division_id;            //string 
+    
+	var $search_close_date_as;			//string
+	var $search_close_date;				//string
+
+    var $search_entry_date_as;          //string
+    var $search_entry_date;             //string
+     
+	var $search_academic_as;			//string
+	var $search_min_academic;			//string
+	var $search_workterms_as;			//string
+	var $search_min_workterms;			//string
+
+	var $search_yes_industries;			//string
+	var $search_no_industries;			//string
+
+	var $search_keywords;				//array of strings
+	var $search_not_keywords;			//array of strings
+
+	var $search_disciplines;			//array of ints
+
+	var $search_order;				    //array of strings
+
+	
+	function SearchJob($searchJob)
+	{
+		if ($searchJob)
+		{
+			$this->search_start_term = $searchJob->search_start_term;
+            $this->search_start_year = $searchJob->search_start_year;
+
+            $this->search_show_term = $searchJob->search_show_term;
+            $this->search_show_year = $searchJob->search_show_year;
+            $this->search_future_jobs = $searchJob->search_future_jobs;
+
+            $this->search_on_jobs = $searchJob->search_on_jobs;
+            $this->folder_id = $searchJob->folder_id;
+            $this->search_status = $searchJob->search_status;
+            $this->apply_method = $searchJob->apply_method;
+            $this->search_area = $searchJob->search_area;
+            $this->search_country = $searchJob->search_country;
+            $this->search_provstate = $searchJob->search_provstate;
+            $this->search_region = $searchJob->search_region;
+
+            $this->search_job_codes = $searchJob->search_job_codes;
+            $this->search_job_codes_m = $searchJob->search_job_codes_m;
+
+            $this->search_company_name = $searchJob->search_company_name;
+            $this->search_company_name_m = $searchJob->search_company_name_m;
+
+            $this->search_division_id = $searchJob->search_division_id;
+            $this->search_contact_id = $searchJob->search_contact_id;
+
+            $this->search_close_date_as = $searchJob->search_close_date_as;
+            $this->search_close_date = $searchJob->search_close_date;
+
+            $this->search_entry_date_as = $searchJob->search_entry_date_as;
+            $this->search_entry_date = $searchJob->search_entry_date;
+
+            $this->search_academic_as = $searchJob->search_academic_as;
+            $this->search_min_academic = $searchJob->search_min_academic;
+            $this->search_workterms_as = $searchJob->search_workterms_as;
+            $this->search_min_workterms = $searchJob->search_min_workterms;
+
+            $this->search_yes_industries = $searchJob->search_yes_industries;
+            $this->search_no_industries = $searchJob->search_no_industries;
+
+            $this->search_keywords = $searchJob->search_keywords;
+            $this->search_not_keywords = $searchJob->search_not_keywords;
+
+            $this->search_disciplines = $searchJob->search_disciplines;
+
+            $this->search_order = $searchJob->search_order;
+        }
+	}
+
+	function set_student_search_values($search_show_term, $search_show_year, $search_future_jobs, 
+        $search_on_jobs, $folder_id, $search_status, $apply_method, $search_area, $search_country, 
+        $search_provstate, $search_region, $search_job_codes, $search_job_codes_m, $search_company_name, 
+        $search_company_name_m, $search_close_date_as, $search_close_date, $search_academic_as, 
+        $search_min_academic, $search_workterms_as, $search_min_workterms, $search_yes_industries, 
+        $search_no_industries, $search_keywords, $search_not_keywords, $search_disciplines, 
+        $search_order)
+	{
+		$this->search_show_term = $search_show_term;
+		$this->search_show_year = $search_show_year;
+		$this->search_future_jobs = $search_future_jobs;
+
+		$this->search_on_jobs = $search_on_jobs;
+		$this->folder_id = $folder_id;
+		$this->search_status = $search_status;
+		$this->apply_method = $apply_method;
+		$this->search_area = $search_area;
+		$this->search_country = $search_country;
+		$this->search_provstate = $search_provstate;
+		$this->search_region = $search_region;
+
+		$this->search_job_codes = $search_job_codes;
+		$this->search_job_codes_m = $search_job_codes_m;
+
+        $this->search_division_id = $search_division_id;
+        $this->search_contact_id = $search_contact_id;
+        
+		$this->search_close_date_as = $search_close_date_as;
+		$this->search_close_date = $search_close_date;
+
+		$this->search_academic_as = $search_academic_as;
+		$this->search_min_academic = $search_min_academic;
+		$this->search_workterms_as = $search_workterms_as;
+		$this->search_min_workterms = $search_min_workterms;
+
+		$this->search_yes_industries = $search_yes_industries;
+		$this->search_no_industries = $search_no_industries;
+
+		$this->search_keywords = $search_keywords;
+		$this->search_not_keywords = $search_not_keywords;
+
+		$this->search_disciplines = $search_disciplines;
+
+        $this->search_order = $search_order;
+	}
+
+	function set_admin_search_values($search_start_term, $search_start_year, $search_future_jobs, $search_on_jobs,
+        $search_status, $apply_method, $search_area, $search_country, $search_provstate, $search_region, $search_job_codes,
+        $search_job_codes_m, $search_company_name, $search_company_name_m, $search_close_date_as, $search_close_date, 
+        $search_entry_date_as, $search_entry_date, $search_division_id, $search_contact_id, 
+        $search_academic_as, $search_min_academic, $search_workterms_as, $search_min_workterms, $search_yes_industries,
+        $search_no_industries, $search_keywords, $search_not_keywords, $search_disciplines, $search_order)
+	{
+		$this->search_start_term = $search_start_term;
+        $this->search_start_year = $search_start_year;
+        $this->search_future_jobs = $search_future_jobs;
+
+        $this->search_on_jobs = $search_on_jobs;
+        $this->search_status = $search_status;
+        $this->apply_method = $apply_method;
+        $this->search_area = $search_area;
+        $this->search_country = $search_country;
+        $this->search_provstate = $search_provstate;
+        $this->search_region = $search_region;
+
+        $this->search_job_codes = $search_job_codes;
+        $this->search_job_codes_m = $search_job_codes_m;
+
+        $this->search_company_name = $search_company_name;
+        $this->search_company_name_m = $search_company_name_m;
+
+        $this->search_close_date_as = $search_close_date_as;
+        $this->search_close_date = $search_close_date;
+
+        $this->search_entry_date_as = $search_entry_date_as;
+        $this->search_entry_date = $search_entry_date;
+                
+        $this->search_division_id = $search_division_id;
+        $this->search_contact_id = $search_contact_id;
+
+        $this->search_academic_as = $search_academic_as;
+        $this->search_min_academic = $search_min_academic;
+        $this->search_workterms_as = $search_workterms_as;
+        $this->search_min_workterms = $search_min_workterms;
+
+        $this->search_yes_industries = $search_yes_industries;
+        $this->search_no_industries = $search_no_industries;
+
+        $this->search_keywords = $search_keywords;
+        $this->search_not_keywords = $search_not_keywords;
+
+        $this->search_disciplines = $search_disciplines;
+
+        $this->search_order = $search_order;
+    }
+}
+
+?>
+

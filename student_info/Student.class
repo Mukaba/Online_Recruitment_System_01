@@ -1,0 +1,320 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: Student.class                                                      |
+ +------------------------------------------------------------------------------+
+ | Description: This class stores all of the variables pertaining to a          |
+ | student.                                                                     |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+class Student 
+{
+    // Declare All Variables
+
+    // Variables from the student table
+
+    // General Info
+    var $login_id;                      // String
+    var $netlink_id;                    // String
+    var $student_number;                // String
+
+    var $first_name;                    // String
+    var $middle_name;                   // String
+    var $last_name;                     // String
+    var $preferred_name;                // String
+    var $email;                         // String
+    var $email2;                        // String
+
+    // Current Address Info
+    var $street_address_current;        // String
+    var $street_address_current2;       // String
+    var $street_address_current3;       // String
+    var $city_current;                  // String
+    var $province_current;              // int
+    var $postal_code_current;           // String
+    var $country_current;               // int
+    var $region_current;                // int
+    var $phone_current;                 // String
+    var $fax_current;                   // String
+
+    // Permanent Address Info
+    var $street_address_permanent;      // String
+    var $street_address_permanent2;     // String
+    var $street_address_permanent3;     // String
+    var $city_permanent;                // String
+    var $province_permanent;            // int
+    var $country_permanent;             // int
+    var $region_permanent;              // int
+    var $postal_code_permanent;         // String
+    var $phone_permanent;               // String
+    var $fax_permanent;                 // String
+
+    var $which_address;                 // String
+
+    // Miscellaneous Info
+    var $photo;                         // String
+    var $deletephoto;                   // Boolean
+    var $citizen;                       // String
+    var $gender;                        // char
+    var $current;                       // int
+    var $student_status;                // String
+    var $birth;                         // String (in date format)
+    var $high_school;                   // String
+    var $view_job_last;                 // String (in date format)
+    var $view_job_last_time;            // String (in time format)
+    var $view_job_recent;               // String (in date format)
+    var $view_job_recent_time;          // String (in time format)
+
+    // Emergency Contact Information
+    var $emergency_name;                // String
+    var $emergency_relationship;        // String
+    var $emergency_home_phone;          // String
+    var $emergency_home_fax;            // String
+    var $emergency_work_phone;          // String
+    var $emergency_work_fax;            // String
+    var $emergency_email;               // String
+
+    // Variables from the student_department
+
+    // General Info
+    var $department_id;                 // int
+    var $record_id;                     // int
+
+    var $comment;                       // String
+    var $advisor;                       // String
+    var $coop_advisor;                  // int
+    var $academic_year;                 // int
+    var $grad_gpa;                      // double
+    var $admit;                         // String (in date format)
+    
+    var $convocation_month;             // int
+    var $convocation_year;              // int
+    
+    var $grad;
+    
+    /* :EXPIRY: Date to Expire: Undecided
+                Entered by:     Shaun
+                Date Entered:   May-30-2003
+
+        -This var is no longer in use as we are switching to selection boxes for the Convocation Date.
+        -Eventually this line could be deleted, however since we are keeping all the old data in the database we should
+        probably keep this commented out until we no longer are keeping the old data. 
+        -I have kept an identical copy of this line active above as 
+                
+    var $grad;                          // String (in date format)
+    */
+    
+    var $withdraw;                      // String (in date format)
+    var $discipline_id;                 // int
+    var $start_year;                    // String
+    var $grad_year;                     // int
+
+    // Changes Recorded Info
+    var $changes_recorded_1;            // String
+    var $changes_recorded_2;            // String
+    var $changes_recorded_3;            // String
+    var $change_by_1;                   // String
+    var $change_by_2;                   // String
+    var $change_by_3;                   // String
+    var $change_date_1;                 // String (in date format)
+    var $change_date_2;                 // String (in date format)
+    var $change_date_3;                 // String (in date format)
+
+    // Other Variables
+
+    // Student Flags
+    var $general_flags; 			    // Array (of ints)
+    var $eligible_flags;                // Array (of ints)
+    var $profile_flags;                 // Array (of ints)
+
+    // Student Schedule
+    var $semesters;                     // Array (of ints)
+
+    // Student Notes
+    var $new_note;                      // String
+    var $note_ids;                      // Array (of ints)
+    var $delete_note_ids;               // Array (of ints)
+
+
+    // Constructor.  This constuctor can take a packed Student and restore from that, a regular Student and set values from that, or no Student at all.
+    function Student($student = null) 
+    {
+        if ($student && is_string($student))
+        {
+            $student = unpackObject($student);
+            /* :EXPIRY: May 31 2005 - Patrick - Phasing this stuff out in favour of [pack|unpack]Object()
+            // We've been passed a packed Student.  Unpack it and then proceed as normal.
+            $student = unpackObject(($student));
+            $student->general_flags = unpackObject(($student->general_flags));
+            $student->term_flags = unpackObject(($student->term_flags));
+            $student->profile_flags = unpackObject(($student->profile_flags));
+
+            // Eligible flags is 2-Dimensional, so we need to unserialize and urldecode each of its entries
+            if ($student->eligible_flags)
+            {
+                $student->eligible_flags = unpackObject(($student->eligible_flags));
+                foreach (array_keys($student->eligible_flags) as $key)
+                {
+                    $student->eligible_flags[$key] = unpackObject(($student->eligible_flags[$key]));
+                }
+            }
+
+            // Semesters is 2-Dimensional, so we need to unserialize and urldecode each of its entries
+            if ($student->semesters)
+            {
+                $student->semesters = unpackObject(($student->semesters));
+                foreach (array_keys($student->semesters) as $key)
+                {
+                    $student->semesters[$key] = unpackObject(($student->semesters[$key]));
+                }
+            }
+
+            $student->note_ids = unpackObject(($student->note_ids));
+            $student->delete_note_ids = unpackObject(($student->delete_note_ids));
+            */
+        }
+            
+        if ($student) 
+        {
+            $this->login_id = $student->login_id;
+            $this->netlink_id = $student->netlink_id;
+
+            $this->student_number = $student->student_number;
+            $this->first_name = $student->first_name;
+            $this->middle_name = $student->middle_name;
+            $this->last_name = $student->last_name;
+            $this->preferred_name = $student->preferred_name;
+            $this->email = $student->email;
+            $this->email2 = $student->email2;
+
+            // Current Address Info
+            $this->street_address_current = $student->street_address_current;
+            $this->street_address_current2 = $student->street_address_current2;
+            $this->street_address_current3 = $student->street_address_current3;
+            $this->city_current = $student->city_current;
+            $this->province_current = $student->province_current;
+            $this->postal_code_current = $student->postal_code_current;
+            $this->country_current = $student->country_current;
+            $this->region_current = $student->region_current;
+            $this->phone_current = $student->phone_current;
+            $this->fax_current = $student->fax_current;
+
+            // Permanent Address Info
+            $this->street_address_permanent = $student->street_address_permanent;
+            $this->street_address_permanent2 = $student->street_address_permanent2;
+            $this->street_address_permanent3 = $student->street_address_permanent3;
+            $this->city_permanent = $student->city_permanent;
+            $this->province_permanent = $student->province_permanent;
+            $this->country_permanent = $student->country_permanent;
+            $this->region_permanent = $student->region_permanent;
+            $this->postal_code_permanent = $student->postal_code_permanent;
+            $this->phone_permanent = $student->phone_permanent;
+            $this->fax_permanent = $student->fax_permanent;
+
+            $this->which_address = $student->which_address;
+
+            // Miscellaneous Info
+            $this->photo = $student->photo;
+            $this->citizen = $student->citizen;
+            $this->gender = $student->gender;
+            $this->current = $student->current;
+            $this->student_status = $student->student_status;
+            $this->birth = $student->birth;
+            $this->high_school = $student->high_school;
+            $this->view_job_last = $student->view_job_last;
+            $this->view_job_last_time = $student->view_job_last_time;
+            $this->view_job_recent = $student->view_job_recent;
+            $this->view_job_recent_time = $student->view_job_recent_time;
+
+
+            // Emergency Contact Information
+            $this->emergency_name = $student->emergency_name;
+            $this->emergency_relationship = $student->emergency_relationship;
+            $this->emergency_home_phone = $student->emergency_home_phone;
+            $this->emergency_home_fax = $student->emergency_home_fax;
+            $this->emergency_work_phone = $student->emergency_work_phone;
+            $this->emergency_work_fax = $student->emergency_work_fax;
+            $this->emergency_email = $student->emergency_email;
+
+            // Variables from the student_department
+
+            // General Info
+            $this->department_id = $student->department_id;
+            $this->record_id = $student->record_id;
+
+            $this->comment = $student->comment;
+            $this->advisor = $student->advisor;
+            $this->coop_advisor = $student->coop_advisor;
+            $this->academic_year = $student->academic_year;
+            $this->grad_gpa = $student->grad_gpa;
+            $this->admit = $student->admit;
+            
+
+            $this->convocation_month = $student->convocation_month;
+            $this->convocation_year = $student->convocation_year;
+            $this->grad = $student->grad; 
+            
+            /* :EXPIRY: Expires on: Undecided
+                        Entered by: Shaun
+                        Entered on: May-30-2003 
+            
+                 - See above comment for explanation.
+            
+            $this->grad = $student->grad;
+            */
+            
+            $this->withdraw = $student->withdraw;
+            $this->discipline_id = $student->discipline_id;
+            $this->start_year = $student->start_year;
+            $this->grad_year = $student->grad_year;
+
+            // Changes Recorded Info
+            $this->changes_recorded_1 = $student->changes_recorded_1;
+            $this->changes_recorded_2 = $student->changes_recorded_2;
+            $this->changes_recorded_3 = $student->changes_recorded_3;
+            $this->change_by_1 = $student->change_by_1;
+            $this->change_by_2 = $student->change_by_2;
+            $this->change_by_3 = $student->change_by_3;
+            $this->change_date_1 = $student->change_date_1;
+            $this->change_date_2 = $student->change_date_2;
+            $this->change_date_3 = $student->change_date_3;
+
+            // Student Flags
+            $this->general_flags = $student->general_flags;
+            $this->term_flags = $student->term_flags;
+            $this->profile_flags = $student->profile_flags;
+            $this->eligible_flags = $student->eligible_flags;
+
+            // Student Schedule
+            $this->semesters = $student->semesters;
+
+            // Student notes
+            $this->note_ids = $student->note_ids;
+            $this->delete_note_ids = $student->delete_note_ids;
+        }
+    }
+}
+?>

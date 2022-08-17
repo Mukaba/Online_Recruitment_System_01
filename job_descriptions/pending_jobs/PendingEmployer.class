@@ -1,0 +1,454 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: PendingEmployer.class                                              |
+ +------------------------------------------------------------------------------+
+ | Description: This is the class that is used to allow ease of passing         |
+ | inputs back and forth between forms.  This class also draws all of the       |
+ | pending information out of the database.                                     |
+ +------------------------------------------------------------------------------+
+
+*/
+
+class PendingEmployer
+{
+	// Company information
+
+	var $employer_id;			//int
+	var $company_name;                      //string
+    var $company_website;                   //string
+    var $company_description;               //string
+    var $company_street_address_1;          //string
+    var $company_street_address_2;          //string
+    var $company_street_address_3;		//string
+    var $company_city;                      //string
+    var $company_region_id;                 //int
+    var $company_provstate_id;              //int
+    var $company_country_id;                //int
+    var $company_postal_code;               //string
+    var $company_phone;                     //string
+    var $company_fax;                       //string
+    var $company_email;                     //string
+    var $company_industry_id;               //int
+    var $company_size_id;                   //int (size_id)
+    var $company_type_id;			//int
+
+    // Contact information
+
+    var $contact_id;                        //int
+    var $contact_title;                     //string
+    var $contact_first_name;                //string
+    var $contact_middle_name;               //string
+    var $contact_last_name;                 //string
+    var $contact_called_name;               //string
+    var $contact_email;                     //string
+    var $contact_phone;                     //string
+    var $contact_pager;                     //string
+    var $contact_cellphone;                 //string
+    var $contact_fax;                       //string
+    var $contact_street_address_1;          //string
+    var $contact_street_address_2;          //string
+    var $contact_street_address_3;		//string
+    var $contact_city;                      //string
+    var $contact_region_id;                 //int
+    var $contact_provstate_id;              //int
+    var $contact_country_id;                //int
+    var $contact_postal_code;               //string
+    var $contact_department_name;		//string
+
+    // Job form information
+
+    var $job_id;				//int
+    var $job_position_title;                //string
+    var $job_employer_code;                 //string
+    var $job_num_positions;                 //int
+    var $job_apply_method;                  //string
+    var $job_receive_address;               //string
+    var $job_country_id;                    //int
+    var $job_provstate_id;                  //int
+    var $job_region_id;                     //int
+    var $job_city;                          //string
+    var $job_start_term;                    //string
+    var $job_start_year;                    //string
+    var $job_start_date;                    //date
+    var $job_start_date_date;               //int
+    var $job_start_date_month;              //int
+    var $job_start_date_year;               //int
+    var $job_end_date;                      //date
+    var $job_end_date_date;                 //int
+    var $job_end_date_month;                //int
+    var $job_end_date_year;                 //int
+    var $job_salary_amount1;                //int
+    var $job_salary_amount2;                //int
+    var $job_salary_period;                 //string
+    var $job_workterm_lengths;              //array containing the workterm lengths
+    var $job_workterm_hours;                //int
+    var $job_other_postings;                //string
+    var $job_industry_id;                   //int
+    var $job_min_academic;                  //int (minimum academic year.  1, 2, 3, 4+)
+    var $job_min_workterms;                 //int (minimum workterms done.  0, 1, 2, 3, 4, 5+)
+    var $job_apply_departments;             //array of ints
+    var $job_host_department;               //int
+    var $job_description;               	//string
+    var $job_skills_required;               //string
+    var $job_special_requirements;          //string
+    var $displayname_on_coverltr;          //string
+    var $job_comments;			//string
+	var $job_disciplines;			//array of ints
+
+	// IP address
+
+	var $IP_added_from;			//string
+
+	function PendingEmployer($pendingEmployer)
+	{
+		if($pendingEmployer)
+		{
+			$this->employer_id = $pendingEmployer->employer_id;
+			$this->company_name = $pendingEmployer->company_name;
+            $this->company_website = $pendingEmployer->company_website;
+            $this->company_description = $pendingEmployer->company_description;
+            $this->company_street_address_1 = $pendingEmployer->company_street_address_1;
+            $this->company_street_address_2 = $pendingEmployer->company_street_address_2;
+            $this->company_street_address_3 = $pendingEmployer->company_street_address_3;
+            $this->company_city = $pendingEmployer->company_city;
+            $this->company_region_id = $pendingEmployer->company_region_id;
+            $this->company_provstate_id = $pendingEmployer->company_provstate_id;
+            $this->company_country_id = $pendingEmployer->company_country_id;
+            $this->company_postal_code = $pendingEmployer->company_postal_code;
+            $this->company_phone = $pendingEmployer->company_phone;
+            $this->company_fax = $pendingEmployer->company_fax;
+            $this->company_email = $pendingEmployer->company_email;
+            $this->company_industry_id = $pendingEmployer->company_industry_id;
+            $this->company_size_id = $pendingEmployer->company_size_id;
+            $this->company_type_id = $pendingEmployer->company_type_id;
+
+            $this->contact_id = $pendingEmployer->contact_id;
+            $this->contact_title = $pendingEmployer->contact_title;
+            $this->contact_first_name = $pendingEmployer->contact_first_name;
+            $this->contact_middle_name = $pendingEmployer->contact_middle_name;
+            $this->contact_last_name = $pendingEmployer->contact_last_name;
+            $this->contact_called_name = $pendingEmployer->contact_called_name;
+            $this->contact_email = $pendingEmployer->contact_email;
+            $this->contact_phone = $pendingEmployer->contact_phone;
+            $this->contact_pager = $pendingEmployer->contact_pager;
+            $this->contact_cellphone = $pendingEmployer->contact_cellphone;
+            $this->contact_fax = $pendingEmployer->contact_fax;
+            $this->contact_street_address_1 = $pendingEmployer->contact_street_address_1;
+            $this->contact_street_address_2 = $pendingEmployer->contact_street_address_2;
+            $this->contact_street_address_3 = $pendingEmployer->contact_street_address_3;
+            $this->contact_city = $pendingEmployer->contact_city;
+            $this->contact_region_id = $pendingEmployer->contact_region_id;
+            $this->contact_provstate_id = $pendingEmployer->contact_provstate_id;
+            $this->contact_country_id = $pendingEmployer->contact_country_id;
+            $this->contact_postal_code = $pendingEmployer->contact_postal_code;
+            $this->contact_department_name = $pendingEmployer->contact_department_name;
+
+            $this->job_id = $pendingEmployer->job_id;
+            $this->job_position_title = $pendingEmployer->job_position_title;
+            $this->job_num_positions = $pendingEmployer->job_num_positions;
+            $this->job_apply_method = $pendingEmployer->job_apply_method;
+            $this->job_city = $pendingEmployer->job_city;
+            $this->job_region_id = $pendingEmployer->job_region_id;
+            $this->job_provstate_id = $pendingEmployer->job_provstate_id;
+            $this->job_country_id = $pendingEmployer->job_country_id;
+            $this->job_start_term = $pendingEmployer->job_start_term;
+            $this->job_start_year = $pendingEmployer->job_start_year;
+            $this->job_start_date = $pendingEmployer->job_start_date;
+            $this->job_start_date_date = $pendingEmployer->job_start_date_date;
+            $this->job_start_date_month = $pendingEmployer->job_start_date_month;
+            $this->job_start_date_year = $pendingEmployer->job_start_date_year;
+            $this->job_end_date = $pendingEmployer->job_end_date;
+            $this->job_end_date_date = $pendingEmployer->job_end_date_date;
+            $this->job_end_date_month = $pendingEmployer->job_end_date_month;
+            $this->job_end_date_year = $pendingEmployer->job_end_date_year;
+            $this->job_workterm_lengths = $pendingEmployer->job_workterm_lengths;
+            $this->job_workterm_hours = $pendingEmployer->job_workterm_hours;
+            $this->job_receive_address = $pendingEmployer->job_receive_address;
+            $this->job_salary_amount1 = $pendingEmployer->job_salary_amount1;
+            $this->job_salary_amount2 = $pendingEmployer->job_salary_amount2;
+            $this->job_salary_period = $pendingEmployer->job_salary_period;
+            $this->job_min_academic = $pendingEmployer->job_min_academic;
+            $this->job_min_workterms = $pendingEmployer->job_min_workterms;
+            $this->job_apply_departments = $pendingEmployer->job_apply_departments;
+            $this->job_host_department = $pendingEmployer->job_host_department;
+            $this->job_other_postings = $pendingEmployer->job_other_postings;
+            $this->job_industry_id = $pendingEmployer->job_industry_id;
+            $this->job_description = $pendingEmployer->job_description;
+            $this->job_skills_required = $pendingEmployer->job_skills_required;
+            $this->job_special_requirements = $pendingEmployer->job_special_requirements;
+            $this->job_displayname_on_coverltr = $pendingEmployer->job_displayname_on_coverltr;
+            $this->job_comments = $pendingEmployer->job_comments;
+            $this->job_employer_code = $pendingEmployer->job_employer_code;
+            $this->IP_added_from = $pendingEmployer->IP_added_from;
+			$this->job_disciplines = $pendingEmployer->job_disciplines;
+		}
+	}
+
+	function load_pending_values($pending_job_id)
+	{
+		assert($pending_job_id);
+
+		// Load job values
+		
+		$this->job_id = $pending_job_id;
+	
+		$sql = ("
+			SELECT DISTINCT *
+			FROM pending_job_description
+			WHERE job_id='" . $this->job_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->employer_id = $row["employer_id"];
+		$this->contact_id = $row["contact_id"];
+
+		$this->job_position_title = $row["position_title"];
+		$this->job_num_positions = $row["num_positions"];
+		$this->job_apply_method = $row["apply_method"];
+		$this->job_city = $row["city"];
+		$this->job_region_id = $row["region_id"];
+		$this->job_provstate_id = $row["provstate_id"];
+		$this->job_country_id = $row["country_id"];
+		$this->job_start_term = $row["term_id"];
+		$this->job_start_year = $row["year"];
+
+        // date format is YYYY-MM-DD
+        $this->job_start_date = $row["start_date"];
+        $arr_start_date = explode("-",$this->job_start_date);
+        $this->job_start_date_date = $arr_start_date[2];
+        $this->job_start_date_month = $arr_start_date[1];
+        $this->job_start_date_year = $arr_start_date[0];
+
+        $this->job_end_date = $row["end_date"];
+        $arr_end_date = explode("-",$this->job_end_date);
+        $this->job_end_date_date = $arr_end_date[2];
+        $this->job_end_date_month = $arr_end_date[1];                                                                                                    
+        $this->job_end_date_year = $arr_end_date[0];
+
+		$this->job_workterm_lengths = $row["workterm_lengths"];
+		$this->job_workterm_hours = $row["workterm_hours"];
+		$this->job_receive_address = $row["receive_address"];
+		$this->job_salary_amount1 = $row["salary_amount1"];
+		$this->job_salary_amount2 = $row["salary_amount2"];
+		$this->job_salary_period = $row["salary_period"];
+		$this->job_min_academic = $row["min_academic"];
+		$this->job_min_workterms = $row["min_workterms"];
+		$this->job_apply_departments = $row["apply_departments"];
+		$this->job_host_department = $row["host_department"];
+		$this->job_other_postings = $row["other_postings"];
+		$this->job_industry_id = $row["industry"];
+		$this->job_description = $row["job_description"];
+		$this->job_skills_required = $row["skills_required"];
+		$this->job_special_requirements = $row["special_requirements"];
+		$this->job_displayname_on_coverltr = $row["displayname_on_coverltr"];
+		$this->job_comments = $row["comments"];
+		$this->job_employer_code = $row["employer_code"];
+		$this->IP_added_from = $row["ip_added_with"];
+		$this->job_disciplines = $row["disciplines"];
+		
+		//Convert workterm_lengths and apply_departments from strings back to arrays
+		
+		$this->job_workterm_lengths = explode(',', $this->job_workterm_lengths);
+		$this->job_apply_departments = explode(',', $this->job_apply_departments);
+		$this->job_disciplines = explode(',', $this->job_disciplines);
+
+		// Load company values
+		
+		$sql = ("
+			SELECT DISTINCT *
+			FROM pending_employer_company
+			WHERE employer_id='" . $this->employer_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->company_name = $row["company_name"];
+		$this->company_website = $row["company_website"];
+		$this->company_description = $row["company_description"];
+		$this->company_street_address_1 = $row["street_address_1"];
+		$this->company_street_address_2 = $row["street_address_2"];
+		$this->company_street_address_3 = $row["street_address_3"];
+		$this->company_city = $row["city"];
+		$this->company_region_id = $row["region_id"];
+		$this->company_provstate_id = $row["provstate_id"];
+		$this->company_country_id = $row["country_id"];
+		$this->company_postal_code = $row["postal_code"];
+		$this->company_phone = $row["phone"];
+		$this->company_fax = $row["fax"];
+		$this->company_email = $row["email"];
+		$this->company_industry_id = $row["industry_id"];
+		$this->company_size_id = $row["size_id"];
+		$this->company_type_id = $row["company_type_id"];
+
+		// Load contact values
+
+		$sql = ("
+			SELECT DISTINCT *
+			FROM pending_employer_contact
+			WHERE contact_id='" . $this->contact_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->contact_title = $row["title"];
+		$this->contact_first_name = $row["first_name"];
+		$this->contact_middle_name = $row["middle_name"];
+		$this->contact_last_name = $row["last_name"];
+		$this->contact_called_name = $row["called_name"];
+		$this->contact_email = $row["email"];
+		$this->contact_phone = $row["phone"];
+  		$this->contact_pager = $row["pager"];
+	  	$this->contact_cellphone = $row["cellphone"];
+		$this->contact_fax = $row["fax"];
+		$this->contact_street_address_1 = $row["street_address_1"];
+		$this->contact_street_address_2 = $row["street_address_2"];
+		$this->contact_street_address_3 = $row["street_address_3"];
+		$this->contact_city = $row["city"];
+		$this->contact_region_id = $row["region_id"];
+		$this->contact_provstate_id = $row["provstate_id"];
+		$this->contact_country_id = $row["country_id"];
+		$this->contact_postal_code = $row["postal_code"];
+		$this->contact_department_name = $row["department_name"];
+	}
+
+	function load_incomplete_values($pending_contact_id)
+	{
+		assert($pending_contact_id);
+
+		$this->contact_id = $pending_contact_id;
+	
+		// Load contact values
+
+		$sql = ("
+			SELECT DISTINCT *
+			FROM pending_employer_contact
+			WHERE contact_id='" . $this->contact_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->contact_title = $row["title"];
+		$this->contact_first_name = $row["first_name"];
+		$this->contact_middle_name = $row["middle_name"];
+		$this->contact_last_name = $row["last_name"];
+		$this->contact_called_name = $row["called_name"];
+		$this->contact_email = $row["email"];
+		$this->contact_phone = $row["phone"];
+  		$this->contact_pager = $row["pager"];
+	  	$this->contact_cellphone = $row["cellphone"];
+		$this->contact_fax = $row["fax"];
+		$this->contact_street_address_1 = $row["street_address_1"];
+		$this->contact_street_address_2 = $row["street_address_2"];
+		$this->contact_street_address_3 = $row["street_address_3"];
+		$this->contact_city = $row["city"];
+		$this->contact_region_id = $row["region_id"];
+		$this->contact_provstate_id = $row["provstate_id"];
+		$this->contact_country_id = $row["country_id"];
+		$this->contact_postal_code = $row["postal_code"];
+		$this->contact_department_name = $row["department_name"];
+		$this->employer_id = $row["employer_id"];
+
+		// Load company values
+		
+		$sql = ("
+			SELECT DISTINCT *
+			FROM pending_employer_company
+			WHERE employer_id='" . $this->employer_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->company_name = $row["company_name"];
+		$this->company_website = $row["company_website"];
+		$this->company_description = $row["company_description"];
+		$this->company_street_address_1 = $row["street_address_1"];
+		$this->company_street_address_2 = $row["street_address_2"];
+		$this->company_street_address_3 = $row["street_address_3"];
+		$this->company_city = $row["city"];
+		$this->company_region_id = $row["region_id"];
+		$this->company_provstate_id = $row["provstate_id"];
+		$this->company_country_id = $row["country_id"];
+		$this->company_postal_code = $row["postal_code"];
+		$this->company_phone = $row["phone"];
+		$this->company_fax = $row["fax"];
+		$this->company_email = $row["email"];
+		$this->company_industry_id = $row["industry_id"];
+		$this->company_size_id = $row["size_id"];
+		$this->company_type_id = $row["type_id"];
+	}
+
+	function setCompanyValues($employer_id, $company_website, $company_description, $company_street_address_1,
+		$company_street_address_2, $company_street_address_3, $company_city, $company_region_id, $company_provstate_id,
+		$company_country_id, $company_postal_code, $company_phone, $company_fax, $company_email, $company_industry_id,
+		$company_size_id, $company_type_id)
+	{
+		$this->employer_id = $employer_id;
+        $this->company_website = $company_website;
+        $this->company_description = $company_description;
+        $this->company_street_address_1 = $company_street_address_1;
+        $this->company_street_address_2 = $company_street_address_2;
+        $this->company_street_address_3 = $company_street_address_3;
+        $this->company_city = $company_city;
+        $this->company_region_id = $company_region_id;
+        $this->company_provstate_id = $company_provstate_id;
+        $this->company_country_id = $company_country_id;
+        $this->company_postal_code = $company_postal_code;
+        $this->company_phone = $company_phone;
+        $this->company_fax = $company_fax;
+        $this->company_email = $company_email;
+        $this->company_industry_id = $company_industry_id;
+        $this->company_size_id = $company_size_id;
+		$this->company_type_id = $company_type_id;
+	}
+
+	function setContactValues($contact_id, $contact_title, $contact_first_name, $contact_middle_name, $contact_last_name,
+		$contact_called_name, $contact_email, $contact_phone, $contact_pager, $contact_cellphone, $contact_fax,
+		$contact_street_address_1, $contact_street_address_2, $contact_street_address_3, $contact_city, $contact_region_id,
+		$contact_provstate_id, $contact_country_id, $contact_postal_code, $contact_department_name)
+	{
+		$this->contact_id = $contact_id;
+		$this->contact_title = $contact_title;
+		$this->contact_first_name = $contact_first_name;
+		$this->contact_middle_name = $contact_middle_name;
+		$this->contact_last_name = $contact_last_name;
+		$this->contact_called_name = $contact_called_name;
+		$this->contact_email = $contact_email;
+		$this->contact_phone = $contact_phone;
+		$this->contact_pager = $contact_pager;
+		$this->contact_cellphone = $contact_cellphone;
+		$this->contact_fax = $contact_fax;
+		$this->contact_street_address_1 = $contact_street_address_1;
+		$this->contact_street_address_2 = $contact_street_address_2;
+		$this->contact_street_address_3 = $contact_street_address_3;
+		$this->contact_city = $contact_city;
+		$this->contact_region_id = $contact_region_id;
+		$this->contact_provstate_id = $contact_provstate_id;
+		$this->contact_country_id = $contact_country_id;
+		$this->contact_postal_code = $contact_postal_code;
+		$this->contact_department_name = $contact_department_name;
+	}
+}
+
+?>

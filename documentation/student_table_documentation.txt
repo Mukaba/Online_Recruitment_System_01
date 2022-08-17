@@ -1,0 +1,604 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: student_table_documentation.txt                                    |
++------------------------------------------------------------------------------+
+
+This file's purpose is to document all of the tables currently used in Mamook[tm] by the
+student module.
+
+This document was created on Feb 5, 2003
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+Primary Key
+[Multiple Key]
+Foreign Key(s)
+    foreign key -> main table that the key links to
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+
+--------------------------------------------------------------------------------
+
+Table Name:  applications
+Purpose:  Stores all the job applications in the system.
+
+Primary Key:  { application_id }
+Multiple Key:  { resume_id, student_number, job_id, coverletter_id, app_status }
+Foreign Keys:
+                app_status -> application_status
+                coverletter_id -> coverletter
+                job_id -> job_info
+                resume_id -> resume
+                student_number -> student
+
+    Column Name:  added_by_admin
+    Purpose:  Boolean { 0, 1 } value for whether or not the application was added by admin.
+
+    Column Name:  applied_date
+    Purpose:  The date and time the student applied to the job.
+
+    Column Name:  transcript
+    Purpose:  Boolean { 0, 1 } value for whether or not the application should be sent with
+    the student's transcript.
+
+--------------------------------------------------------------------------------
+
+Table Name:  contact
+Purpose:  Stores contacts of all types (employer, potential employer, internal, alumni)
+in the system.
+
+Primary Key:  { contact_id }
+Foreign Keys:
+                country_id -> country_list
+                provstate_id -> provstate_list
+                region_id -> region_list
+                title -> title
+
+    Column Name:  location_info
+    Purpose:  A dummy value to help determine the contact's address.  
+    If it's set to 'Use Department' or 'Use Company', grab the address from the
+    company's department and company respectively.  Any other values in this
+    column should be ignored and should signal the user to stick with the contact's
+    address.
+
+    Column Name:  fax, phone
+    Purpose:  Contact's fax and phone number.  If the contact specifies it to be the 
+    same as their department or company phone number, 'Use Department' and 'Use Company'
+    are respectively stored in this field.
+
+    Column Name:  title
+    Purpose:  Foreign key to title table that defines the contact's title (Mr, Mrs, etc)
+
+    Column Name:  type
+    Purpose:  Type of contact (employer, potential employer, internal, alumni).
+
+    See contact_table_documentation for details
+
+--------------------------------------------------------------------------------
+
+Table Name:  contact_internal
+Purpose:  Secondary table for internal contacts.
+
+Primary Key:  { contact_id }
+Foreign Keys:
+                contact_id -> contact
+                department_id -> department
+                
+    See contact_table_documentation for details
+
+--------------------------------------------------------------------------------
+
+Table Name:  convocation_month
+Purpose:  A static table which stores all the months in numerical form for which
+          this institution holds convocation ceremonies..
+
+Primary Key:  { month }
+    
+    Column Name: month
+    Purpose:  This column stores a month in numerical form.
+
+--------------------------------------------------------------------------------
+
+Table Name: country_list
+Purpose: Country list stores all of the countries that a job (or anything else) can be placed
+in.
+
+Primary Key:  { country_id }
+Foreign Keys:
+                area_id -> area_list
+
+	Column Name: country_id
+	Purpose: This field is the id number used to keep track of different countries.  This is
+	the primary key for the table.
+
+	Column Name: country_name
+	Purpose: This field is simply the name of the corresponding country.
+
+	Column Name: area_id
+	Purpose: This field holds the area_id of the area that the country belongs to.  Eg.
+	England would have the area_id that correponds to Europe.
+
+    Column Name: order_by
+    Purpose: This field allows us to specify an order for countries other than alphabetical.
+    (Typically we want to display Canada and USA first).
+
+---------------------------------------------------------------------------------
+
+Table Name:  department
+Purpose:  Stores all the Co-op departments at the institution.
+
+Primary Key:  { department_id }
+Foreign Keys:
+                default_building_id -> building.building_id
+                primary_contact_id -> contact, contact_internal
+                placement_contact_id -> contact, contact_internal
+                menus_being_used_id -> menus_being_used
+                short_list_contact_id -> contact, contact_internal
+                interview_contact_id -> contact, contact_internal
+                jobhost_contact_id -> contact, contact_internal
+
+    See contact_table_documentation for details
+
+---------------------------------------------------------------------------------
+
+Table Name:  department_default_semesters
+Purpose:  Stores the department-specific default timetables' semesters.
+
+Multiple Key:  
+Foreign Keys:  department_id -> department
+               semesters_id -> semesters
+               term_id -> term
+
+ColumnName: department_id
+Purpose:     This field holds which department this default entry belongs to. 
+
+Column Name: semesters_id
+Purpose:     This field holds the semester classification for this default entry.
+
+Column Name: term_id
+Purpose:     This field holds which term of the timetable the above semesters_id 
+             is to be placed.
+
+Column Name: timetable_num
+Purpose:     This field allows to distinguish between 3 default timetables per
+             department.
+
+Column Name: year_num
+Purpose:     This field holds which year of the timetable the above semesters_id
+             is to be placed.
+
+---------------------------------------------------------------------------------
+
+
+Table Name:  department_semesters
+Purpose:  Stores the department-specific semester types.
+Eg.  Work Term 1, Academic Term 5, etc.
+
+Multiple Key:  { department_id, semesters_id }
+Foreign Keys:
+                department_id -> department
+                semesters_id -> semesters
+
+---------------------------------------------------------------------------------
+
+Table Name:  department_student_flags
+Purpose:  Department-specific flags for students.  The flags defined globally
+for the system are in student_flags, and each department chooses a subset of these
+to use, which are stored in this table.
+
+Primary Key:  { department_id, student_flags_id }
+Foreign Keys:
+                department_id -> department
+                student_flags_id -> student_flags
+
+---------------------------------------------------------------------------------
+
+Table Name:  discipline
+Purpose:  Department-specific disciplines.  Eg, Engr -> CSc, CE, ME, EE, etc.
+
+Primary Key:  { discipline_id }
+Foreign Keys:
+                department_id -> department
+
+---------------------------------------------------------------------------------
+
+Table Name:  edit_student_flags
+
+    This table is deprecated.
+
+---------------------------------------------------------------------------------
+
+Table Name:  eligible_placed
+Purpose:  Stores historical information of when a student was eligible or placed,
+by term and year.
+
+Primary Key:  { record_id, term_id, year }
+Foreign Keys:
+                student_flags_id -> student_flags
+                record_id -> student_department
+                term_id -> term
+
+    Column Name:  eval_stu_coop_completed
+    Purpose:  Boolean value that marks whether or not a student has completed an
+    evaluation survey for a certain term-year combination.
+
+    Column Name:  record_id
+    Purpose:  Primary key that identifies a student in a specific department, as
+    opposed to a student_number, which will not identify their specific department
+    if they are in more than one.
+
+---------------------------------------------------------------------------------
+
+Table Name:  employer_company
+Purpose:  Stores company information.
+
+Primary Key:  { employer_id }
+Foreign Keys:
+                company_type_id -> company_type.type_id
+                industry_id -> industries
+                region_id -> region_list
+                size_id -> employer_sizes
+
+    See contact_table_documentation for details.
+
+---------------------------------------------------------------------------------
+
+Table Name:  history
+Purpose:  Stores records of workterms that students have completed.
+
+Primary Key:  { history_id }
+Multiple Key:  { employer_id, student_number, department_id, term_id, year,
+                 company_department_id, job_id }
+Foreign Keys:
+                company_country -> country_list
+                company_department_id -> employer_department.department_id
+                company_province -> provstate_list
+                company_region_id -> region_list
+                contact_id -> contact
+                department_id -> department
+                employer_id -> employer_company
+                job_id -> job_info
+                site_visit_by -> contact, contact_internal
+                site_visit_by_supervisor -> contact, contact_internal
+                site_visit_type_id -> site_visit_type
+                site_visit_type_id_supervisor -> contact, contact_internal
+                student_number -> student
+                term_id -> term
+                work_term_region_id -> region_list
+                wt_status -> history_status.history_status_id
+
+    Column Name:  contact_id
+    Purpose:  Shows the contact or supervisor associated with the workterm.
+
+    Column Name:  site_visit_by
+    Purpose:  Stores the coordinator that did the student site visit.
+
+    Column Name:  site_visit_by_supervisor
+    Purpose:  Coordinator that visited with the student's supervisor.
+
+    Column Name:  site_visit_type_id
+    Purpose:  Different types of student site visits: E-mail, Phone, In person, etc.
+
+    Column Name:  site_visit_type_id_supervisor
+    Purpose:  Types of visits done for a job supervisor, analogous to site_visit_type_id
+    for supervisor site visits.
+
+    This table is only included in this release because the student module
+    assumes its existence.  See documentation on history tables for more 
+    details.
+
+---------------------------------------------------------------------------------
+
+Table Name:  interview_time
+Purpose:  Stores times for interviews
+
+Primary Key:  { time_id }
+Foreign Keys:
+                job_id -> job_info
+                interviewer_id -> interview_interviewer
+                student_number -> student
+                int_room_id -> room
+                int_wait_room_id -> room
+
+    This table is only included in this release because the student module
+    assumes its existence.  See documentation on interview tables for more
+    details.
+
+---------------------------------------------------------------------------------
+
+Table Name:  job_info
+Purpose:  Stores the job descriptions in the system.
+
+Primary Key:  { job_id }
+Multiple Key:  { employer_info, department_id, job_code, term_id, year
+                 closing_date, status, country_id, provstate_id,
+                 region_id, closing_time, contact_id, employer_department_id,
+                 industry }
+Foreign Key:
+                employer_id -> employer_company
+                department_id -> department
+                term_id -> term
+                status -> job_status
+                country_id -> country_list
+                provstate_id -> provstate_list
+                region_id -> region_list
+                contact_id -> contact
+                entered_by -> contact
+                last_updated_by -> contact
+                student_status -> student_status
+                employer_department_id -> employer_department.department_id
+                industry -> industries
+                internal_contact_id -> contact, contact_internal
+                interview_term_id -> term
+                admin_status -> admin_status
+                employer_status -> employer_status
+
+    This table is only included in this release because the studet module
+    assumes its existence.  See documentation on job_description tables
+    for more details.
+
+---------------------------------------------------------------------------------
+
+Table Name:  resume
+Purpose:  Stores all the resumes in the system.
+
+Primary Key:  { resume_id }
+Multiple Key:  { resume_id, student_number }
+Foreign Keys:
+                student_number -> student
+
+    This table is only included in this release because the student module
+    assumes its existence.  See documentation on job_description tables
+    for more details.
+
+---------------------------------------------------------------------------------
+
+Table Name:  special_flags
+
+    This table has been deprecated.
+
+---------------------------------------------------------------------------------
+
+Table Name:  student
+Purpose:  Stores all non-department specific information about students.
+
+Primary Key:  { student_number }
+Foreign Keys:
+                country_current -> country_list
+                country_permanent -> country_list
+                current_region_id -> region_list
+                permanent_region_id -> region_list
+                province_current -> provstate_list
+                province_permanent -> provstate_list
+                student_status -> student_status
+
+    Column Name:  login_id
+    Purpose:  Stores the login id used for NIS authentication
+
+    Column Name:  netlink_id
+    Purpose:  Stores the netlink id used for UVic Netlink authentication
+
+    Column Name:  current
+    Purpose:  Boolean value that states whether or not a student is currently
+    enrolled in Co-op.
+
+    Column Name:  which_address
+    Purpose:  Stores which address should be used for correspondence--current
+    or permanent.
+
+    Column Name:  view_job_last
+    Purpose:  Stores the date on which the student last viewed a job.
+
+    Column Name:  view_job_last_time
+    Purpose:  Stores the time at which the student last viewed a job.
+
+    All other columns are fairly self-explanatory.  Three sets of addresses 
+    are stored per student:  current, permanent, and an emergency contact's
+    address.
+
+---------------------------------------------------------------------------------
+
+Table Name:  student_action_types
+Purpose:  Stores the descriptions for actions that can be performed on
+students by coordinators.  Eg, Work Site Visit, Contacted Via E-mail, etc.
+
+Primary Key:  { action_id }
+
+---------------------------------------------------------------------------------
+
+Table Name:  student_actions
+Purpose:  Stores the actions performed on the students in the system.
+
+Primary Key:  { record_id, student_actions_id }
+Foreign Keys:
+                action_by -> contact, contact_internal
+                action_id -> student_action_types
+                record_id -> student_department
+                student_number -> student
+
+---------------------------------------------------------------------------------
+
+Table Name:  student_department
+Purpose:  Stores student information specific to their program.  This is different
+from student in that if a student is in muliple departments, they will have
+multiple entries in student_department, while only having one in student.
+
+Primary Key:  { record_id }
+Multiple Key:  { department_id, student_number }
+Foreign Keys:
+                coop_advisor -> contact_internal, contact
+                department_id -> department
+                discipline_id -> discipline
+                student_number -> student
+    
+    Column Name: academic_year
+    Purpose: Stores the academic year the student is in their program.
+    
+    Column Name:  advisor
+    Purpose:  Stores the student's coop advisor.  For now, it is a text field
+    that holds the name of the coordinator.
+
+    Column Name:  admit
+    Purpose:  Stores the student's date of admittance to the coop program.
+
+    Column Name:  change_by_*
+    Purpose:  Stores who made the recent changes in changes_recorded_*
+
+    Column Name:  change_date_*
+    Purpose:  Stores the dates for changes made in changes_recorded_*
+
+    Column Name:  changes_recorded_*
+    Purpose:  Stores recent changes made to a student record.  Eg.  Updated
+    phone number, etc.
+
+    Column Name:  comment
+    Purpose:  Any comments made on the student that coordinators would want
+    stored in the system.
+    
+    Column Name:  convocation_month
+    Purpose:  Stores the month the student went through convocation.  This column
+    was added to take the place of column 'grad' which had data being stored in
+    an inconsistent way. 'grad' will be kept (for now) as a historical record.
+
+    Column Name:  convocation_year
+    Purpose:  Same as convocation_month except it stores the year of convocation.
+    
+    Column Name:  coop_advisor
+    Purpose:  Stores the id of the co-op advisor that looks after this student.
+     
+    Column Name:  discipline_id
+    Purpose:  Stores the key to be joined with the discipline table.  This stores
+    what discipline of a particular department the student is in.
+    Eg.  Computer Science Business Option, Computer Science and Math combined, etc.
+
+    Column Name:  grad
+    Purpose:  Stores the graduation date for a student who has graduated,
+    a projected graduation date otherwise.
+
+    Column Name:  grad_gpa
+    Purpose:  Stores the student's graduating GPA.
+    
+    Column Name:  grad_year
+    Purpose:  Stores the student expected graduation year.
+    
+    Column Name:  MAC_COOP_modified
+    Purpose: 
+
+    Column Name:  MAC_COOP_URL
+    Purpose: 
+         
+    Column Name:  start_year
+    Purpose:  Stores the year the student started in their program.
+    
+    Column Name:  withdraw
+    Purpose:  Stores the withdraw date for a student withdrawn from the coop
+    program.
+    
+---------------------------------------------------------------------------------
+
+Table Name:  student_flags
+Purpose:  Stores flags that are used to mark certain attributes for students.
+Eg.  Student Visa, Grad Student, Eligible, Placed, etc.
+
+Primary Key:  { student_flags_id }
+
+    Column Name:  comment
+    Purpose:  Stores a short comment about the flag--usually the department
+    that uses the flag.
+
+    Column Name:  description
+    Purpose:  Stores the name of the flag.
+
+---------------------------------------------------------------------------------
+
+Table Name:  student_flags_join
+Purpose:  Stores all the flags associated with each student.
+
+Primary Key:  { student_flags_id, record_id }
+Foreign Key:
+                student_flags_id -> student_flags
+
+---------------------------------------------------------------------------------
+
+Table Name:  student_jobs_flagged
+Purpose:  Stores the jobs that a student has marked as being flagged.
+
+Primary Key:  { student_number, job_id }
+Foreign Keys:
+                job_id -> job_info
+                student_number -> student
+
+---------------------------------------------------------------------------------
+
+Table Name:  student_notes
+Purpose:  Stores notes that coordinators have made on students.
+
+Primary Key:  { record_id, student_notes_id }
+Foreign Keys:
+                student_number -> student
+                record_id -> department_id
+                contact_id -> contact, contact_internal
+                form_id -> form
+
+    Column Name:  notes
+    Purpose:  Stores the actual contents of a note.
+
+    Column Name:  contact_id
+    Purpose:  Stores the contact id for who made the note, most likely a
+    coop coordinator.
+
+---------------------------------------------------------------------------------
+
+Table Name:  students_shortlisted
+Purpose:  Stores the students shortlisted for an interview.
+
+Primary Key:  { job_id, student_number }
+Foreign Keys:
+                job_id -> job_info
+                student_number -> student
+
+    This table is included in this release because student assumes its existence.
+
+---------------------------------------------------------------------------------
+
+Table Name:  transcript
+Purpose:  Stores the transcripts for current students in the program.
+
+Primary Key:  { student_number }
+
+    Column Name:  transcript
+    Purpose:  Stores the transcript in html format.
+
+---------------------------------------------------------------------------------
+

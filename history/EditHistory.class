@@ -1,0 +1,221 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: EditHistory.class                                                  |
+ +------------------------------------------------------------------------------+
+ | Description: This class stores all search variables, from the history        |
+ | search page. A class is used to ease the passing of multiple variables       |
+ | through forms.                                                               |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+class editHistory {
+
+	// Declare All Variables
+
+	var $term_id;
+	var $year;
+	var $student_num;
+	
+	var $company_name;
+	var $department_name;
+	var $company_street_address_1;
+	var $company_street_address_2;
+	var $company_street_address_3;
+	var $company_city;
+	var $company_province;
+	var $company_country;
+    var $company_region;
+	var $company_postal_code;
+	var $supervisor_name;
+	var $supervisor_fax_number;
+	var $supervisor_phone_number;
+    var $supervisor_cellphone_number;
+	var $supervisor_email;
+	var $supervisor_position;
+	var $salary;
+	var $salary_period_id;
+    var $work_term_hours_per_week;
+    var $start_date;
+    var $end_date;
+    var $work_term_length;
+	var $wt_status;
+	var $job_title;
+	var $options;
+	var $work_term_street_address_1;
+	var $work_term_street_address_2;
+	var $work_term_street_address_3;
+	var $work_term_city;
+	var $work_term_postal_code;
+	var $work_term_province;
+	var $work_term_country;
+	var $work_term_home_phone;
+	var $student_work_phone;
+	var $work_email;
+	var $site_visit_date_supervisor;
+	var $site_visit_date;
+	var $site_visit_type_id;
+	var $site_visit_type_id_supervisor;
+	var $site_visit_by;
+	var $site_visit_by_supervisor;
+	var $work_site_visit_notes;
+	var $report_title;
+	var $report_code;
+	var $report_subject;
+	var $report_marker;
+	
+	var $student_number;
+
+	var $flags;
+
+
+	// Constructor
+	function EditHistory($editHistory) {
+
+		if ($editHistory) {
+
+			$this->term_id=$editHistory->term_id;
+			$this->year=$editHistory->year;
+			$this->student_num=$editHistory->student_num;
+			
+			$this->company_name=$editHistory->company_name;
+			$this->department_name=$editHistory->department_name;
+			$this->company_street_address_1=$editHistory->company_street_address_1;
+			$this->company_street_address_2=$editHistory->company_street_address_2;
+			$this->company_street_address_3=$editHistory->company_street_address_3;
+			$this->company_city=$editHistory->company_city;
+			$this->company_province=$editHistory->company_province;
+			$this->company_country=$editHistory->company_country;
+			$this->company_region=$editHistory->company_region;
+			$this->company_postal_code=$editHistory->company_postal_code;
+			$this->supervisor_name=$editHistory->supervisor_name;
+			$this->supervisor_fax_number=$editHistory->supervisor_fax_number;
+			$this->supervisor_phone_number=$editHistory->supervisor_phone_number;
+            $this->supervisor_cellphone_number=$editHistory->supervisor_cellphone_number;
+			$this->supervisor_email=$editHistory->supervisor_email;
+			$this->supervisor_position=$editHistory->supervisor_position;
+			$this->salary=$editHistory->salary;
+			$this->salary_period_id=$editHistory->salary_period_id;
+            $this->work_term_hours_per_week=$editHistory->work_term_hours_per_week;
+            $this->start_date=$editHistory->start_date;
+            $this->end_date=$editHistory->end_date;
+            $this->work_term_length=$editHistory->work_term_length;
+			$this->wt_status=$editHistory->wt_status;
+			$this->job_title=$editHistory->job_title;
+			$this->options=$editHistory->options;
+			$this->work_term_street_address_1=$editHistory->work_term_street_address_1;
+			$this->work_term_street_address_2=$editHistory->work_term_street_address_2;
+			$this->work_term_street_address_3=$editHistory->work_term_street_address_3;
+			$this->work_term_city=$editHistory->work_term_city;
+			$this->work_term_postal_code=$editHistory->work_term_postal_code;
+			$this->work_term_province=$editHistory->work_term_province;
+			$this->work_term_country=$editHistory->work_term_country;
+			$this->work_term_home_phone=$editHistory->work_term_home_phone;
+			$this->student_work_phone=$editHistory->student_work_phone;
+			$this->work_email=$editHistory->work_email;
+			$this->site_visit_date_supervisor=$editHistory->site_visit_date_supervisor;
+			$this->site_visit_date=$editHistory->site_visit_date;
+			$this->site_visit_type_id=$editHistory->site_visit_type_id;
+			$this->site_visit_type_id_supervisor=$editHistory->site_visit_type_id_supervisor;
+			$this->site_visit_by=$editHistory->site_visit_by;
+			$this->site_visit_by_supervisor=$editHistory->site_visit_by_supervisor;
+			$this->work_site_visit_notes=$editHistory->work_site_visit_notes;
+			$this->report_title=$editHistory->report_title;
+			$this->report_code=$editHistory->report_code;
+			$this->report_subject=$editHistory->report_subject;
+			$this->report_marker=$editHistory->report_marker;
+			
+			$this->student_number=$editHistory->student_number;
+			$this->flags=$editHistory->flags;
+			
+		}
+
+	}
+	function setVariables (
+        $term_id,$year,$student_num,$company_name,$department_name,$company_street_address_1,$company_street_address_2
+        ,$company_street_address_3,$company_city,$company_province,$company_country,$company_region,$company_postal_code
+        ,$supervisor_name,$supervisor_fax_number,$supervisor_phone_number,$supervisor_cellphone_number,$supervisor_email,$supervisor_position,$salary
+        ,$salary_period_id,$work_term_hours_per_week,$start_date,$end_date,$work_term_length,$wt_status,$job_title,$options,$work_term_street_address_1
+        ,$work_term_street_address_2,$work_term_street_address_3,$work_term_city,$work_term_postal_code,$work_term_province,$work_term_country
+        ,$work_term_home_phone,$student_work_phone,$work_email,$site_visit_date_supervisor,$site_visit_date,$site_visit_type_id
+        ,$site_visit_type_id_supervisor,$site_visit_by,$site_visit_by_supervisor,$work_site_visit_notes,$report_title,$report_code
+        ,$report_subject,$report_marker,$student_number,$flags
+            )
+	{	
+			$this->term_id=removeSlashes(addslashes($term_id));
+			$this->year=removeSlashes(addslashes($year));
+			$this->student_num=removeSlashes(addslashes($student_num));
+			$this->company_name=removeSlashes(addslashes($company_name));
+			$this->department_name=removeSlashes(addslashes($department_name));
+			$this->company_street_address_1=removeSlashes(addslashes($company_street_address_1));
+			$this->company_street_address_2=removeSlashes(addslashes($company_street_address_2));
+			$this->company_street_address_3=removeSlashes(addslashes($company_street_address_3));
+			$this->company_city=removeSlashes(addslashes($company_city));
+			$this->company_province=removeSlashes(addslashes($company_province));
+			$this->company_country=removeSlashes(addslashes($company_country));
+			$this->company_region=removeSlashes(addslashes($company_region));
+			$this->company_postal_code=removeSlashes(addslashes($company_postal_code));
+			$this->supervisor_name=removeSlashes(addslashes($supervisor_name));
+			$this->supervisor_fax_number=removeSlashes(addslashes($supervisor_fax_number));
+			$this->supervisor_phone_number=removeSlashes(addslashes($supervisor_phone_number));
+            $this->supervisor_cellphone_number=removeSlashes(addslashes($supervisor_cellphone_number));
+			$this->supervisor_email=removeSlashes(addslashes($supervisor_email));
+			$this->supervisor_position=removeSlashes(addslashes($supervisor_position));
+			$this->salary=removeSlashes(addslashes($salary));
+			$this->salary_period_id=removeSlashes(addslashes($salary_period_id));
+            $this->work_term_hours_per_week=removeSlashes(addslashes($work_term_hours_per_week));
+            $this->start_date=removeSlashes(addslashes($start_date));
+            $this->end_date=removeSlashes(addslashes($end_date));
+            $this->work_term_length=removeSlashes(addslashes($work_term_length));
+			$this->wt_status=removeSlashes(addslashes($wt_status));
+			$this->job_title=removeSlashes(addslashes($job_title));
+			$this->options=removeSlashes(addslashes($options));
+			$this->work_term_street_address_1=removeSlashes(addslashes($work_term_street_address_1));
+			$this->work_term_street_address_2=removeSlashes(addslashes($work_term_street_address_2));
+			$this->work_term_street_address_3=removeSlashes(addslashes($work_term_street_address_3));
+			$this->work_term_city=removeSlashes(addslashes($work_term_city));
+			$this->work_term_postal_code=removeSlashes(addslashes($work_term_postal_code));
+			$this->work_term_province=removeSlashes(addslashes($work_term_province));
+			$this->work_term_country=removeSlashes(addslashes($work_term_country));
+			$this->work_term_home_phone=removeSlashes(addslashes($work_term_home_phone));
+			$this->student_work_phone=removeSlashes(addslashes($student_work_phone));
+			$this->work_email=removeSlashes(addslashes($work_email));
+			$this->site_visit_date_supervisor=removeSlashes(addslashes($site_visit_date_supervisor));
+			$this->site_visit_date=removeSlashes(addslashes($site_visit_date));
+			$this->site_visit_type_id=removeSlashes(addslashes($site_visit_type_id));
+			$this->site_visit_type_id_supervisor=removeSlashes(addslashes($site_visit_type_id_supervisor));
+			$this->site_visit_by=removeSlashes(addslashes($site_visit_by));
+			$this->site_visit_by_supervisor=removeSlashes(addslashes($site_visit_by_supervisor));
+			$this->work_site_visit_notes=removeSlashes(addslashes($work_site_visit_notes));
+			$this->report_title=removeSlashes(addslashes($report_title));
+			$this->report_code=removeSlashes(addslashes($report_code));
+			$this->report_subject=removeSlashes(addslashes($report_subject));
+			$this->report_marker=removeSlashes(addslashes($report_marker));
+			$this->student_number=removeSlashes(addslashes($student_number));
+			$this->flags=$flags;
+	}
+}
+
+?>

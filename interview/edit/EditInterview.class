@@ -1,0 +1,418 @@
+<?php
+
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: EditInterview.class                                                |
+ +------------------------------------------------------------------------------+
+ | Description:                                                                 |
+ +------------------------------------------------------------------------------+
+
+*/
+
+/**
+ *	File name: EditInterview.class
+ */
+
+include('interview/add/interview.class');
+
+class EditInterview extends interview
+{	
+	/***	variables storing id ( primary key ) for save modified date back to database	***/
+	var $last_modified;
+	
+	var $job_id;
+	var $employer_id;
+	var $interviewer_ids;
+		
+	var $modes;	
+	
+	var $location_names;
+	var $wait_rooms;			
+
+	function EditInterview($interview)
+	{
+		$this->interview($interview);
+		
+		$this->job_id = $interview->job_id;		
+		$this->employer_id = $interview->employer_id;
+		$this->interviewer_ids = $interview->interviewer_ids;
+
+		$this->modes = $interview->modes;
+		
+		$this->location_names = $interview->location_names;
+		$this->wait_rooms = $interview->wait_rooms;
+	
+		$this->last_modified = $interview->last_modified;
+	}
+	
+	function loadValues($job_id, $menu="")
+	{
+		assert( $job_id );
+		$this->job_id = $job_id;	
+	
+		$sql = "SELECT job_code, employer_id
+			FROM job_info
+			WHERE job_id ='$this->job_id'";
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		$this->job_code = $row["job_code"];
+		$this->employer_id = $row['employer_id'];
+
+		$sql = "
+			SELECT a.email
+			FROM contact AS a, contact_job AS b
+			WHERE b.job_id = '$this->job_id'
+			AND a.contact_id=b.contact_id
+			";
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		$this->employer_email = $row["email"];
+		
+		$sql = "SELECT * FROM interview WHERE job_id='$this->job_id'";
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		assert ( $row );
+		$this->notes = $row["notes"];
+		$this->staff_notes = $row["staff_notes"];
+		$this->interview_medium = $row["interview_medium_id"];
+		$this->presentation = $row["presentation"];
+
+		$this->interview_type = $row["interview_type_id"];
+		$this->emailed_newsgroup = $row["emailed_newsgroup"];	
+		$this->cancelled= $row["cancelled"];
+		$this->contact = $row["contact"];
+		$this->student_visible = $row['student_visible'];
+		$this->interview_place = $row['interview_place_id'];		
+
+		$result = $GLOBALS['dbh']->Execute("SELECT company_name FROM employer_company WHERE employer_id='$this->employer_id'");
+		$row = $result->FetchRow();
+		$this->company_name = $row['company_name'];
+
+		/***  	retrieve presentation info	  ***/
+		if( $this->presentation == 1 )
+		{
+			$result = $GLOBALS['dbh']->Execute("SELECT * FROM presentation WHERE job_id='$this->job_id'");
+			$row = $result->FetchRow();
+			$this->pres_date = $row["pres_date"];
+			$this->pres_time = substr($row["pres_time"],0,5);
+			$this->pres_len = cal_length( $this->pres_time, $row["end_time"] );
+			$this->pres_loc = $row["pres_loc"];
+			$this->pres_notes = $row["pres_notes"];
+			$this->pres_viewable_by_all = $row["viewable_by_all"];
+		}
+
+		/***  retrieve time/break/lunch info for each interview day  ***/
+		$result = $GLOBALS['dbh']->Execute("SELECT DISTINCT int_date FROM interview_time WHERE job_id = '$this->job_id' ORDER BY int_date");
+		while($row = $result->FetchRow())
+		{
+			$this->int_dates[] = $row['int_date'];
+		
+		    $result2 = $GLOBALS['dbh']->Execute("
+			SELECT DISTINCT int_time, end_time, int_type 
+			FROM interview_time 
+			WHERE job_id='$this->job_id' 
+			AND int_date='$row[0]'  
+			AND switch=0 
+			AND sequential=0 
+			ORDER BY int_time
+			");
+		
+		    while($row2 = $result2->FetchRow())
+		    {
+	 			$start = $row2['int_time'];
+	 			$end = $row2['end_time'];
+	 			$type = $row2['int_type'];
+
+	 			if( $type == NO_TIME && !$this->no_time )
+	 				$this->no_time = 1;
+	 				
+				if( $type == NO_TIME )
+					$type = INTERVIEW;	 				
+	 					 			
+	 			if( isSwitching($this->interview_type) == 1 && $type == INTERVIEW )
+	 			{
+					$row3 = $GLOBALS['dbh']->GetRow("
+						SELECT DISTINCT end_time 
+						FROM interview_time 
+						WHERE job_id='$this->job_id' 
+						AND int_date='$row[0]' 
+						AND switch='1' 
+						AND int_time='$end'
+						");		 			
+		 			$schedule[] = array( "START"=>$start, "END"=>$row3['end_time'], "TYPE"=>$type);   	
+	 			}
+	 			else
+	 			{
+		 			$schedule[] = array( "START"=>$start, "END"=>$end, "TYPE"=>$type);   	
+		 		}
+		    }
+			$this->schedules[] = $schedule;
+			
+			unset($schedule);
+		}
+		
+		assert( count($this->int_dates) == count( $this->schedules ) );
+		
+		//retrieve info of interviewers, waiting rooms and interview locations
+
+		$sql = "SELECT DISTINCT (interviewer_id)
+			FROM interview_time
+			WHERE job_id = '$this->job_id'
+			ORDER BY interviewer_id";
+		
+		$result = $GLOBALS['dbh']->Execute($sql);
+
+
+		while( $row = $result->FetchRow() )
+		{
+			$this->interviewer_ids[] = $row['interviewer_id'];
+		   	$row2 = $GLOBALS['dbh']->GetRow("SELECT interviewer_name FROM interview_interviewer WHERE interviewer_id='" . $row['interviewer_id'] . "'");
+			$this->interviewers[] = $row2['interviewer_name'];
+			
+			$sql = "SELECT DISTINCT int_room_id, int_wait_room_id
+				FROM interview_time
+				WHERE job_id = '$this->job_id' AND interviewer_id = '" . $row['interviewer_id'] . "'
+				ORDER BY interviewer_id";
+			
+			$result2 = $GLOBALS['dbh']->Execute($sql);
+			
+			$row = $result2->FetchRow();
+			
+			if ($result2->RecordCount() > 1){
+				$this->location[] = "";
+				$this->wait_locations[] = "";
+				$this->location_names[] = "Many";
+				$this->wait_rooms[] = "Many";
+			}else{
+		   		
+				$this->locations[] = $row["int_room_id"];
+	           		$this->wait_locations[] = $row["int_wait_room_id"];	
+		   
+
+		   		if( isOnCampus($this->interview_place) || isPhone($this->interview_medium) )
+		   		{
+		   			$result4a = $GLOBALS['dbh']->Execute( "SELECT CONCAT(b.building_code, ' ', a.room_number) AS room_code, 
+								a.wait_room_id 
+							FROM room as a, building as b 
+							WHERE a.building_id=b.building_id AND 
+								a.room_id='" . $row["int_room_id"] . "'" );
+					
+					$row4a = $result4a->FetchRow();
+		 	   	
+					if( $row4a["room_code"] != '' )
+		   			{	
+					   $this->location_names[] = $row4a["room_code"];
+			        	}
+			        	else
+			        	{
+					   $this->location_names[] = "T . B . A";
+			       	 	}
+					$result4b = $GLOBALS['dbh']->Execute( "SELECT CONCAT(b.building_code, ' ', a.room_number) AS room_code 
+				 		       FROM room as a, building as b 
+						       WHERE a.building_id=b.building_id AND a.room_id='" . 
+						       	$row["int_wait_room_id"] . "'" );
+					$row4b = $result4b->FetchRow();
+					if ($row4b["room_code"] != '' ){
+						$this->wait_rooms[] = $row4b["room_code"];
+					}else{
+						$this->wait_rooms[] = "T . B . A";
+					}
+				}
+			}
+		}
+	   
+	   	if( !isOnCampus($this->interview_place) && !isPhone($this->interview_medium) )
+	   	{
+		    $result5a = $GLOBALS['dbh']->Execute("select * from interview_location where job_id='$this->job_id'");
+		    $row5a =  $result5a->FetchRow();
+			$this->address1  = 	$row5a['street_address_1'];
+			$this->address2  = 	$row5a['street_address_2'];
+			$this->city      = 	$row5a['city'];
+			$this->province  = 	$row5a['province'];
+			$this->country   = 	$row5a['country'];
+			$this->direction = 	$row5a['directions'];
+	   	}
+		
+		//retrieve shortlisted students' name
+		$result = $GLOBALS['dbh']->Execute("SELECT student_number FROM students_shortlisted WHERE job_id='$this->job_id'");
+		while($row = $result->FetchRow())
+		{
+		   $result2 = $GLOBALS['dbh']->Execute("SELECT first_name, last_name FROM student WHERE student_number='$row[0]'");
+		   $row2 = $result2->FetchRow();
+		   $students[] = array( $row2['first_name'], $row2['last_name'] );
+		}
+		if($students)
+		{
+			sortName($students);
+			for( $i = 0; $i < count($students); $i++ )
+			{
+				$this->students = (($this->students)? $this->students . chr(10) : "") . ($students[$i][0] . chr(32) . $students[$i][1]);
+			}
+		}
+
+		$result = $GLOBALS['dbh']->Execute("SELECT MAX(date_edited) as last_modified FROM interview_edit 
+					WHERE job_id = '$job_id'" . (($menu != "") ? (($menu=='Job Info') ? " AND menu_edited ='" . $menu . "' OR menu_edited = 'Button'" : "" ) : ""));
+		$row = $result->FetchRow();
+		$this->last_modified = $row["last_modified"];
+	}	
+
+	function updateLocation($interview_place, $use_room_phone_number){
+		$this->interview_place = $interview_place;
+		$this->use_room_number = $use_room_phone_number;
+	}
+
+	function updateValues( 	$job_code, $company_name, $employer_email, $interviewers, 
+		$contact, $int_dates, $students, $notes, $staff_notes, $interview_medium,
+		$pres_date, $pres_time, $pres_len, $pres_loc, $pres_notes,
+		$pres_viewable_by_all, $interview_place, $no_time, $use_room_phone_number)
+	{			
+		$this->use_room_number = removeSlashes ($use_room_phone_number);
+		$this->job_code 	= removeSlashes( $job_code );
+		$this->company_name = removeSlashes( $company_name );
+		$this->employer_email = removeSlashes( $employer_email );
+		$this->interviewers = removeSlashes( $interviewers );
+		//$this->locations 	= $locations;
+		//$this->wait_locations =  $wait_locations;
+		//$this->wait_rooms 	= $wait_rooms;
+		$this->contact 		= $contact;
+		$this->int_dates 	= $int_dates;
+		$this->students 	= removeSlashes( $students );
+		$this->notes		= removeSlashes( $notes );
+		$this->staff_notes	= removeSlashes( $staff_notes );
+		$this->interview_medium	= $interview_medium;
+				
+		$this->pres_date 	= $pres_date;		
+		$this->pres_time 	= $pres_time;
+		$this->pres_len		= $pres_len;
+		$this->pres_loc		= removeSlashes( $pres_loc );
+		$this->pres_notes	= removeSlashes( $pres_notes );
+		$this->pres_viewable_by_all = $pres_viewable_by_all;
+		$this->interview_place 	= $interview_place;
+		$this->no_time 		= $no_time;
+		
+	}
+	
+	function updateJobInfo(	$job_code, $company_name, $employer_email, $interviewers, 
+					$contact, $notes, $staff_notes, $interview_medium,
+					$pres_date, $pres_time, $pres_len, $pres_loc, $pres_notes,
+					$pres_viewable_by_all, $no_time )
+	{			
+		$this->job_code 	= removeSlashes( $job_code );
+		$this->company_name = removeSlashes( $company_name );
+		$this->employer_email = removeSlashes( $employer_email );
+		$this->interviewers = removeSlashes( $interviewers );
+		$this->contact 		= $contact;
+		$this->notes		= removeSlashes( $notes );
+		$this->staff_notes	= removeSlashes( $staff_notes );
+		$this->interview_medium	= $interview_medium;
+				
+		$this->pres_date 	= $pres_date;		
+		$this->pres_time 	= $pres_time;
+		$this->pres_len		= $pres_len;
+		$this->pres_loc		= removeSlashes( $pres_loc );
+		$this->pres_notes	= removeSlashes( $pres_notes );
+		$this->pres_viewable_by_all = $pres_viewable_by_all;
+		$this->no_time 		= $no_time;
+		
+	}
+
+	function updateRoomLocation($locations, $wait_locations){
+		$this->locations = $locations;
+		$this->wait_locations = $wait_locations;
+		for($i=0;$i<count($locations);$i++){
+			$result4a = $GLOBALS['dbh']->Execute( "SELECT CONCAT(b.building_code, ' ', a.room_number) AS room_code 
+					FROM room as a, building as b 
+					WHERE a.building_id=b.building_id AND 
+					a.room_id='" . $locations[$i] . "'" );
+
+			$row4a = $result4a->FetchRow();
+	
+			if( $row4a["room_code"] != '' ){$this->location_names[$i] = $row4a["room_code"];}
+			else{$this->location_names[$i] = "T . B . A";}
+		
+			$result4b = $GLOBALS['dbh']->Execute( "SELECT CONCAT(b.building_code, ' ', a.room_number) AS room_code 
+					FROM room as a, building as b 
+					WHERE a.building_id=b.building_id AND a.room_id='" . 
+					$wait_locations[$i] . "'" );
+			$row4b = $result4b->FetchRow();
+			if ($row4b["room_code"] != '' ){$this->wait_rooms[$i] = $row4b["room_code"];}
+			else{$this->wait_rooms[$i] = "T . B . A";}
+		}
+	}
+	
+	function updateOffCampusLoc($address1, $address2, $city,  $province, $country, $direction )
+	{
+		$this->address1 = removeSlashes( trim($address1) );
+		$this->address2 = removeSlashes( trim($address2) );
+		$this->city = removeSlashes( trim($city) );
+		$this->province = removeSlashes( trim($province) );
+		$this->country = removeSlashes( trim($country) );
+		$this->direction = removeSlashes( trim($direction) );
+	}
+	
+	function debug()
+	{
+		$this->print_debug_message();
+		echo("<table><tr><td>Job id: $this->job_id</td><td>employer id: $this->employer_id</td></tr></table>");
+	}	
+	
+	/**
+	 * split daily schedules into the pattern of pulling out from interview_time ordered by time,
+	 * interview_id. Used for restoring already signed up students based on different interview type.
+	 */ 	
+	
+	function splitSchedule()
+	{
+		for( $i = 0; $i < count( $this->schedules ); $i++ )
+		{
+			for( $j = 0; $j < count( $this->schedules[$i] ); $j++ )
+			{
+				$type = $this->schedules[$i][$j]['TYPE'];
+				if( $type == INTERVIEW || $type == NO_TIME )
+				{				 	
+					
+					if( isSwitching($this->interview_type) )
+					{
+			       	    		$switch_length = cal_length($this->schedules[$i][$j]["START"], $this->schedules[$i][$j]["END"])/2;
+			           		$switch_time = add_times($this->schedules[$i][$j]["START"], $switch_length);
+						
+						/* same pattern as the output of query ordered by time, interviewer_id */
+					 	$schedules[$i][] = array( "START"=>$this->schedules[$i][$j]["START"], "END"=>$switch_time, "TYPE"=>$type );
+					 	$schedules[$i][] = array( "START"=>$this->schedules[$i][$j]["START"], "END"=>$switch_time, "TYPE"=>$type );
+					 	$schedules[$i][] = array( "START"=>$switch_time, "END"=>$this->schedules[$i][$j]["END"], "TYPE"=>$type );
+					 	$schedules[$i][] = array( "START"=>$switch_time, "END"=>$this->schedules[$i][$j]["END"], "TYPE"=>$type );
+					}		
+					elseif( isSimultaneous($this->interview_type) )
+					{
+					 	$schedules[$i][] = $this->schedules[$i][$j];
+					 	$schedules[$i][] = $this->schedules[$i][$j];
+					}					
+					else
+					 	$schedules[$i][] = $this->schedules[$i][$j];
+				}				 	
+			}
+		}
+		return $schedules;
+	}		
+}
+?>

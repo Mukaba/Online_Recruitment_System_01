@@ -1,0 +1,571 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: EditContact.class                                                  |
+ +------------------------------------------------------------------------------+
+ | Description: This object is used to hold all of the company, department,     |
+ | and contact values that can be edited to simplify passing of data between    |
+ | pages.  This object also contains three loadValues functions, each of which  |
+ | loads company, department or contact information from the database to be     |
+ | edited.                                                                      |
+ |                                                                              |
+ | This class inherits from Contact.class                                       |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+include('contact/Contact.class');
+
+class EditContact extends Contact
+{
+	function EditContact($contact)
+	{
+		$this->Contact($contact);
+	}
+
+	/*
+	 Function below is used to load company values from the database into the contact object,
+	 using the provided employer_id.
+	*/
+
+	function loadCompanyValues($employer_id)
+	{
+		global $auth;
+		assert($employer_id);
+		
+		$this->employer_id = $employer_id;
+
+		$sql = ("
+			SELECT DISTINCT *
+			FROM employer_company
+			WHERE employer_id='" . $employer_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+
+		$row = $result->FetchRow();
+	
+		assert($row);
+
+		$this->company_name = $row["company_name"];
+		$this->company_website = $row["website"];
+		$this->company_description = $row["company_description"];
+
+		$this->company_street_address_1 = $row["street_address_1"];
+		$this->company_street_address_2 = $row["street_address_2"];
+		$this->company_street_address_3 = $row["street_address_3"];
+		$this->company_city = $row["city"];
+		$this->company_region_id = $row["region_id"];
+		$this->company_provstate_id = $row["provstate_id"];
+		$this->company_country_id = $row["country_id"];
+		$this->company_postal_code = $row["postal_code"];
+	
+		$this->company_phone = $row["phone"];
+		$this->company_fax = $row["fax"];
+		$this->company_email = $row["email"];
+
+		$this->company_changes_recorded_1 = $row["changes_recorded_1"];
+		$this->company_changes_recorded_2 = $row["changes_recorded_2"];
+		$this->company_changes_recorded_3 = $row["changes_recorded_3"];
+
+		$this->company_change_by_1 = $row["change_by_1"];
+		$this->company_change_by_2 = $row["change_by_2"];
+		$this->company_change_by_3 = $row["change_by_3"];
+
+		$this->company_change_date_1 = $row["change_date_1"];
+		$this->company_change_date_2 = $row["change_date_2"];
+		$this->company_change_date_3 = $row["change_date_3"];
+
+		$this->company_industry_id = $row["industry_id"];
+		$this->company_size_id = $row["size_id"];
+		
+		$this->company_entered_on = $row["entered_on"];
+		$this->company_entered_by = $row["entered_by"];
+
+		$this->company_name_legitimate = $row["company_name_legitimate"];
+		$this->company_type_id = $row["company_type_id"];
+
+		// Pull out co-op department specific information now.
+
+		$sql = ("
+			SELECT DISTINCT comments
+			FROM employer_company_comments
+			WHERE employer_company_id='" . $employer_id . "'
+			AND department_id='" . $auth->department . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		
+		$this->company_department_comments = $row["comments"];
+
+		$sql = ("
+			SELECT DISTINCT a.flag_id
+			FROM company_flags_set AS a, department_company_flags AS b
+			WHERE b.department_id='" . $auth->department . "'
+			AND a.employer_id='" . $employer_id . "'
+			AND a.flag_id=b.flag_id
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+
+		while ($row = $result->FetchRow())
+		{
+			$this->company_flags[] = $row["flag_id"];
+		}
+
+		// Get the status for this company specific to the department
+
+		$sql = ("
+			SELECT DISTINCT status_id
+			FROM department_company_status
+			WHERE employer_id='" . $employer_id . "'
+			AND department_id='" . $auth->department . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		
+		$this->company_status = $row["status_id"];
+
+		// Get all of the note ids for this company
+
+		$sql = ("
+			SELECT DISTINCT note_id
+			FROM company_notes
+			WHERE employer_id='" . $employer_id . "'
+			ORDER BY date_entered DESC
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		while ($row = $result->FetchRow())
+		{
+			$this->company_note_ids[] = $row["note_id"];
+		}
+	}
+
+	/*
+	 Function below is used to load department values from the database into the contact object,
+	 using the provided department_id.
+	*/
+
+	function loadDepartmentValues($department_id)
+	{
+		global $auth;
+		assert($department_id);
+		
+		$this->department_id = $department_id;
+
+		$sql = ("
+			SELECT DISTINCT *
+			FROM employer_department
+			WHERE department_id='" . $department_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		assert($row);
+
+		$this->department_company_id = $row["employer_id"];
+		$this->department_name = $row["department_name"];
+                $this->department_website = $row["department_website"];
+                $this->department_description = $row["department_description"];
+
+		$this->department_location_info = $row["location_info"];
+                $this->department_street_address_1 = $row["street_address_1"];
+                $this->department_street_address_2 = $row["street_address_2"];
+		$this->department_street_address_3 = $row["street_address_3"];
+                $this->department_city = $row["city"];
+                $this->department_region_id = $row["region_id"];
+                $this->department_provstate_id = $row["provstate_id"];
+                $this->department_country_id = $row["country_id"];
+                $this->department_postal_code = $row["postal_code"];
+
+                $this->department_phone = $row["phone"];
+                $this->department_fax = $row["fax"];
+                $this->department_email = $row["email"];
+
+                $this->department_changes_recorded_1 = $row["changes_recorded_1"];
+                $this->department_changes_recorded_2 = $row["changes_recorded_2"];
+                $this->department_changes_recorded_3 = $row["changes_recorded_3"];
+
+                $this->department_change_by_1 = $row["change_by_1"];
+                $this->department_change_by_2 = $row["change_by_2"];
+                $this->department_change_by_3 = $row["change_by_3"];
+
+                $this->department_change_date_1 = $row["change_date_1"];
+                $this->department_change_date_2 = $row["change_date_2"];
+                $this->department_change_date_3 = $row["change_date_3"];
+
+                $this->department_industry_id = $row["industry_id"];
+                $this->department_size_id = $row["size_id"];
+
+                $this->department_entered_on = $row["entered_on"];
+                $this->department_entered_by = $row["entered_by"];
+
+		$this->department_name_legitimate = $row["department_name_legitimate"];
+		
+		// Pull out co-op department specific information now.
+
+		$sql = ("
+			SELECT DISTINCT comments
+			FROM employer_department_comments
+			WHERE employer_department_id='" . $department_id . "'
+			AND department_id='" . $auth->department . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->department_department_comments = $row["comments"];
+
+		$sql = ("
+			SELECT DISTINCT a.flag_id
+			FROM department_flags_set AS a, department_division_flags AS b
+			WHERE b.department_id='" . $auth->department . "'
+			AND a.department_id='" . $department_id . "'
+			AND a.flag_id=b.flag_id
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+
+		while ($row = $result->FetchRow())
+		{
+			$this->department_flags[] = $row["flag_id"];
+		}
+
+		// Get the status for this division specific to their department
+
+		$sql = ("
+			SELECT DISTINCT status_id
+			FROM department_division_status
+			WHERE division_id='" . $department_id . "'
+			AND department_id='" . $auth->department . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		
+		$this->department_status = $row["status_id"];
+		
+		// Get the note ids from the database.
+
+		$sql = ("
+			SELECT DISTINCT note_id
+			FROM division_notes
+			WHERE department_id='" . $department_id . "'
+			ORDER BY date_entered DESC
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		
+		while ($row = $result->FetchRow())
+		{
+			$this->department_note_ids[] = $row["note_id"];
+		}
+	}
+
+	/*
+	 Function below is used to load contact values from the database into the contact object,
+	 using the provided contact_id.
+	*/
+
+	function loadContactValues($contact_id)
+	{
+		global $auth;
+		assert($contact_id);
+		
+		$this->contact_id = $contact_id;
+	
+		$sql = ("
+			SELECT DISTINCT *
+			FROM contact
+			WHERE contact_id='" . $contact_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		assert($row);
+
+		$this->contact_title = $row["title"];
+		$this->contact_first_name = $row["first_name"];
+		$this->contact_middle_name = $row["middle_name"];
+		$this->contact_last_name = $row["last_name"];
+		$this->contact_called_name = $row["called_name"];
+		$this->contact_greeting = $row["greeting"];
+
+		$this->contact_email = $row["email"];
+
+		$this->contact_phone = $row["phone"];
+		$this->contact_pager = $row["pager"];
+		$this->contact_cellphone = $row["cellphone"];
+		$this->contact_fax = $row["fax"];
+		
+		$this->contact_location_info = $row["location_info"];
+		$this->contact_street_address_1 = $row["street_address_1"];
+		$this->contact_street_address_2 = $row["street_address_2"];
+		$this->contact_street_address_3 = $row["street_address_3"];
+		$this->contact_city = $row["city"];
+		$this->contact_region_id = $row["region_id"];
+		$this->contact_provstate_id = $row["provstate_id"];
+		$this->contact_country_id = $row["country_id"];
+		$this->contact_postal_code = $row["postal_code"];
+
+		// Now pull out from the contact_employer table.
+		
+		$sql = ("
+			SELECT DISTINCT *
+			FROM contact_employer
+			WHERE contact_id='" . $contact_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->contact_employer_id = $row["employer_id"];
+		if ($row["department_id"])
+		{
+			$this->contact_department_id = $row["department_id"];
+		}
+		elseif (!$row["department_id"])
+		{
+			$this->contact_department_id = 'none';
+		}
+		$this->contact_position_title = $row["position"];
+		$this->contact_department_name = $row["department_name"];
+		
+		$this->contact_changes_recorded_1 = $row["changes_recorded_1"];
+		$this->contact_changes_recorded_2 = $row["changes_recorded_2"];
+		$this->contact_changes_recorded_3 = $row["changes_recorded_3"];
+		$this->contact_change_by_1 = $row["change_by_1"];
+		$this->contact_change_by_2 = $row["change_by_2"];
+		$this->contact_change_by_3 = $row["change_by_3"];
+		$this->contact_change_date_1 = $row["change_date_1"];
+		$this->contact_change_date_2 = $row["change_date_2"];
+		$this->contact_change_date_3 = $row["change_date_3"];
+
+		$this->contact_last_action_on = $row["last_action_on"];
+		$this->contact_last_action_by = $row["last_action_by"];
+		$this->contact_last_action_id = $row["last_action_id"];
+		
+		$this->contact_entered_on = $row["entered_on"];
+		$this->contact_entered_by = $row["entered_by"];
+		
+		// Now pull out co-op department specific values.
+		
+		$sql = ("
+			SELECT DISTINCT comments
+			FROM employer_contact_comments
+			WHERE department_id='" . $auth->department . "'
+			AND employer_contact_id='" . $this->contact_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->contact_department_comments = $row["comments"];
+
+		// Now get the contact flags.
+
+		$sql = ("
+			SELECT DISTINCT a.flag_id
+			FROM contact_flags_set AS a, department_contact_flags AS b
+			WHERE b.department_id='" . $auth->department . "'
+			AND a.contact_id='" . $contact_id . "'
+			AND a.flag_id=b.flag_id
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		
+		while ($row = $result->FetchRow())
+		{
+			$this->contact_flags[] = $row["flag_id"];
+		}
+
+		// Get the status for this contact specific to the department
+
+        $sql = ("
+                SELECT status_id
+                FROM department_contact_status
+                WHERE contact_id='" . $contact_id . "'
+                AND department_id='" . $auth->department . "'
+                AND current_status = '1'
+                ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $this->contact_status_id = $row["status_id"];
+
+        // Get the status flags for this contact 
+
+        $this->contact_status_flag_array = array();
+
+        $sql = ("
+            SELECT status_flag_id
+            FROM employer_info_status_flags_join
+            WHERE contact_id = '".$contact_id."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        if ($result->RecordCount() > 0)
+        {
+            while ($row = $result->FetchRow())
+            {
+                $this->contact_status_flag_array[] = $row['status_flag_id'];
+            }
+        }
+
+        $this->contact_deleted_flag = $row["deleted_flag"];
+
+
+		// Get the contact note ids
+
+		$sql = ("
+			SELECT DISTINCT contact_actions_id
+			FROM contact_actions_set
+			WHERE contact_id='" . $contact_id . "'
+            AND action_id = '".GENERIC_NOTE."'
+			ORDER BY contact_actions_id DESC
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		
+		while ($row = $result->FetchRow())
+		{
+			$this->contact_note_ids[] = $row["contact_actions_id"];
+		}
+
+		// Get the contact action ids
+
+		$sql = ("
+			SELECT DISTINCT contact_actions_id
+			FROM contact_actions_set
+			WHERE contact_id='" . $contact_id . "'
+            AND action_id != '".GENERIC_NOTE."'
+			ORDER BY contact_actions_id DESC
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		
+		while ($row = $result->FetchRow())
+		{
+			$this->contact_action_ids[] = $row["contact_actions_id"];
+		}
+	}
+	
+	// Function below is used to set the company values in the contact object with the given inputs.
+
+	function set_company_values($company_name, $company_website, $company_description, $company_street_address_1,
+        $company_street_address_2, $company_street_address_3, $company_city, $company_region_id, $company_provstate_id, 
+        $company_country_id, $company_postal_code, $company_phone, $company_fax, $company_email, $company_flags, $company_industry_id,
+        $company_size_id, $company_type_id, $company_department_comments, $company_name_legitimate, $company_status, $company_new_note, 
+        $company_note_ids, $company_delete_note_ids)
+    {
+        $this->company_name = removeSlashes(trim($company_name));
+        $this->company_website = removeSlashes(trim(normalizeWebsite($company_website)));
+        $this->company_description = removeSlashes(trim($company_description));
+        $this->company_street_address_1 = removeSlashes(trim($company_street_address_1));
+        $this->company_street_address_2 = removeSlashes(trim($company_street_address_2));
+        $this->company_street_address_3 = removeSlashes(trim($company_street_address_3));
+        $this->company_city = removeSlashes(trim($company_city));
+        $this->company_region_id = $company_region_id;
+        $this->company_provstate_id = $company_provstate_id;
+        $this->company_country_id = $company_country_id;
+        $this->company_postal_code = removeSlashes(trim($company_postal_code));
+        $this->company_phone = removeSlashes(trim($company_phone));
+        $this->company_fax = removeSlashes(trim($company_fax));
+        $this->company_email = removeSlashes(trim($company_email));
+        $this->company_flags = $company_flags;
+        $this->company_industry_id = $company_industry_id;
+        $this->company_size_id = $company_size_id;
+        $this->company_type_id = $company_type_id;
+        $this->company_department_comments = removeSlashes(trim($company_department_comments));
+        $this->company_name_legitimate = removeSlashes(trim($company_name_legitimate));
+        $this->company_status = removeSlashes(trim($company_status));
+        $this->company_new_note = removeSlashes(trim($company_new_note));
+        $this->company_note_ids = removeSlashes($company_note_ids);
+        $this->company_delete_note_ids = removeSlashes($company_delete_note_ids);
+    }
+
+    // Function below is used to set the department values in the contact object with the given inputs.
+
+    function set_department_values($department_company_id, $department_name, $department_website, $department_description,
+        $department_location_info, $department_street_address_1, $department_street_address_2, $department_street_address_3, 
+        $department_city, $department_region_id, $department_provstate_id, $department_country_id, $department_postal_code, 
+        $department_phone, $department_fax, $department_email, $department_flags, $department_industry_id, $department_size_id, 
+        $department_department_comments, $department_name_legitimate, $department_status, $department_new_note, $department_note_ids,
+        $department_delete_note_ids)
+    {
+        $this->department_company_id = $department_company_id;
+        $this->department_name = removeSlashes(trim($department_name));
+        $this->department_website = removeSlashes(trim(normalizeWebsite($department_website)));
+        $this->department_description = removeSlashes(trim($department_description));
+        $this->department_location_info = removeSlashes(trim($department_location_info));
+        $this->department_street_address_1 = removeSlashes(trim($department_street_address_1));
+        $this->department_street_address_2 = removeSlashes(trim($department_street_address_2));
+        $this->department_street_address_3 = removeSlashes(trim($department_street_address_3));
+        $this->department_city = removeSlashes(trim($department_city));
+        $this->department_region_id = $department_region_id;
+        $this->department_provstate_id = $department_provstate_id;
+        $this->department_country_id = $department_country_id;
+        $this->department_postal_code = removeSlashes(trim($department_postal_code));
+        $this->department_phone = removeSlashes(trim($department_phone));
+        $this->department_fax = removeSlashes(trim($department_fax));
+        $this->department_email = removeSlashes(trim($department_email));
+        $this->department_flags = $department_flags;
+        $this->department_industry_id = $department_industry_id;
+        $this->department_size_id = $department_size_id;
+        $this->department_department_comments = removeSlashes(trim($department_department_comments));
+        $this->department_name_legitimate = removeSlashes(trim($department_name_legitimate));
+        $this->department_status = removeSlashes(trim($department_status));
+        $this->department_new_note = removeSlashes(trim($department_new_note));
+        $this->department_note_ids = removeSlashes($department_note_ids);
+        $this->department_delete_note_ids = removeSlashes($department_delete_note_ids);
+    }
+
+	// Function below is used to set the contact values in the contact object with the given inputs.
+
+    function set_contact_values($contact_employer_id, $contact_department_id, $contact_title, $contact_first_name,
+        $contact_middle_name, $contact_last_name, $contact_called_name, $contact_greeting, $contact_email, $contact_phone, 
+        $contact_pager, $contact_cellphone, $contact_fax, $contact_position_title, $contact_department_name, $contact_location_info, 
+        $contact_street_address_1, $contact_street_address_2, $contact_street_address_3, $contact_city, $contact_region_id, 
+        $contact_provstate_id, $contact_country_id, $contact_postal_code, $contact_department_comments, 
+        $contact_flags, $contact_new_note, $contact_note_ids, $contact_delete_note_ids)
+    {
+        $this->contact_employer_id = $contact_employer_id;
+        $this->contact_department_id = $contact_department_id;
+        $this->contact_title = removeSlashes(trim($contact_title));
+        $this->contact_first_name = removeSlashes(trim($contact_first_name));
+        $this->contact_middle_name = removeSlashes(trim($contact_middle_name));
+        $this->contact_last_name = removeSlashes(trim($contact_last_name));
+        $this->contact_called_name = removeSlashes(trim($contact_called_name));
+        $this->contact_greeting = removeSlashes(trim($contact_greeting));
+        $this->contact_email = removeSlashes(trim($contact_email));
+        $this->contact_phone = removeSlashes(trim($contact_phone));
+        $this->contact_pager = removeSlashes(trim($contact_pager));
+        $this->contact_cellphone = removeSlashes(trim($contact_cellphone));
+        $this->contact_fax = removeSlashes(trim($contact_fax));
+        $this->contact_position_title = removeSlashes(trim($contact_position_title));
+        $this->contact_department_name = removeSlashes(trim($contact_department_name));
+        $this->contact_location_info = removeSlashes(trim($contact_location_info));
+        $this->contact_street_address_1 = removeSlashes(trim($contact_street_address_1));
+        $this->contact_street_address_2 = removeSlashes(trim($contact_street_address_2));
+        $this->contact_street_address_3 = removeSlashes(trim($contact_street_address_3));
+        $this->contact_city = removeSlashes(trim($contact_city));
+        $this->contact_region_id = $contact_region_id;
+        $this->contact_provstate_id = $contact_provstate_id;
+        $this->contact_country_id = $contact_country_id;
+        $this->contact_postal_code = removeSlashes(trim($contact_postal_code));
+        $this->contact_department_comments = removeSlashes(trim($contact_department_comments));
+        $this->contact_flags = $contact_flags;
+        $this->contact_new_note = removeSlashes(trim($contact_new_note));
+        $this->contact_note_ids = removeSlashes($contact_note_ids);
+        $this->contact_delete_note_ids = removeSlashes($contact_delete_note_ids);
+    }
+}

@@ -1,0 +1,888 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: SkeletonHistory.class                                              |
+ +------------------------------------------------------------------------------+
+ | Description: This class stores the minimum information required for a        |
+ |              history record. It is useful in the placement modules as a      |
+ |              user will place a student and will not write down a lot of      |
+ |              information. It also contains all the functions required to     |
+ |              place a student and clean up other tables to make them placed.  |
+ |              In general, we use this class as a parent to child classes as   |
+ |              the children will take on my specialized tasks.                 |
+ +------------------------------------------------------------------------------+
+
+ list of functions other than set/validate functions:
+
+ function isStudentPlaced()
+ function isStudentEligible()
+ function generateWorkTermNumber()
+ function syncNonContainersWithHistory() 
+ function generateHistoryRecordsTerm()
+ function generateHistoryRecordsHours()
+ function getArrayOfCurrentDepartments()
+ function setPlacedFlag()
+ function unsetEligibleFlag()
+ function disableStudentApplications()
+*/
+
+include_once('history/container_functions.inc');
+//make sure functions.inc is included
+include_once('misc/functions.inc');
+
+class SkeletonHistory {
+
+	// Declare All Variables
+    var $first_name;                //string
+    var $last_name;                 //string
+	var $student_number;            //numeric
+    var $student_department_id;     //int
+    var $record_id;                 //int
+    var $discipline_id;             //int
+    var $discipline_name;           //string
+
+	var $year;                      //int
+	var $term_id;                   //int
+
+    var $company_name;              //string
+    var $employer_id;               //int
+
+    var $division_name;             //string
+    var $division_id;               //int
+
+    var $contact_id;                //int
+
+    var $job_id;                    //int
+    var $job_code;                  //string
+
+    var $start_date;                //date (YYYY-MM-DD)
+    var $end_date;                  //date (YYYY-MM-DD)
+
+    var $work_term_hours_per_week;  //double
+    var $work_term_length;          //int
+    var $work_term_number;          //int
+
+    var $history_containers_min_days_for_wt = 28; // int
+
+    var $container_mode;            //int = 0 or CONTAINER_TERM or CONTAINER_HOURS, it tells us what type of history container the student is using.
+
+    var $placed_flag;               // int
+    var $eligible_flag;             // int
+
+    var $keep_eligible_flag;        // int 0 or 1, used to keep students eligible after they're placed (primarily for students that use containers)
+
+	// Constructor
+	function SkeletonHistory($skeletonHistory) {
+
+		if ($skeletonHistory) {
+            $this->first_name = $skeletonHistory->first_name;
+            $this->last_name = $skeletonHistory->last_name;
+            $this->student_number = $skeletonHistory->student_number;
+            $this->student_department_id = $skeletonHistory->student_department_id;
+            $this->record_id = $skeletonHistory->record_id;
+            $this->discipline_id = $skeletonHistory->discipline_id;
+
+            $this->year = $skeletonHistory->year;
+            $this->term_id = $skeletonHistory->term_id;
+
+            $this->company_name = $skeletonHistory->company_name;
+            $this->employer_id = $skeletonHistory->employer_id;
+
+            $this->division_name = $skeletonHistory->division_name;
+            $this->division_id= $skeletonHistory->division_id;
+
+            $this->contact_id = $skeletonHistory->contact_id;
+            $this->job_id = $skeletonHistory->job_id;
+            $this->job_code = $skeletonHistory->job_code;
+
+            $this->start_date = $skeletonHistory->start_date;
+            $this->end_date = $skeletonHistory->end_date;
+
+            $this->work_term_hours_per_week = $skeletonHistory->work_term_hours_per_week;
+            $this->work_term_length = $skeletonHistory->work_term_length;
+            $this->work_term_number= $skeletonHistory->work_term_number;
+
+            $this->history_containers_min_days_for_wt = $skeletonHistory->history_containers_min_days_for_wt;
+            $this->container_mode = $skeletonHistory->container_mode;
+
+            $this->placed_flag = $skeletonHistory->placed_flag;
+            $this->eligible_flag = $skeletonHistory->eligible_flag;
+
+            $this->keep_eligible_flag = $skeletonHistory->keep_eligible_flag;
+		}
+	}
+
+    // Begin set methods, all set methods are extremely basic, each variable declared above will have a corresponding set method below. 
+    // We keep them simple so many children classes can use these set methods. 
+
+    function setFirstName($first_name) {
+        $this->first_name = trim(removeSlashes(addslashes($first_name)));
+    }
+    function setLastName($last_name) {
+        $this->last_name = trim(removeSlashes(addslashes($last_name)));
+    }
+    function setStudentNumber($student_number) {
+        $this->student_number = trim(removeSlashes(addslashes($student_number)));
+    }
+    function setStudentDepartmentID($student_department_id) {
+        $this->student_department_id = trim(removeSlashes(addslashes($student_department_id)));
+    }
+    function setRecordID($record_id) {
+        $this->record_id = trim(removeSlashes(addslashes($record_id)));
+    }
+    function setDisciplineID($discipline_id) {
+        $this->discipline_id = trim(removeSlashes(addslashes($discipline_id)));
+    }
+    function setDisciplineName($discipline_name) {
+        $this->discipline_name = trim(removeSlashes(addslashes($discipline_name)));
+    }
+    function setYear($year) {
+        $this->year = trim(removeSlashes(addslashes($year)));
+    }
+    function setTermID($term_id) {
+        $this->term_id = trim(removeSlashes(addslashes($term_id)));
+    }
+    function setCompanyName($company_name) {
+        $this->company_name = trim(removeSlashes(addslashes($company_name)));
+    }
+    function setEmployerID($employer_id) {
+        $this->employer_id = trim(removeSlashes(addslashes($employer_id)));
+    }
+    function setDivisionName($division_name) {
+        $this->division_name = trim(removeSlashes(addslashes($division_name)));
+    }
+    function setDivisionID($division_id) {
+        $this->division_id = trim(removeSlashes(addslashes($division_id)));
+    }
+    function setContactID($contact_id) {
+        $this->contact_id = trim(removeSlashes(addslashes($contact_id)));
+    }
+    function setJobID($job_id) {
+        $this->job_id = trim(removeSlashes(addslashes($job_id)));
+    }
+    function setJobCode($job_code) {
+        $this->job_code = trim(removeSlashes(addslashes($job_code)));
+    }
+    function setStartDate($start_date) {
+        $this->start_date = trim(removeSlashes(addslashes($start_date)));
+    }
+    function setEndDate($end_date) {
+        $this->end_date = trim(removeSlashes(addslashes($end_date)));
+    }
+    function setWorkTermHoursPerWeek($work_term_hours_per_week) {
+        $this->work_term_hours_per_week = trim(removeSlashes(addslashes($work_term_hours_per_week)));
+    }
+    function setWorkTermLength($work_term_length) {
+        $this->work_term_length = trim(removeSlashes(addslashes($work_term_length)));
+    }
+    function setWorkTermNumber($work_term_number) {
+        $this->work_term_number = trim(removeSlashes(addslashes($work_term_number)));
+    }
+    function setHistoryContainersMinDaysForWT($history_containers_min_days_for_wt) {
+        $this->history_containers_min_days_for_wt = trim(removeSlashes(addslashes($history_containers_min_days_for_wt)));
+    }
+    function setContainerMode($container_mode) {
+        $this->container_mode = trim(removeSlashes(addslashes($container_mode)));
+    }
+    function setKeepEligibleFlag($keep_eligible_flag) {
+        $this->keep_eligible_flag = $keep_eligible_flag;
+    }
+
+    // Begin validation functions. 
+    
+    function validateFirstName() {
+        if (isset($this->first_name) && preg_match("/%/",$this->first_name)) {
+            return "The first name you have entered contains characters that are not numbers or letters. Please re-enter the first name.";
+        }
+    }
+
+    function validateLastName() {
+        if (isset($this->last_name) && preg_match("/%/",$this->last_name)) {
+            return "The last name you have entered contains characters that are not numbers or letters. Please re-enter the last name.";
+        }
+    }
+    function validateStudentNumber() {
+        if (isset($this->student_number) && !isValidStudentNumber($this->student_number)) {
+            return "The given student number is not valid. Check to make sure this student number exists in the database.";
+        }
+    }
+    function validateTermID() {
+        if (isset($this->term_id) && !isValidTermID($this->term_id)) {
+            return "The given term is not valid. Please re-enter the term.";
+        }
+    }
+    function validateJobID() {
+        $sql = ("
+            SELECT job_id 
+            FROM job_info
+            WHERE job_id = '".$this->job_id."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        if (!$result->RecordCount())
+        {
+            return "The given job is not valid. Please select a valid job to place the student in.";
+        }
+    }
+    function validateYear() {
+        if (isset($this->year) && !is_numeric($this->year)) {
+            return "The given year is not valid. Please re-enter the year.";
+        }
+    }
+    function validateStartDate() {
+        if (isset($this->start_date) && !isValidDate2($this->start_date)) {
+            return "The given start date is invalid. Please check that the date exists, and ensure that the date format is YYYY-MM-DD.";
+        }
+    }
+    function validateEndDate() {
+        if (isset($this->end_date) && !isValidDate2($this->end_date)) {
+            return "The given end date is invalid. Please check that the date exists, and ensure that the date format is YYYY-MM-DD.";
+        }
+    }
+    function validateStartAndEndDate() {
+        if (isset($this->start_date) && isset($this->end_date))
+        {
+            if (strtotime($this->start_date) >= strtotime($this->end_date)) {
+                return "The given end date is before the start date. Please verify dates and re-enter them.";
+            }
+            elseif (count_days($this->start_date, $this->end_date) < $this->history_containers_min_days_for_wt) {
+                return "A work term must span at least ". $this->history_containers_min_days_for_wt . " days. Please adjust the start and end dates.";
+            }
+        }
+    }
+    function validateWorkTermHoursPerWeek() {
+        if (isset($this->work_term_hours_per_week) && (!isNumber($this->work_term_hours_per_week) || $this->work_term_hours_per_week <= 0)) {
+            return "The given hours per week is not valid. Please ensure that it is numeric and a positive number greater than zero.";
+        }
+        elseif ($this->work_term_hours_per_week > 168) {
+            return "The given hours per week exceeds 168 hours per week, please re-enter the number of hours per week.";
+        }
+    }
+    function validateWorkTermLength() {
+        if (isset($this->work_term_hours_per_week) && (!isInteger($this->work_term_length) || $this->work_term_length <= 0)) {
+            return "The given work term length is not valid. Please ensure that it is numeric and a positive number greater than zero.";
+        }
+    }
+
+    // Function that checks to see if a student has already been placed in that term (assumes student is not using history containers).
+    // This function caches its result during the execution of the script. So, if you run isStudentPlaced multiple times on a page, 
+    // it will not requery the database over and over again if and only if an instance of this object exists. 
+    function isStudentPlaced() 
+    {
+        if (func_num_args() == 3) 
+        {
+            $record_id = func_get_arg(0);
+            $term_id = func_get_arg(1);
+            $year = func_get_arg(2);
+
+            $sql = ("
+                SELECT student_number, department_id
+                FROM student_department
+                WHERE record_id = '".$record_id."'
+                ");
+            $result = $GLOBALS['dbh']->Execute($sql);
+            $row = $result->FetchRow();
+
+            $student_number = $row['student_number'];
+            $student_department_id = $row['department_id'];
+        }
+        else
+        {
+            $student_number = $this->student_number;
+            $student_department_id = $this->student_department_id;
+            $term_id = $this->term_id;
+            $year = $this->year;
+        }
+
+        if (!isset($this->placed_flag))
+        {
+            $sql = ("
+                SELECT history_id
+                FROM history
+                WHERE term_id = '".$term_id."'
+                AND year='".$year."' AND student_number='".$student_number."' AND department_id = '".$student_department_id."'
+                ");
+            $results = $GLOBALS['dbh']->Execute($sql);
+            $this->placed_flag = $results->RecordCount();
+        }
+
+        return $this->placed_flag;
+    }
+
+    // Function that checks to see if a student is eligible for that term.
+    // This function caches its result. So, if you run isStudentEligible multiple times on a page, it will not requery the database over and over again. 
+    function isStudentEligible() 
+    {
+        if (!isset($this->eligible_flag))
+        {
+            $sql = ("
+                SELECT student_flags_id
+                FROM eligible_placed
+                WHERE term_id = '".$this->term_id."'
+                AND year='".$this->year."' AND record_id='".$this->record_id."'
+                AND student_flags_id = '".ELIGIBLE_FLAG."'
+                ");
+            $results = $GLOBALS['dbh']->Execute($sql);
+            $this->eligible_flag = $results->RecordCount();
+        }
+
+        return $this->eligible_flag;
+    }
+
+    // an all important function that determines what work term number a history record should be assigned
+    // :IMPORTANT: When calling this function, history records are adjusted to accomodate the new work term number.
+    //             DO NOT call this function unless you're reading to insert a new history record right away.
+    //             IN ADDITION, this function should only be called for history records that DON'T use containers.
+
+    // You have been warned...
+    function generateWorkTermNumber() 
+    {
+
+        // I already told you, you're not supposed to use this with containers! Why must you defy the warning!
+        if ($this->container_mode == CONTAINER_HOURS || $this->container_mode == CONTAINER_TERM) 
+        {
+            break;
+        }
+
+        $sql = ("
+            SELECT MAX(work_term_number) AS work_term_number
+            FROM history 
+            WHERE student_number='".$this->student_number."' 
+            AND department_id='".$this->student_department_id."'
+            ");
+        $results = $GLOBALS['dbh']->Execute($sql);
+        $wt_row  = $results->FetchRow();
+
+        if (!$wt_row['work_term_number']) 
+        {
+            $work_term_number = 1;
+        } 
+        else 
+        {
+            // find a suitable workterm number, keeping in mind a placement can occur in the future or the past
+            $sql = ("
+                SELECT h.history_id, h.year , t.year_order
+                FROM history h
+                INNER JOIN term t
+                ON h.term_id = t.term_id
+                WHERE student_number = '".$this->student_number."'
+                AND department_id  = '".$this->student_department_id."'
+                ");
+            $results = $GLOBALS['dbh']->Execute($sql);
+            
+            // fetch all the previous workterms into an array
+            $work_terms = array();
+            while ($row = $results->FetchRow()) {
+                $work_terms[] = $row;//array('history_id' => $row['history_id']
+                                     //,'term_id'    => $row['term_id']
+                                     //,'year_order' => $row['year_order']
+                                     //,'year'       => $row['year']);
+            }
+            // add an element for the workterm we're adding
+            $curr_work_term = array('term_id'    => $this->term_id
+                                   ,'year_order' => getTermYearOrder($this->term_id)
+                                   ,'year'       => $this->year);
+            $work_terms[]   = $curr_work_term;
+
+            // sort the array by term and year
+            usort($work_terms,
+                    // anonymous function that compares 2 workterms by year and term
+                    create_function('$a, $b',
+                        'if ($a["year"].$a["year_order"] == $b["year"].$b["year_order"]) {
+                             return 0;
+                         }
+                         return ($a["year"].$a["year_order"] < $b["year"].$b["year_order"]) ? -1 : 1;'));
+
+            // determine the workterm number for the term we're adding
+            $work_term_number = array_search($curr_work_term, $work_terms) + 1;
+
+            // shift all the workterms after the current one forward by one term
+            for ($i = $work_term_number; $i <= sizeof($work_terms); $i++) {
+                $sql = "UPDATE history
+                        SET    work_term_number = '".($i + 1)."'
+                        WHERE  history_id       = '".$work_terms[$i]['history_id']."'";
+                $GLOBALS['dbh']->Execute($sql);
+            }
+        }
+
+        return $work_term_number;
+    }
+
+    // This function renumbers a student's history records. The work term numbers are updated based on term and year
+    // of the history record. Please note that this function should ONLY be used for students NOT using containers. 
+    // This function will update history records when you call this function, so be careful when using this. This 
+    // function should be called after the term/year of a history record is changed (if it doesn't use containers).
+    function syncNonContainersWithHistory() 
+    {
+        // I already told you, you're not supposed to use this with containers! Why must you defy the warning!
+        if ($this->container_mode == CONTAINER_HOURS || $this->container_mode == CONTAINER_TERM) 
+        {
+            break;
+        }
+
+        if (func_num_args() == 2)
+        {
+            $student_number = func_get_arg(0);
+            $student_department_id = func_get_arg(1);
+        }
+        else
+        {
+            $student_number = $this->student_number;
+            $student_department_id= $this->student_department_id;
+        }
+
+        $sql = ("
+            SELECT h.history_id, h.year , t.year_order
+            FROM history h
+            INNER JOIN term t
+            ON h.term_id = t.term_id
+            WHERE student_number = '".$student_number."'
+            AND department_id  = '".$student_department_id."'
+            ");
+        $results = $GLOBALS['dbh']->Execute($sql);
+
+        // if they don't have history records, nothing to sync, otherwise to the following below
+        if ($results->RecordCount() > 0)
+        {
+            // fetch all the workterms into an array
+            $work_terms = array();
+            while ($row = $results->FetchRow()) {
+                $work_terms[] = $row;
+            }
+
+            // sort the array by term and year
+            usort($work_terms,
+                    // anonymous function that compares 2 workterms by year and term
+                    create_function('$a, $b',
+                        'if ($a["year"].$a["year_order"] == $b["year"].$b["year_order"]) {
+                             return 0;
+                         }
+                         return ($a["year"].$a["year_order"] < $b["year"].$b["year_order"]) ? -1 : 1;'));
+
+            // Re-number the history records in the proper order
+            for ($i = 0; $i < sizeof($work_terms); $i++) {
+                $sql = "UPDATE history
+                        SET    work_term_number = '".($i + 1)."'
+                        WHERE  history_id       = '".$work_terms[$i]['history_id']."'";
+                $GLOBALS['dbh']->Execute($sql);
+            }
+        }
+    }
+
+    // Function used to automatically split up history records depending on the number of months a student has worked.  
+    // We assume a start_date, work_term_length, and a discipline_id have already been set before  using this. This is 
+    // only to be used for hours based history containers. 
+
+    // The function returns a two-dimensional array with information required to build a history record. 
+    function generateHistoryRecordsTerm() 
+    {
+        assert($this->container_mode == CONTAINER_TERM);
+
+        // figure out how many months a container is 
+        $container_length_sql = ("
+            SELECT history_containers_length_term
+            FROM discipline
+            WHERE discipline_id = '".$this->discipline_id."'
+            ");
+        $container_length_result = $GLOBALS['dbh']->Execute($container_length_sql);
+        $container_length_row = $container_length_result->FetchRow();
+        $container_length = $container_length_row['history_containers_length_term'];
+
+        // figure out how many full containers we have, and partial ones.
+        // eg, if the container size is 4 months, and we have a 19 month work term, 
+        //     we get 4 full containers, and a partially filled container
+        $num_full_containers = (int) ($this->work_term_length / $container_length);
+        $partial_container_length = $this->work_term_length % $container_length;
+
+        $arrResults = array();
+        $arrIndex = 0;
+        $start_date = $this->start_date;
+        $end_date = 0;
+
+        if ($num_full_containers)
+        {
+            for ($i = 0; $i < $num_full_containers; $i++)
+            {
+                if ($i != 0)
+                {
+                    // Start of a new container, add one day to the previous end date, and this
+                    // is our new start date. 
+                    $start_date = date("Y-m-d",strtotime("+1 day",strtotime($end_date)));
+                }
+
+                // Add x months to the start date, and this is our new end date. This is based on our container size.  
+                $end_date = date("Y-m-d",strtotime("+".$container_length." Month",strtotime($start_date)));
+
+                // figure out what term and year this date belongs to. 
+                $arr_term_year = getTermYearWithGracePeriod($start_date);
+
+                $arrResults[$arrIndex]["start_date"] = $start_date;
+                $arrResults[$arrIndex]["end_date"] = $end_date;
+                $arrResults[$arrIndex]["work_term_length"] = $container_length;
+                $arrResults[$arrIndex]["term_id"] = $arr_term_year["term"];
+                $arrResults[$arrIndex]["year"] = $arr_term_year["year"];
+
+                $arrIndex++;
+            }
+        }
+
+        // Same algorithm as above, except we're dealing with containers that are not full. 
+        if ($partial_container_length)
+        {
+            if ($arrIndex)
+            {
+                $start_date = date("Y-m-d",strtotime("+1 day",strtotime($end_date)));
+            }
+
+            $end_date = date("Y-m-d",strtotime("+".$partial_container_length." Month",strtotime($start_date)));
+
+            $arr_term_year = getTermYearWithGracePeriod($start_date);
+
+            $arrResults[$arrIndex]["start_date"] = $start_date;
+            $arrResults[$arrIndex]["end_date"] = $end_date;
+            $arrResults[$arrIndex]["work_term_length"] = $partial_container_length;
+            $arrResults[$arrIndex]["term_id"] = $arr_term_year["term"];
+            $arrResults[$arrIndex]["year"] = $arr_term_year["year"];
+        }
+
+        return $arrResults;
+    }
+
+    // Function used to automatically split up history records depending on the number of hours a student works. 
+    // We assume a start_date, end_date, work_term_hours_per_week, and a discipline_id have already been set before
+    // using this. This is only to be used for hours based history containers. 
+
+    // The function returns a two-dimensional array with information required to build a history record. 
+    function generateHistoryRecordsHours() 
+    {
+        assert($this->container_mode == CONTAINER_HOURS);
+
+        // Figure out how many hours a container has, and its spill over. 
+        $container_length_sql = ("
+            SELECT history_containers_length_hours, history_containers_spill_over_hours
+            FROM discipline
+            WHERE discipline_id = '".$this->discipline_id."'
+            ");
+        $container_length_result = $GLOBALS['dbh']->Execute($container_length_sql);
+        $container_length_row = $container_length_result->FetchRow();
+        $container_length = $container_length_row['history_containers_length_hours'];
+
+        $hours_per_day = $this->work_term_hours_per_week / 7;
+        $num_days = count_days($this->start_date, $this->end_date);
+
+        $total_hours_worked = $hours_per_day * $num_days;
+
+        $num_full_containers = (int) ($total_hours_worked / $container_length);
+        $partial_container_length = round($total_hours_worked % $container_length);
+
+        // Say our container length is 560 hours, and the number of hours this student works is 561 hours. So, the partial container length
+        // will be 1 hour. We don't want to create a history record for such a short work term. So, we bundle this last hour into the last
+        // full container. history_containers_spill_over_hours dictates how many hours you need before a new work term record is created. 
+        if ($partial_container_length <= $container_length_row['history_containers_spill_over_hours'])
+        {
+            $spill_over_flag = 1;
+        }
+
+        $arrResults = array();
+        $arrIndex = 0;
+        $start_date = $this->start_date;
+        $end_date = 0;
+
+        if ($num_full_containers)
+        {
+            $num_days_per_container = ceil($container_length / $hours_per_day);
+
+            for ($i = 0; $i < $num_full_containers; $i++)
+            {
+                if ($i != 0)
+                {
+                    // Start of a new container, add one day to the previous end date, and this
+                    // is our new start date. 
+                    $start_date = date("Y-m-d",strtotime("+1 day",strtotime($end_date)));
+                }
+
+                // Add x days to the start date, and this is our new end date. This is based on our container size.
+                $end_date = date("Y-m-d",strtotime("+".$num_days_per_container." day",strtotime($start_date)));
+
+                // add spilled over work term to last full container, adjust end date as required. 
+                if ($i == ($num_full_containers - 1) && $spill_over_flag)
+                {
+                    $num_days_per_partial_container = ceil($partial_container_length / $hours_per_day);
+                    //$end_date = date("Y-m-d",strtotime("+".$num_days_per_partial_container." day",strtotime($end_date)));
+                    $end_date = $this->end_date;
+
+                    // bypass partial container algorithm below
+                    $partial_container_length = null;
+                }
+                
+                // figure out what term and year this date belongs to. 
+                $arr_term_year = getTermYearWithGracePeriod($start_date);
+
+                $arrResults[$arrIndex]["start_date"] = $start_date;
+                $arrResults[$arrIndex]["end_date"] = $end_date;
+                $arrResults[$arrIndex]["term_id"] = $arr_term_year["term"];
+                $arrResults[$arrIndex]["year"] = $arr_term_year["year"];
+
+                $arrIndex++;
+            }
+        }
+
+        // Same algorithm as above, except we're dealing with containers that are not full. 
+        if ($partial_container_length)
+        {
+            $num_days_per_partial_container = ceil($partial_container_length / $hours_per_day);
+
+            if ($arrIndex)
+            {
+                $start_date = date("Y-m-d",strtotime("+1 day",strtotime($end_date)));
+            }
+
+            //$end_date = date("Y-m-d",strtotime("+".$num_days_per_partial_container." day",strtotime($start_date)));
+            $end_date = $this->end_date;
+
+            $arr_term_year = getTermYearWithGracePeriod($start_date);
+
+            $arrResults[$arrIndex]["start_date"] = $start_date;
+            $arrResults[$arrIndex]["end_date"] = $end_date;
+            $arrResults[$arrIndex]["term_id"] = $arr_term_year["term"];
+            $arrResults[$arrIndex]["year"] = $arr_term_year["year"];
+        }
+
+        return $arrResults;
+    }
+
+    // returns an array of record ids, if you get more than one back, it means the student is in multiple departments. 
+    function getArrayOfCurrentDepartments() 
+    {
+        $sql = ("
+            SELECT sd.record_id
+            FROM student_department sd
+            INNER JOIN student_flags_join sfj
+            ON sd.record_id = sfj.record_id
+            WHERE sd.student_number = '".$this->student_number."' AND sfj.student_flags_id = '".CURRENT_FLAG."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+
+        $arr_result = array();
+        if ($result->RecordCount()) 
+        {
+            while($row = $result->FetchRow())
+            {
+                $arr_result[] = $row['record_id'];
+            }
+        }
+
+        return $arr_result;
+    }
+
+    //this function should be called after a history record has been created, and the student is placed in it
+    //note, this function is an overloaded function. If you give it 0 parameters, it'll go ahead and use the
+    //term_id and year it currently has. If you pass it two parameters, it'll use the provided term_id and year. 
+    function setPlacedFlag() 
+    {
+        if (func_num_args() == 2)
+        {
+            $record_id = $this->record_id;
+            $term_id = func_get_arg(0);
+            $year = func_get_arg(1);
+        }
+        elseif (func_num_args() == 3) 
+        {
+            $record_id = func_get_arg(0);
+            $term_id = func_get_arg(1);
+            $year = func_get_arg(2);
+        }
+        else
+        {
+            $record_id = $this->record_id;
+            $term_id = $this->term_id;
+            $year = $this->year;
+        }
+
+        // If we don't have a placed flag for this term, go ahead and insert one. 
+        $sql = ("
+            SELECT student_flags_id
+            FROM eligible_placed
+            WHERE term_id = '".$term_id."' AND year = '".$year."' AND record_id = '".$record_id."' AND student_flags_id = '".PLACED_FLAG."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        if (!$result->RecordCount())
+        {
+            $sql = ("
+                INSERT INTO eligible_placed 
+                (term_id,student_flags_id,year,record_id) 
+                VALUES ('".$term_id."','".PLACED_FLAG."','".$year."','".$record_id."')
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+    }
+
+    //deletes student's eligible flag
+    //this function should be called after a history record has been created, and the student is placed in it
+    //note, this function is an overloaded function. If you give it 0 parameters, it'll go ahead and use the
+    //term_id and year it currently has. If you pass it two parameters, it'll use the provided term_id and year. 
+    function unsetEligibleFlag() 
+    {
+        if (func_num_args() == 2)
+        {
+            $record_id = $this->record_id;
+            $term_id = func_get_arg(0);
+            $year = func_get_arg(1);
+        }
+        elseif (func_num_args() == 3) 
+        {
+            $record_id = func_get_arg(0);
+            $term_id = func_get_arg(1);
+            $year = func_get_arg(2);
+        }
+        else
+        {
+            $record_id = $this->record_id;
+            $term_id = $this->term_id;
+            $year = $this->year;
+        }
+
+        $sql = ("
+            DELETE 
+            FROM eligible_placed 
+            WHERE record_id='".$record_id."' AND term_id='".$term_id."' AND year='".$year."' AND student_flags_id = '".ELIGIBLE_FLAG."'
+            ");
+        $GLOBALS['dbh']->Execute($sql);
+    }
+
+    //deletes student's placed flag
+    //note, this function is an overloaded function. If you give it 0 parameters, it'll go ahead and use the
+    //term_id and year it currently has. If you pass it two parameters, it'll use the provided term_id and year. 
+    function unsetPlacedFlag() 
+    {
+        if (func_num_args() == 2)
+        {
+            $record_id = $this->record_id;
+            $term_id = func_get_arg(0);
+            $year = func_get_arg(1);
+        }
+        elseif (func_num_args() == 3) 
+        {
+            $record_id = func_get_arg(0);
+            $term_id = func_get_arg(1);
+            $year = func_get_arg(2);
+        }
+        else
+        {
+            $record_id = $this->record_id;
+            $term_id = $this->term_id;
+            $year = $this->year;
+        }
+
+        // check if any other history records exist, if yes, don't actually delete eligible_placed flag 
+
+        if (!SkeletonHistory::isStudentPlaced($record_id, $term_id, $year)) {
+            $sql = ("
+                DELETE 
+                FROM eligible_placed 
+                WHERE record_id='".$record_id."' AND term_id='".$term_id."' AND year='".$year."' AND student_flags_id = '".PLACED_FLAG."'
+                ");
+            $GLOBALS['dbh']->Execute($sql);
+        }
+    }
+
+    //update statues in applications table so that employers can not view unavailable students
+    //this function should be called after a history record has been created, and the student is placed in it
+    //note, this function is an overloaded function. If you give it 0 parameters, it'll go ahead and use the
+    //term_id and year it currently has. If you pass it two parameters, it'll use the provided term_id and year. 
+    function disableStudentApplications() 
+    {
+        if (func_num_args() == 2)
+        {
+            $student_number = $this->student_number;
+            $term_id = func_get_arg(0);
+            $year = func_get_arg(1);
+        }
+        elseif (func_num_args() == 3) 
+        {
+            $student_number = func_get_arg(0);
+            $term_id = func_get_arg(1);
+            $year = func_get_arg(2);
+        }
+        else
+        {
+            $student_number = $this->student_number;
+            $term_id = $this->term_id;
+            $year = $this->year;
+        }
+        $job_sql = "
+            SELECT ji.job_id
+            FROM job_info ji
+            INNER JOIN applications a
+            ON ji.job_id = a.job_id
+            WHERE ji.term_id='".$term_id."' AND ji.year='".$year."'
+            AND a.student_number = '".$student_number."'
+            AND (a.app_status = ".APP_ACTIVATED_ONLINE."
+            OR a.app_status = ". APP_APPLIED_ONLINE . ")
+            ";
+        $job_results = $GLOBALS['dbh']->Execute($job_sql);
+        while ($job_rows=$job_results->FetchRow())
+        {
+            $jobs[] = $job_rows['job_id'];
+        }
+        if (count($jobs) > 0)
+        {
+            $job_sql = "
+                UPDATE applications
+                SET app_status = ".APP_UNAVAILABLE."
+                WHERE student_number = '".$student_number."' 
+                AND job_id IN (" . implode(",", $jobs) . ")
+                ";
+
+            // We have a list of job applications we're going to de-activate, but we don't want to deactivate any 
+            // applications where the student has been placed. So, we search for the jobs the student has gotten
+            // and we make sure we don't de-activate those applications. 
+            $hired_sql = ("
+                SELECT h.job_id
+                FROM history h
+                WHERE h.student_number = '".$student_number."' AND h.job_id IS NOT NULL AND h.job_id != 0
+                ");
+            $hired_result=$GLOBALS['dbh']->Execute($hired_sql);
+
+            while ($hired_row = $hired_result->FetchRow())
+            {
+                $hired_jobs[] = $hired_row['job_id']; 
+            }
+
+            if (count($hired_jobs) > 0)
+            {
+                $job_sql .= " AND job_id NOT IN (" . implode(",",$hired_jobs) . ")";
+            }
+
+            $GLOBALS['dbh']->Execute($job_sql);
+        }
+    }
+
+    // clear cached results when the object is unserialized. See PHP magic functions for more details. 
+    function __wakeup()
+    {
+        unset($this->placed_flag);
+        unset($this->eligible_flag);
+    }
+} // end SkeletonHistory class
+
+?>

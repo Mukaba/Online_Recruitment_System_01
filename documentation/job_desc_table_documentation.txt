@@ -1,0 +1,920 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: job_desc_table_documentation.txt                                   |
++------------------------------------------------------------------------------+
+
+This file's purpose is to document all of the tables currently used in recruitSource,
+by the job descriptions module.  As the number of tables in the database is rapidly 
+increasing in size, it is becoming very important to document the purpose and use of 
+each table in the database.  
+
+This document was created on Mar 20, 2003.
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+-----------------
+
+2nd Table Name
+
+2nd Table's Purpose
+
+etc.
+
+
+---------------------------------------------------------------------------------
+
+Table Name: admin_status
+
+Purpose: This table is used to store the different types of statuses that an administrator
+set for a job
+
+
+    Column Name: status_id
+
+    Purpose: This is the primary key for this table
+
+    Column Name: status_name
+
+    Purpose: This is the name of this status
+
+    Column Name: job_status_id
+
+    Purpose: This is a foreign key that relates to the job_status table.  Every status
+    in this table falls under the category of one of the statuses in the job_status table.
+
+    Column Name: order_by
+
+    Purpose: This is the order under which these status should be displayed on screen.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_discipline_join
+
+Purpose: This table is used to join disciplines to departments
+
+
+    Column Name: department_id
+
+    Purpose: This is a foreign key representing a department from the department table.
+
+    Column Name: discipline_id
+
+    Purpose: This is a foreign key representing a discipline from the discipline table.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_disciplines
+
+Purpose: This table is used to store the disciplines related to each department (in the department
+table)
+
+
+    Column Name: discipline_id
+
+    Purpose: This is the primary key for this table.
+
+    Column Name: discipline_name
+
+    Purpose: This is the name of this discipline.
+
+    Column Name: discipline_code
+
+    Purpose: This is the code used to refer to this discipline (so Software Engineering
+    may be represented as SEng)
+
+---------------------------------------------------------------------------------
+
+Table Name: department_job_join
+
+Purpose: This table is used to link departments to a job.  An entry in this table
+represents a department as being applicable to have its students apply to the specific
+job.
+
+
+    Column Name: department_id
+
+    Purpose: This is a foreign key relating to the department table.
+
+    Column Name: job_id
+
+    Purpose: This is a foreign key relating to the job_info table.
+
+---------------------------------------------------------------------------------
+
+Table Name: job_discipline_join
+
+Purpose: This table is used to link disciplines to a job.  An entry in this table means
+that the specified job has been set as applicable to students in the specified discipline.
+
+
+    Column Name: job_id
+
+    Purpose: This is a foreign key relating to the job that has had this discipline marked
+    as applicable for it.
+
+    Column Name: discipline_id
+
+    Purpose: This is a foreign key relating to the discipline that has been marked as applicable
+    to the specified job.
+
+---------------------------------------------------------------------------------
+
+Table Name: job_hiring_status
+
+Purpose: This table is used by job applications to determine how the hiring for the job has proceded 
+(so, for example, "Pending", "UVic", "Elsewhere")
+
+
+    Column Name: status_id
+
+    Purpose: This is the primary key for this table.
+
+    Column Name: status_name
+
+    Purpose: This is the name of this hiring_status.
+
+---------------------------------------------------------------------------------
+
+Table Name: job_info
+
+Purpose: This table stores all of the information for a given job in the database.
+This field also provides job_id's for interviews in order to ensure that job_id's 
+in the system all correspond.  
+
+	Column Name: job_id
+
+	Purpose: This is the id number used to keep track of all the jobs
+	and interviews in the database.  This is the primary key for the
+	table.
+
+	Column Name: employer_id
+
+	Purpose: This is the id number of the company that this job is 
+	posted with.  
+
+	Column Name: department_id
+
+	Purpose: This is the id number of the company department that
+	this job is posted with.  This may or may not have a value,
+	depending on whether or not the job is posted with a company
+	that HAS departments.
+
+	Column Name: job_code
+
+	Purpose: This is the job code for the job.
+
+	Column Name: employer_code
+
+	Purpose: This field stores the internal employer code
+	for this job.
+
+	Column Name: term_id
+
+	Purpose: This is the id number that corresponds to the term
+	that this job is in.  This corresponds to the 'term' table.
+
+	Column Name: year
+
+	Purpose: This is the year that the job is in.
+
+	Column Name: position_title
+
+	Purpose: This is the title of the position, or the job name.
+
+	Column Name: num_positions
+
+	Purpose: This is the number of positions that are available 
+	for a given job.
+
+	Column Name: apply_method
+
+	Purpose: This is the method that the employer would like to
+	receive applications for this job.  This will typically be
+	either paper or online.
+
+	Column Name: receive_address
+
+	Purpose: If the employer has indicated that they would like
+	to receive applications online instead of paper, then this
+	field holds the email address that applications will be 
+	sent to.  
+
+	Column Name: country_id
+
+	Purpose: This field contains the id number that corresponds 
+	to the country that the job is in.
+
+	Column Name: provstate_id
+
+	Purpose: This field contains the id number of the province
+	or state that the job is in.  This field will only have a 
+	value if the job is in Canada or the US.
+
+	Column Name: region_id
+
+	Purpose: This field contains the id number of the region
+	that the job is in.  This field will only have a value
+	if the job is in certain Canadian provinces.
+
+	Column Name: city
+
+	Purpose: This field contains the name of the city that
+	the job is in.
+
+	Column Name: salary_amount1
+
+	Purpose: This field contains either the first part of the
+	salary range for the job, or the actual salary for the job.
+	Both this and 'salary_amount2' will hold the same values if
+	there is an actual salary amount for the job rather than a
+	range.
+
+	Column Name: salary_amount2
+
+	Purpose: This field contains the second part of the salary
+	range for the job, or the actual salary amount if its value
+	is the same as salary_amount1.
+
+	Column Name: salary_period
+
+	Purpose: This field stores the period of time over which
+	the salary range/amount indicated by salary_amount1 and
+	salary_amount2 will be paid on.  This can have values of
+	'hour', 'week', '2 weeks', 'month', and 'year'.
+
+	Column Name: workterm_hours
+
+	Purpose: This field stores the number of hours that 
+	successful applicants will be expected to work a week.
+
+	Column Name: closing_date
+
+	Purpose: This field stores the date that this job closes
+	on.  This field coupled with the closing_time field
+	determine when the job's status is changed to 'CLOSED'.
+
+	Column Name: closing_time
+
+	Purpose: This field stores the time of day that this job
+	closes at.
+
+	Column Name: workterm_lengths
+
+	Purpose: This field stores a string containing all of the
+	lengths of workterm that this job can have, delimited by
+	commas.  Eg.  If this job is hiring for a 4 month workterm
+	or a 16 month workterm, this field will hold the string
+	"4,16".
+
+	Column Name: other_postings
+
+	Purpose: This field stores the names of the other 
+	institutions that this job is posted at.
+
+	Column Name: job_description
+
+	Purpose: This field stores the description for the
+	job.
+
+	Column Name: contact_id
+
+	Purpose: This field stores the contact id that 
+	corresponds with the contact (in the contact table)
+	for this job.  Eg.  If the contact for this job
+	has the contact_id of 254 in the contact table,
+	then this field will hold the value 254.
+
+	Column Name: min_academic
+
+	Purpose: This field stores the minimum academic
+	year that has been completed required for this job.
+	Eg.  If applicants must have completed first year
+	to be hired for this job, this field will hold a
+	value of 1.
+
+	Column Name: min_workterms
+
+	Purpose: This field stores the minimum number
+	of workterms that applicants must have completed
+	for this job.  Eg.  If applicants must have 
+	completed 2 workterms to be hired for this job,
+	this field will hold a value of 2.
+
+	Column Name: skills_required
+
+	Purpose: This field holds the skills that are
+	required or will be developed by those hired for 
+	this job.
+
+	Column Name: special_requirements
+
+	Purpose: This field holds any special requirements
+	that are necessary to be hired for this job, if there
+	are any.  Eg.  Successful applicant must be returning
+	for an academic term upon completion of this workterm.
+
+	Column Name: comments
+
+	Purpose: This field contains comments that are seen
+	by both the employer and co-op staff.  Both of these
+	levels of users may change this field.
+
+	Column Name: admin_comments
+
+	Purpose: This field contains comments that are seen
+	only by co-op staff, and can only be changed by them.
+
+	Column Name: status
+
+	Purpose: This is a foreign key relating to the job_status table,
+    and represents the status of this job.
+
+	Column Name: date_posted
+
+	Purpose: This field contains the date that this
+	job was added to the database.
+
+	Column Name: entered_by
+
+	Purpose: This field contains the contact_id of the
+	co-op staff member that added this job to the database.
+
+	Column Name: last_updated_on
+
+	Purpose: This field contains the date that this job was 
+	last updated on.
+
+	Column Name: last_updated_by
+
+	Purpose: This field contains the login_id of the person that
+	last updated this job.
+
+    Column Name: last_updated_time
+
+    Purpose: This is the time that this record was last updated on.
+
+	Column Name: student_status
+
+	Purpose: This field contains the id number that corresponds
+	with the student status this job has.  Eg.  If this job
+	currently has a student status of 'Accepting Applications',
+	and that status has an id number of '4', then this field
+	will contain the value of 4.
+
+	Column Name: resumes_pulled
+
+	Purpose: This field contains an integer that represents a
+	boolean value.  If resumse have been pulled for this job,
+	this field contains a 1, otherwise it contains a 0.
+
+	Column Name: employer_department_id
+
+	Purpose: This field contains the id number that corresponds
+	(in the employer_department table) to the company's department 
+	that this job is posted with.
+
+    Column Name: industry
+
+    Purpose: This is a foreign key relating to the industries table, and represents the main
+    industry that this companmy is a part of.
+
+    Column Name: internal_contact_id
+
+    Purpose: This is an unused field, and should be deleted in future releases.
+
+    Column Name: is_rejectable
+
+    Purpose: This is an int value that represents whether or not this job can
+    be rejected.  When an employer enters a new job, there is a period during which
+    that job can be rejected.  Once that period has passed, this field will hold
+    a '0' value
+
+    Column Name: filled
+
+    Purpose: This field is an integer representing a boolean value denoting whether or
+    not this job has been filled.  When there are a number of placement records equal
+    to the num_positions value for this record, this field will be set to '1'.
+
+    Column Name: interview_term_id
+
+    Purpose: This field is a foreign key relating to the term table, and represents the
+    term that this job's associated interview takes place in.
+
+    Column Name: interview_year
+
+    Purpose: This is the year that this job's associated interview takes place in.
+
+    Column Name: hiring_status
+
+    Purpose: This is a foreign key relating to the job_hiring_status table, and represents
+    how the hiring for the job has proceded.
+
+    Column Name: admin_status
+
+    Purpose: This is a foreign key relating to the admin_status table, and represents
+    the status that this job currently has.  This field offers a finer level of granularity
+    over that of the job_status table, and is used more by the users of the system, rather
+    than the system itself.
+
+    Column Name: special_instructions
+
+    Purpose: Some jobs require special measures be taken to apply for them.  In such a case,
+    those special instructions are held in this field.
+
+    Column Name: special_instr_button
+
+    Purpose: If this job has a special requirement to apply for it, office staff may create a
+    special button that users may click on to indicate that they have fulfilled these requirements.
+    The text written on this button is contained in this field.
+
+    Column Name: show_special_instr_button
+
+    Purpose: This field is an integer representing whether or not the special instruction button
+    should be displayed.  If this field holds a '1', the button will be displayed.
+
+    Column Name: employer_status
+
+    Purpose: This field represents the status of this job that employers see.  This field is not yet
+    used, but will be in future iterations.
+
+    Column Name: interview_notify_sent
+
+    Purpose:  This field is an integer representing whether or not an employer has sent in their
+    interview shortlist yet.  If the shortlist has been sent, this field will have a '1'.
+
+    Column Name: hold_begin_datetime
+
+    Purpose: This is the date and time that this job entered the holding cycle.
+
+    Column Name: hold_end_datetime
+
+    Purpose: This is the date and time that this job left the holding cycle.
+
+    Column Name: date_posted
+
+    Purpose: This is the date that this job was entered into the system.
+
+---------------------------------------------------------------------------------
+
+Table Name: job_status
+
+Purpose: This table is used to store the status of a job.  These statuses are the high-level statuses
+and do not offer only a low-level of granularity, eg. "Open", "Closed", "Cancelled".
+
+
+    Column Name: status_id
+
+    Purpose: This is the primary key for this table.
+
+    Column Name: status_name
+
+    Purpose: This is the name of this status.
+
+---------------------------------------------------------------------------------
+
+Table Name: pending_employer_company
+
+Purpose: This table holds employer_company information that has been entered by a brand
+new employer.  This information is held in this table until the employer has been approved
+by an Employer Service Co-ordinator, at which point it is transferred to the employer_company
+table.
+
+
+    Column Name: employer_id
+
+    Purpose: This is the primary key for this table.  This value does not represent a 
+    foreign key relation to the 'employer_company' table.
+
+    Column Name: company_name
+
+    Purpose: This is the name of the company.
+
+    Column Name: company_website
+
+    Purpose: This is the URL to the pending company's website
+
+    Column Name: company_description
+
+    Purpose: This is a description of the pending company.
+
+    Column Name: street_address_1
+
+    Purpose: This is the first line of the company's street address.
+
+    Column Name: street_address_2
+
+    Purpose: This is the second line of the company's street address.
+
+    Column Name: street_address_3
+
+    Purpose: This is the third line of the company's street address.
+
+    Column Name: city
+
+    Purpose: This is the city out of which this company operates.
+
+    Column Name: provstate_id
+
+    Purpose: This is a foreign key relating to the provstate_list table, and 
+    represents the province or state out of which this company operates.  This field
+    only holds a value if the company operates out of a country for which we allow
+    a choice of provinces and states.
+
+    Column Name: country_id
+
+    Purpose: This is a forien key relating to the country_list table, and
+    represents the country out of which this company operates.
+
+    Column Name: postal_code
+
+    Purpose: This is the postal code for this company.
+
+    Column Name: phone
+
+    Purpose: This is the phone number for this company
+
+    Column Name: fax
+
+    Purpose: This is the fax number for this company
+
+    Column Name: email
+
+    Purpose: This is the main email address for this company
+
+    Column Name: department_name
+
+    Purpose: This is the department for which the contact that has been added with this company,
+    works at.
+
+    Column Name: industry_id
+
+    Purpose: This is a foreign key relating to the industries table, and represents the main
+    industry that this companmy is a part of.
+
+    Column Name: size_id
+
+    Purpose: This is a foreign key relating to the employer_sizes table, and represents the size
+    range that this company falls under.
+
+    Column Name: entered_on
+
+    Purpose: This is the date that this company was entered into the system.
+
+    Column Name: region_id
+
+    Purpose: This is a foreign key relating to the region_list table, and represents the region
+    that this company operates out of.  This only holds a value if the company operates out of
+    a province or state for which we allow a choice of regions.
+
+    Column Name: company_type_id
+
+    Purpose: This is a foreign key relating to the company_type table, and represents the type
+    of company this is, relative to its level of government involvement (see the company_size
+    table description for more elaboration).
+
+---------------------------------------------------------------------------------
+
+Table Name: pending_employer_contact
+
+Purpose: This table holds contact information that has been entered by a brand
+new employer.  This information is held in this table until the employer has been approved
+by an Employer Service Co-ordinator, at which point it is transferred to the contact and
+contact_employer tables.
+
+    
+    Column Name: employer_id
+
+    Purpose: This is a foreign key relating to the pending_employer_company table
+    (NOT employer_company), and represents the company that this contact works for.
+
+    Column Name: contact_id
+
+    Purpose: This is the primary key for this table.  This field does NOT relate to
+    the 'contact' or 'contact_employer' table as a foreign key.
+
+    Column Name: title
+
+    Purpose: This is the title given to this contact.  Eg. "Mr", "Mrs", etc.
+
+    Column Name: first_name
+
+    Purpose: This is the contact's first name.
+
+    Column Name: last_name
+
+    Purpose: This is the contact's last name.
+
+    Column Name: called_name
+
+    Purpose: This is the name that the contact goes as.
+
+    Column Name: middle_name
+
+    Purpose: This is the contact's middle name.
+
+    Column Name: email
+
+    Purpose: This is the contact's e-mail address.
+
+    Column Name: phone
+
+    Purpose: This is the contact's phone number.
+
+    Column Name: pager
+
+    Purpose: This is the contact's pager number.
+    
+    Column Name: cellphone
+
+    Purpose: This is the contact's cellphone number.
+
+    Column Name: fax
+
+    Purpose: This is the contact's fax number.
+
+    Column Name: street_address_1
+
+    Purpose: This is the first line of this contact's street address.
+
+    Column Name: street_address_2
+
+    Purpose: This is the second line of this contact's street address.
+
+    Column Name: street_address_3
+
+    Purpose: This is the third line of this contact's street address.
+
+    Column Name: country_id
+
+    Purpose: This is a foreign key relating to the country_list table, and
+    represents the country that this contact lives in.
+
+    Column Name: provstate_id
+
+    Purpose: This is a foreign key relating to the provstate_list table, and 
+    represents the province or state that this contact lives in.  This field
+    only holds a value if the contact lives in a country for which we allow
+    a choice of provinces and states.
+
+    Column Name: region_id
+
+    Purpose: This is a foreign key relating to the region_list table, and represents the region
+    that this contact lives in.  This only holds a value if the contact lives in a province or 
+    state for which we allow a choice of regions.
+
+    Column Name: city
+
+    Purpose: This is the city that the contact lives in.
+
+    Column Name: postal_code
+
+    Purpose: This is the postal code for this contact's mailing address.
+
+    Column Name: entered_on
+
+    Purpose: This is the date that this contact was entered into the system.
+
+    Column Name: department_name
+
+    Purpose: This is the name of the department that this contact works under, at their
+    company.
+
+    Column Name: ip_added_with
+
+    Purpose: This is the IP Address that was used to add this record.
+
+    Column Name: module
+
+    Purpose: This column represents whether this information is actually part of the
+    'new_employer' module (as it was designed for), or as part of the 'evaluation' module
+    (which was added after this).
+
+---------------------------------------------------------------------------------
+
+Table Name: pending_job_description
+
+Purpose: This table holds job description information that has been entered by a brand
+new employer.  This information is held in this table until the employer has been approved
+by an Employer Service Co-ordinator, at which point it is transferred to the job_info.
+
+    
+    Column Name: job_id
+
+    Purpose: This is the primary key for this table.  This field does NOT relate, as a foreign
+    key, to the job_info table.
+
+    Column Name: employer_id
+
+    Purpose: This is a foreign key relating to the pending_employer_company table, and represents
+    the company that posted this job.
+
+    Column Name: contact_id
+
+    Purpose: This is a foreign key relating to the pending_employer_contact table, and represents
+    the contact that has posted this job.
+
+    Column Name: term_id
+
+    Purpose: This is foreign key relating to the term table, and represents the term that this
+    job is posted for.
+
+    Column Name: year
+
+    Purpose: This is the year that this job is posted for.
+
+    Column Name: position_title
+
+    Purpose:  This is the title of the position for this job.
+
+    Column Name: employer_code
+
+    Purpose: This is the internal code that employers use to refer to this job.
+
+    Column Name: num_positions
+
+    Purpose: This is the number of positions that the employer is hiring for this job.
+
+    Column Name: apply_method
+
+    Purpose: This is the means by which applicants should apply for this job.  Eg. "Paper",
+    "Online", etc.
+
+    Column Name: receive_address
+
+    Purpose: This is the e-mail address to which online applications should be sent.
+
+    Column Name: country_id
+
+    Purpose: This is a foreign key relating to the country_list table, and represents the 
+    country that this job is in.
+
+    Column Name: provstate_id
+
+    Purpose: This is a foreign key relating to the provstate_list table, and represents the
+    province or state that this job is in.  This field only holds a value if the job is in
+    a country for which we allow provinces and states to be chosen.
+
+    Column Name: region_id
+
+    Purpose: This is a foreign key relating to the region_list table, and represents the
+    region that this job is in.  This field only holds a value if the job is in a province
+    or statue for which we allow regions to be chosen.
+
+    Column Name: city
+
+    Purpose: This is the city that this job is in.
+
+    Column Name: salary_amount1
+
+    Purpose: This is the lower end of the range of salary that this job offers.
+
+    Column Name: salary_amount2
+
+    Purpose: This is the upper end of the range of salary that this job offers.
+
+    Column Name: salary_period
+
+    Purpose: This is the period of time over which the above mentioned salary range is
+    paid.
+
+    Column Name: workterm_hours
+
+    Purpose: This is roughly the number of hours that the successful applicant will be working each week.
+
+    Column Name: workterm_lengths
+
+    Purpose: This is the length (in months) that the workterm lasts for
+
+    Column Name: other_postings
+
+    Purpose: This is a string that holds the other places that this job has been posted at.
+
+    Column Name: job_description
+
+    Purpose: This is the description of what this job entails.
+
+    Column Name: min_academic
+
+    Purpose: This is the minimum number of academic years that the applicants must have completed.
+
+    Column Name: min_workterms
+
+    Purpose: This is the minimum number of workterms that the applicants must have completed.
+
+    Column Name: special_requirements
+
+    Purpose: These are any additional special requirements for the job that applicants must possess.
+
+    Column Name: skills_required
+
+    Purpose: These are the skills that applicants are expected to have.
+
+    Column Name: comments
+
+    Purpose: These are any additional comments that the employer has written, pertaining to this
+    job posting.
+
+    Column Name: date_added
+
+    Purpose: This is the date that this job was entered into the system.
+
+    Column Name: industry
+
+    Purpose: This is a foreign key relating to the industries table, and represents the industry
+    that the work involved with this job is primarily involved with.
+
+    Column Name: ip_added_with
+
+    Purpose: This is the IP address from which this job was added.
+
+    Column Name: host_department
+
+    Purpose: This is the department that the employer has expressed a preference that they host the job.
+
+    Column Name: apply_departments
+
+    Purpose: This is departments for which the employer has specified this job is applicable.
+
+    Column Name: disciplines
+
+    Purpose: If this job has less than 4 disciplines, this field represents all of the disciplines within
+    the chosen departments, for which the employer has specified this job is applicable.
+
+---------------------------------------------------------------------------------
+
+Table Name: sequential_job_code
+
+Purpose: This table is used to generate new sequential job codes for jobs entered into the system.  Since
+sequential job codes are reset every term, this table ensures that each job is assigned a new job code
+unique to the term that job is in. Once a job is given its 'next_sequential_code' integer, the field is 
+incremented by one, so that the next job code is one greater than the previous.  
+Eg.  If this field held 934, with the corresponding year of 2003 and term of Fall, the next job's job 
+code would be: 2003F-00934.  The one after that would be: 2003F-00935, and so on.
+
+
+    Column Name: next_sequential_code
+
+    Purpose: This column represents the integer that is appended to the year and term of
+    the job, to create the complete job code.  Once a job is given an integer, this field
+    is incremented by one, so that the next job code is one greater than the previous.
+
+    Column Name: term_id
+
+    Purpose: This is the term that this record is applicable to.
+
+    Column Name: year
+
+    Purpose: This is the year that this record is applicable to.
+
+---------------------------------------------------------------------------------
+
+Table Name: status
+
+Purpose: This table keeps track of all the various statuses
+that tasks can be assigned within feedback.
+
+
+	Column Name: status_id
+
+	Purpose: This is the id number used to keep track of the
+	various different statuses.  This is the primary key
+	for the table.
+
+	Column Name: status_name
+
+	Purpose: This is the name of the status.
+
+---------------------------------------------------------------------------------

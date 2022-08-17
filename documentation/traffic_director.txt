@@ -1,0 +1,102 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: traffic_director.txt                                               |
++------------------------------------------------------------------------------+
+
+Description: This file is to serve as documentation to explain the 24 hour job hold, and the traffic director's role
+throughout this process.
+
+-- 24-hour job hold --
+
+Purpose: The 24-hour job hold was created as a way to encouraged transparency of jobs, and allow all departments
+at a given campus to make their students eligible to apply to a given job.
+
+Procedure: Whenever a new job is posted by the host department, it enters the 24 hour hold.  This hold spans over
+any weekend that it may fall onto, and weekends do not take away from the time a job spends in the 24 hour hold.
+At any point throughout the week, a staff member may look through the jobs that are currently in the 24-hour hold.
+If the staff member feels that a job currently on hold is applicable to the students of their department, they may 
+make their department one of the applicable departments.  After a job has been held for 24 hours, it exits the 24-hour 
+holding pattern, and automatically becomes posted.  Once a job has been posted, students from any of the departments 
+that have been made applicable may apply to the job.
+
+Weekends: As mentioned above, weekends do not take away from the time a job spends in the 24-hour hold.  If a job enters
+the 24-hour hold at 8pm on Friday, it will remain on hold from that time, until 8pm the following Monday.
+
+-- Traffic Director --
+
+Obviously some jobs are time-sensitive, and may need to be posted immediately.  Additionally, a system such as
+this one needs someone to ensure that everything operates smoothly, and to act as a single point of contact for
+the many employers that wish to post jobs with the institution.  This is the role of the Traffic Director.
+
+The Traffic Director is the only user (although their may be more than one individual given Traffic Director access) that
+has the power to directly make a job's status 'Posted', avoiding the normally necessary 24-hour holding period for that job.
+If departments are given a job that needs to be posted immediately, they can contact the Traffic Director and make a request
+that they do so.
+
+Whereas normally only the host department for a job can edit and make changes to that job, the Traffic Director is above
+this rule, and may edit a job regardless of who is (or isn't) hosting that job.  This means that if a department misses
+their opportunity to make themselves applicable for a given job while it is in the 24-hour hold, they have two options:
+They can request that the host department for that job make their department applicable, or they can request that the
+Traffic Director make the appropriate change.
+
+-- New Employers and New Jobs --
+
+One of the major benefits of a system like Mamook is the ability to allow first time employers
+to enter a job immediately without waiting for authorization procedures to take place.  Obviously, any system like this
+has the potential for abuse, and thus we have the third role of the Traffic Director: to evaluate and determine the
+authenticity of new jobs and new employers.
+
+Procedure: Whenever a first-time employer comes to Mamook to enter a job, contact and company information is collected from
+them, along with a job description.  Once this has been completed, the contact, company, and job are all saved with a 'Incoming'
+status
+
+The Traffic Director may view all 'Incoming' jobs, contacts and companies from the Job Descriptions menu.  For each set of 
+job, contact, and company viewed, the Traffic Director may either Approve the set, if the job, contact and company seem
+legitimate, or Reject the set if they seem to be fake.  Once a job, contact, and company have been approved, the contact and
+company are permanently saved in the system.  The job is also saved, and given a status of 'Not Checked', meaning that it needs
+to be looked over before it enters the 24-hour hold.  
+
+The 'Incoming' jobs page also shows all of the incomplete records that have recently been entered.  Traffic Directories may view
+these records, and determine whether the employer may have become frustrated while trying to enter a job.  Should it be deemed that
+this was the case, the Traffic Director can contact the employer, and follow up on the incomplete entry.  After having done so, 
+the Traffic Director can delete the incomplete information from the system.
+
+-- Jobs Without Host Departments --
+
+When employers (both first-time and otherwise) enter jobs into the system, they have the option of choosing a preferred host
+department for the job.  However, if no host department is specified, one needs to be assigned.  This is the last role of the 
+Traffic Director.  In order to ensure that jobs are distributed evenly and logically across departments at an institution, the
+Traffic Director represents an objective party that will assign jobs appropriately, allowing the avoidance of one department
+having a reign of terror over jobs of a certain type, or political issues that may arise.
+
+-- Adding a new Traffic Director --
+
+Setting up a new Traffic Director is a relatively simple matter.  The contact will already need to exist in the database
+as an internal contact.  To allow this contact to login as a Traffic Director, a new entry will need to be added into the
+'contact_internal' table.  This entry should correspond to the contact's information that is held in the 'contact' table.
+The same contact_id should be used (as contact_id in 'contact_internal' is a foreign key relating to the 'contact' table),
+and the department_id should be set to whatever corresponds to the TRAFFIC_DIRECTOR_DEPARTMENT constant, set in the 
+constants.inc file.
+
+The constants.inc file also defines a constant called 'TRAFFIC_DIRECTOR_ID'.  This should hold the contact_id for the
+primary Traffic Director.  This constant is used to draw out contact information when informing employers who they should
+contact (for various reasons).  This is currently only used when an employer has forgotten their password, and wishes to
+have it reset and e-mailed to them, but may be used in other locations later on.

@@ -1,0 +1,311 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: studentLogin_app_resume_coverletter_documentation.txt              |
++------------------------------------------------------------------------------+
+
+This file's purpose is to document all of the tables currently used in Mamook[tm] by the
+studentLogin, Applications, Resumes, and Coverletter modules.
+
+This document was created on Feb 6, 2003
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+    Primary Key:  { semesters_id }
+    Foreign Keys:
+                description_type -> semesters_description_type
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+-----------------
+
+2nd Table Name
+
+2nd Table's Purpose
+
+etc.
+
+
+--------------------------------------------------------------------------------
+
+Table Name: application_status
+Purpose: This table holds the various statuses that can be applied to a given application.
+
+Primary Key:  { app_status_id }
+
+    Column Name: app_status_id
+    Purpose: This is the primary key of the table.
+
+    Column Name: app_status_description
+    Purpose: This is the description for each status.
+
+--------------------------------------------------------------------------------
+
+Table Name: application
+Purpose: This table holds applications to jobs.  Each time a student applies to a job, 
+and entry is created in this table
+
+Primary Key: { application_id }
+Foreign Keys:
+    job_id -> job_info.job_id
+    student_number -> student.student_number
+    coverletter_id -> coverletter.coverletter_id
+    resume_id -> resume.resume_id
+    app_status -> application_status.app_status_id
+
+    Column Name: application_id
+    Purpose: Primary key for the table
+
+    Column Name: resume_id
+    Purpose: Foreign key relating to the resume table, linking this
+    application to the resume used.
+
+    Column Name: student_number
+    Purpose: Foreign key relating to the student table, linking this
+    application to the applied student
+
+    Column Name: job_id
+    Purpose: Foreign key relating to the job_info table, linking this
+    application to the job that has been applied to.
+
+    Column Name: coverletter_id
+    Purpose: Foreign key relating to the coverletter table, linking
+    this application to the coverletter used.
+
+    Column Name: app_status
+    Purpose: Foreign key relating to the application_status table,
+    representing the status of this application.
+
+    Column Name: transcript
+    Purpose: Integer representing a boolean value that determines whether
+    or not this application should have the student's transcript included
+    with it.  A 0 in this field represents that no transcript should be included,
+    a non-zero value means that it should be included.
+
+    Column Name: applied_date
+    Purpose: Actually a date and time field, relating to when this
+    application was created.
+
+    Column Name: added_by_admin
+    Purpose: Integer representing a boolean value that denotes whether or
+    not this application was added by an admin, or by the student themselves.
+    A non-zero value in this field means it was added by an admin, a 0 means
+    the student has added it.
+
+--------------------------------------------------------------------------------
+
+Table Name: bldr_builder_types
+Purpose: This table holds the various types of builders that exist in the system.
+
+Primary Key: { type_id }
+
+    Column Name: type_id
+    Purpose: This if the primary key for the table
+
+    Column Name: type_name
+    Purpose: This is the name of this type of buider
+
+    Column Name: allowed_per_department
+    Purpose: This is the number of this type of builder
+    each department may have (so if this type:'resume' was set
+    to 2, each department could have 2 different styles of resume
+    builders)
+
+--------------------------------------------------------------------------------
+
+Table Name: bldr_builders
+Purpose: Get help to document this table
+
+Primary Key: { builder_id }
+
+--------------------------------------------------------------------------------
+
+Table Name: bldr_default_inputs
+Purpose: This table holds the default inputs for each of the different
+kinds of builders.
+
+Primary Key: { default_id }
+
+GET HELP DOCUMENTING THE REST OF THIS TABLE
+
+  default_id mediumint(8) unsigned NOT NULL auto_increment,
+  title varchar(35) default NULL,
+  select_items tinytext,
+  from_tables tinytext,
+  where_clause tinytext,
+  variable_dependent varchar(35) default NULL,
+
+--------------------------------------------------------------------------------
+
+Table Name: coverletter
+Purpose: This table holds the coverletters of students.
+
+Primary Key: { coverletter_id }
+Foreign Keys:
+    student_number -> student.student_number
+    job_id -> job_info.job_id
+    resume_id -> resume.resume_id
+    type_id -> coverletter_type.type_id
+    status_id -> coverletter_status.status_id
+
+    Column Name: coverletter_id
+    Purpose: This is the primary key for this table.
+
+    Column Name: student_number
+    Purpose: Foreign key relating to the student table.  This is
+    the student that this coverletter belongs to.
+
+    Column Name: job_id
+    Purpose: Foreign key relating to the job_info table.  This is
+    the job that this coverletter was specifically created for.
+    This field can hold a zero, and does not necessarily have to
+    relate to a job (thus violating the foreign key principle).
+
+    Column Name: type_id
+    Purpose: Foreign key relating to the coverletter_type table,
+    and describing the type of coverletter that this is.
+
+    Column Name: status_id
+    Purpose: Foreign key relating to the coverletter_status table,
+    and determining the status of this coverletter.
+
+    Column Name: resume_id
+    Purpose: Foreign key relating to the resume table, linking this
+    coverletter to the resume it was applied with.  This is a legacy
+    field and is no longer used.
+
+    Column Name: last_modified
+    Purpose: This field is the date and time that this coverletter
+    was last modified.
+
+    Column Name: letter
+    Purpose: This is the body of the coverletter.
+
+    Column Name: include_transcript
+    Purpose: This is an integer acting as a boolean, representing
+    whether or not to include a transcript with this coverletter.
+    This is a legacy field, and is no longer used.
+    
+    Column Name: builder_class
+    Purpose: This field holds the serialized representation of the builder class
+    for this specific coverletter.
+
+--------------------------------------------------------------------------------
+
+Table Name: coverletter_status
+Purpose: This table holds the statuses that a coverletter can be assiged.
+
+Primary Key: { status_id }
+
+    Column Name: status_id
+    Purpose: This is the primary key for this table.
+
+    Column Name: description
+    Purpose: This is the description of this particular status.
+
+--------------------------------------------------------------------------------
+
+Table Name: coverletter_type
+Purpose: This table holds the types that a coverletter can be assigned.
+
+Primary Key: { type_id }
+
+    Column Name: type_id
+    Purpose: This is the primary key for the table
+
+    Column Name: description
+    Purpose: This is the description of this particular type.
+
+--------------------------------------------------------------------------------
+
+Table Name: resume
+Purpose: This table holds resumes that students have created, and use
+to apply to jobs.
+
+Primary Key: { resume_id }
+Foreign Keys:
+    student_number -> student.student_number
+    type_id -> coverletter_type.type_id GET HELP AND ENSURE THIS IS THE CASE
+    
+    Column Name: resume_id
+    Purpose: This is the primary key for the table
+
+    Column Name: student_number
+    Purpose: This is a foreign key relating to the student table, and links
+    this resume to a specific student.
+
+    Column Name: resume
+    Purpose: This is the body of the resume.
+
+    Column Name: last_modified
+    Purpose: This is the last date and time that this this resume
+    was modified.
+
+    Column Name: type_id
+    Purpose: This is a foreign key relating to the coverletter_type table
+    (since resumes and coverletters share types), and indicates the type
+    of resume that this is.
+
+    Column Name: name
+    Purpose: This is the name that the student has assigned to this
+    resume.
+
+    Column Name: builder
+    Purpose: This field holds either 'yes' or 'no' and indicates whether or
+    not this resume was created using (and consequently is edited with) the
+    builder, or manually.
+
+    Column Name: builder_class
+    Purpose: This field holds the serialized representation of the builder class
+    for this specific resume.
+
+--------------------------------------------------------------------------------
+
+Table Name: transcript
+Purpose: This table holds student transcripts.
+
+Primary Key: { student_number }
+Foreign Keys:
+    student_number -> student.student_number
+
+    Column Name: student_number
+    Purpose: This field is the primary key for this table, and is also
+    a foreign key relating to the student table.
+
+    Column Name: transcript
+    Purpose: This field holds the body of the transcript
+
+    Column Name: last_modified
+    Purpose: This field holds the last date and time that this
+    transcript was modified.
+
+--------------------------------------------------------------------------------

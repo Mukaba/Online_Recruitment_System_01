@@ -1,0 +1,303 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: EditJob.class                                                      |
+ +------------------------------------------------------------------------------+
+ | Description: class EditJob, extends job, hold temporary input data to        |
+ | simplify data passing between pages.                                         |
+ +------------------------------------------------------------------------------+
+
+*/
+
+if (!($continue == 'template_job_chosen'))
+{
+	/*
+	 This if statement is necessary so that this file can be used by the add_job module when an employer is using
+	 an old job as a template.
+	*/
+
+	include('job_descriptions/add_job/Job.class');
+}
+
+class EditJob extends job
+{	
+	function EditJob($job)
+	{
+		$this->Job($job);
+	}
+
+	function loadValues($job_id)
+	{
+		assert($job_id);
+
+		$this->job_id = $job_id;
+		
+		$result = $GLOBALS['dbh']->Execute("
+			SELECT DISTINCT *
+			FROM job_info
+			WHERE job_id='" . $job_id . "'
+			");
+		
+		$row = $result->FetchRow();
+		assert($row);
+		
+		$this->position_title = $row["position_title"];
+		$this->job_code = $row["job_code"];
+		$this->employer_code = $row["employer_code"];
+		$this->num_positions = $row["num_positions"];
+		$this->apply_method = $row["apply_method"];
+		$this->receive_address = $row["receive_address"];
+
+		$this->region = $row["region_id"];
+		$this->city = $row["city"];
+		$this->provstate = $row["provstate_id"];
+		$this->country = $row["country_id"];
+		
+		$this->start_term = $row["term_id"];
+		$this->start_year = $row["year"];
+
+        // date format is YYYY-MM-DD
+        $this->start_date = $row["start_date"];
+        $arr_start_date = explode("-",$this->start_date);
+        $this->start_date_date = $arr_start_date[2];
+        $this->start_date_month = $arr_start_date[1];
+        $this->start_date_year = $arr_start_date[0];
+	
+        $this->end_date = $row["end_date"];
+        $arr_end_date = explode("-",$this->end_date);
+        $this->end_date_date = $arr_end_date[2];
+        $this->end_date_month = $arr_end_date[1];
+        $this->end_date_year = $arr_end_date[0];
+
+		$this->salary_amount1 = $row["salary_amount1"];
+		$this->salary_amount2 = $row["salary_amount2"];
+		$this->salary_period = $row["salary_period"];
+
+		$this->closing_date = validDate($row["closing_date"]);
+		$this->closing_time = $row["closing_time"];
+		$this->closing_time = preg_replace("/(\d?\d:\d\d):\d\d/", "$1", $this->closing_time);
+
+		$this->workterm_lengths = $row["workterm_lengths"];
+		$this->workterm_hours = $row["workterm_hours"];
+
+		$this->other_postings = $row["other_postings"];
+
+		$this->contact_id = $row["contact_id"];
+		$this->employer_id = $row["employer_id"];
+
+		if (!$row["employer_department_id"])
+		{
+			$this->department_id = 'none';
+		}
+		else
+		{
+			$this->department_id = $row["employer_department_id"];
+		}
+
+		$this->min_academic = $row["min_academic"];
+		$this->min_workterms = $row["min_workterms"];
+		$this->host_department = $row["department_id"];
+		
+		$this->job_description = $row["job_description"];
+		$this->skills_required = $row["skills_required"];
+		$this->special_requirements = $row["special_requirements"];
+		$this->special_instructions = $row["special_instructions"];
+		$this->special_instr_button = $row["special_instr_button"];
+		$this->show_special_instr_button = $row["show_special_instr_button"];
+		$this->displayname_on_coverltr = $row["displayname_on_coverltr"];
+	
+		$this->comments = $row["comments"];
+		$this->admin_comments = $row["admin_comments"];
+		$this->for_student_comments = $row["for_student_comments"];
+		$this->entered_by = $row["entered_by"];
+		$this->admin_status = $row["admin_status"];
+		$this->status = $row["status"];
+		$this->student_status = $row["student_status"];
+        $this->date_entered=$row["date_entered"];
+		$this->date_posted = $row["date_posted"];
+		$this->last_updated_on = $row["last_updated_on"];
+		$this->last_updated_by = $row["last_updated_by"];
+
+		$this->is_rejectable = $row["is_rejectable"];
+	
+		$this->workterm_lengths = explode(',', $this->workterm_lengths);
+        
+		$sql = ("
+			SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS name, cellphone, phone, fax, email, type
+			FROM contact
+			WHERE contact_id='" . $this->contact_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+
+		$this->contact_name = $row["name"];
+		$this->contact_phone = $row["phone"];
+        $this->contact_cellphone = $row["cellphone"];
+		$this->contact_fax = $row["fax"];
+		$this->contact_email = $row["email"];
+        $this->contact_type =$row["type"];
+		$sql = ("
+			SELECT DISTINCT company_description, company_name, website
+			FROM employer_company
+			WHERE employer_id='" . $this->employer_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		$row = $result->FetchRow();
+		
+        
+		$this->company_name = $row["company_name"];
+		$this->company_description = $row["company_description"];
+		$this->company_website = $row["website"];
+
+		if ($this->department_id)
+		{
+			$sql = ("
+				SELECT DISTINCT department_description, department_name, department_website
+				FROM employer_department
+				WHERE department_id='" . $this->department_id . "'
+				");
+			$result = $GLOBALS['dbh']->Execute($sql);
+			$row = $result->FetchRow();
+
+			$this->department_name = $row["department_name"];
+			$this->department_website = $row["department_website"];
+			$this->department_description = $row["department_description"];
+		}
+
+		$sql = ("
+			SELECT DISTINCT department_id
+			FROM department_job_join
+			WHERE job_id='" . $job_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		while ($row = $result->FetchRow())
+		{
+			$this->apply_departments[] = $row["department_id"];
+		}
+
+		$sql = ("
+			SELECT DISTINCT discipline_id
+			FROM job_discipline_join
+			WHERE job_id='" . $job_id . "'
+			");
+		$result = $GLOBALS['dbh']->Execute($sql);
+		while ($row = $result->FetchRow())
+		{
+			$this->job_disciplines[] = $row["discipline_id"];
+		}
+	}
+
+	
+	/*
+	 Note that the below set_value_n functions are different that the AddJob.class functions, since we edit
+	 different parts of the job at a time.  It is thus necessary to have different functions to assign these
+	 values.
+	*/
+
+	function set_value_1($position_title, $job_code, $employer_code, $num_positions, $apply_method, $receive_address
+                        , $country, $provstate, $region, $city, $salary_amount1, $salary_amount2, $salary_period, $start_term
+                        , $start_year, $start_date, $start_date_date, $start_date_month, $start_date_year, $end_date, $end_date_date
+                        , $end_date_month, $end_date_year, $closing_date, $closing_time, $workterm_lengths, $workterm_hours, $other_postings, $min_academic
+                        , $min_workterms, $apply_departments, $job_description, $skills_required, $special_requirements, $comments, $admin_comments, $for_student_comments
+                        , $admin_status, $status, $job_disciplines, $special_instructions, $special_instr_button, $show_special_instr_button, $displayname_on_coverltr)
+	{
+        $this->position_title = removeSlashes( trim($position_title) );
+        $this->job_code = removeSlashes( trim($job_code) );
+        $this->employer_code = removeSlashes( trim($employer_code) );
+        $this->num_positions = $num_positions;
+        $this->apply_method = $apply_method;
+        $this->receive_address = removeSlashes( trim($receive_address) );
+        $this->country = $country;
+        $this->provstate = $provstate;
+        $this->region = $region;
+        $this->city = removeSlashes( trim($city) );
+
+        $this->salary_amount1 = removeSlashes( trim($salary_amount1) );
+        $this->salary_amount2 = removeSlashes( trim($salary_amount2) );
+        $this->salary_period = $salary_period;
+
+        $this->start_term = $start_term;
+        $this->start_year = $start_year;
+
+        $this->start_date = trim($start_date);
+        $this->start_date_date = trim($start_date_date);
+        $this->start_date_month = trim($start_date_month);
+        $this->start_date_year = trim($start_date_year);
+        
+        $this->end_date = trim($end_date);
+        $this->end_date_date = trim($end_date_date);
+        $this->end_date_month = trim($end_date_month);
+        $this->end_date_year = trim($end_date_year);
+
+        $this->closing_date = removeSlashes(validDate($closing_date));
+        $this->closing_time = removeSlashes(validTime($closing_time));
+
+        $this->workterm_lengths = $workterm_lengths;
+        $this->workterm_hours = removeSlashes($workterm_hours);
+        $this->other_postings = removeSlashes( trim($other_postings) );
+        $this->min_academic = $min_academic;
+        $this->min_workterms = $min_workterms;
+        $this->apply_departments = $apply_departments;
+
+		$this->job_description = removeSlashes( trim($job_description) );
+		$this->skills_required = removeSlashes( trim($skills_required) );
+		$this->special_requirements = removeSlashes( trim($special_requirements) );
+		$this->special_instructions = removeSlashes( trim($special_instructions) );
+		$this->special_instr_button = removeSlashes( trim($special_instr_button) );
+		$this->show_special_instr_button = $show_special_instr_button;
+		$this->displayname_on_coverltr= $displayname_on_coverltr;
+		$this->comments = removeSlashes( trim($comments) );
+		$this->admin_comments = removeSlashes( trim($admin_comments) );
+		$this->for_student_comments = removeSlashes( trim($for_student_comments) );
+		$this->admin_status = $admin_status;
+		$this->status = $status;
+		$this->job_disciplines = $job_disciplines;
+
+	}
+
+	function set_value_2($host_department)
+	{
+		$this->host_department = removeSlashes(trim($host_department));
+	}
+	function set_value_3($company_name, $company_description, $company_website, $employer_id, $department_name
+                        , $department_description, $department_website, $department_id, $contact_name, $contact_phone, $contact_cellphone
+                        , $contact_email, $contact_fax, $contact_id)
+	{
+        $this->company_name = removeSlashes( trim($company_name));
+        $this->company_description = removeSlashes( trim($company_description));
+        $this->company_website = removeSlashes( trim($company_website));
+        $this->employer_id = $employer_id;
+        $this->department_name = $department_name;
+        $this->department_description = removeSlashes(trim($department_description));
+        $this->department_website = $department_website;
+        $this->department_id = $department_id;
+        $this->contact_name = removeSlashes( trim($contact_name));
+        $this->contact_phone = removeSlashes( trim($contact_phone));
+        $this->contact_cellphone = removeSlashes( trim($contact_cellphone));
+        $this->contact_email = removeSlashes( trim($contact_email));
+        $this->contact_fax = removeSlashes( trim($contact_fax));
+        $this->contact_id = $contact_id;
+	}
+}
+?>
+

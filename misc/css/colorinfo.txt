@@ -1,0 +1,191 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: colorinfo.txt                                                      |
+ +------------------------------------------------------------------------------+
+ | Description:                                                                 |
+ +------------------------------------------------------------------------------+
+
+This file documents what each css class is used for throughout Mamook[tm].
+Many conventions used with the classes documented here are defined
+in misc/styleguide.php
+
+This document goes into more depth of how each class is used and in 
+what situations they've been used in existing code.  New colorschemes
+should define each of these classes.
+
+Formatting convention used in this document:
+---------------------------------------------------------------------
+Class Name
+Selectors used in conjunction with the class
+
+Detailed explanation of where the class is used in Mamook[tm].
+
+Note:  Unless otherwise preceded by a specific html tag name, the
+       classes are actually global.  In this case,
+       recommended tags that would make sense under a specific
+       class are listed after the class name.
+
+---------------------------------------------------------------------
+
+
+row0
+<table>, <td>, <tr>
+
+row0 sets the background colour for any subsection of an area
+requiring input from the user.  Typically, a form will have its main
+background as row1 (see below) and any major subsections of this
+form will use the class row0.  This class applies to table tags,
+as Mamook[tm] uses table-based html layout.
+
+---------------------------------------------------------------------
+
+row1
+<table>, <td>, <tr>
+
+row1 sets the background colour for any portion of a page that
+requires input from the user.  Anything from paging options to
+search forms use this class in conjunction with various table tags
+to affect the proper background.  Presumably, this class would 
+also apply to html selectors like div and span in any future files that
+don't use table-based layouts.
+
+---------------------------------------------------------------------
+
+row2
+<table>, <td>, <tr>
+
+row2 is used as an alternate background colour to row0 in user-input areas. 
+It can also be used for contrast where row0 and row1 are already used.
+
+---------------------------------------------------------------------
+
+row3
+<table>, <td>, <tr>
+
+row3 is used for situations where a light background is needed to separate
+a portion of the page from input areas or to showcase a block of text.
+An example of its use is previewing a resume built from an HTML builder,
+where the resume would be shown against the light background to
+differentiate from the main Mamook[tm] background and any input fields around
+the resume.
+
+---------------------------------------------------------------------
+
+row4
+<table>, <td>, <tr>
+
+row4 is used interchangeably with row3, however it should enforce a dark font
+on a light background, rather than the light font colour defaulted to in
+row3.
+
+---------------------------------------------------------------------
+
+rowgrey
+<td>, <tr>
+
+rowgrey sets the background for column headings of a table, usually in a page
+using a table-list format to present data to the user (eg. job descriptions).
+
+---------------------------------------------------------------------
+
+row0d, row1d
+<td>, <tr>
+
+row0d and row1d are used as the alternating colours of a table listing.
+In PHP, this is used with a very commonly occuring idiom in Mamook[tm]:
+
+    "<td class=".(($i % 2)? "row0d" : "row1d")."><td>"
+
+Where $i is an integer counter for the current row in the dataset being
+output to the page.
+
+See misc/styleguide.php for more details on use.
+
+---------------------------------------------------------------------
+
+row2d
+<td>, <tr>
+
+row2d is used to highlight a single row or cell in a table listing,
+where other rows are alternating between row0d and row1d.  It is used
+to bring attention to a certain row for any special reason the user
+should be alerted about.
+
+At the time of writing, this is not yet commonly used in the existing
+codebase.
+
+---------------------------------------------------------------------
+
+med, light, dark
+<td>, <tr>
+
+These 3 classes are used to affect varying background colours for
+whatever reason is felt appropriate.  They are, at the time of writing,
+not used in the current codebase.
+
+---------------------------------------------------------------------
+
+cal-titlebar, cal-date-area, cal-day-names-area, cal-today
+<td>, <tr>
+
+The cal* classes are private classes used only in misc/calendar.inc
+This calendar is used in the interview module to display a calendar
+that shows on what days interviews are being held.
+
+Each class is used to set the background colour of various parts
+of the calendar displayed on screen.
+
+---------------------------------------------------------------------
+
+table.notify, table.error
+<table>
+
+These classes are defined only for <table> and are used in the two
+functions used for notify() and error() messages.  Their use is
+documented by misc/styleguide.php
+
+---------------------------------------------------------------------
+
+b.green, b.white, b.black, b.red, b.blue, b.lightblue, b.instruct
+<b>
+
+These classes are used in any cases where special colours are
+required to bring attention to a certain piece of bold text.
+In user-input forms, for example, required fields are often
+preceded by bold red asterisks.
+
+---------------------------------------------------------------------
+
+tableheaders
+<td>, <tr>
+
+tableheaders is used for instructional headings that precede certain
+form elements, or groups of form elements.  It is used to instruct
+the user on how to fill out forms that are not straightforward.
+In the case of placement history, for example, the user is given
+the choice of choosing to view by student name and number, selecting
+the name from a list, or by selecting an entire term or group of terms.
+Each seperate choice is preceded by an instructional message
+using the tableheaders class to seperate it from form element labels
+and other text on the page.
+
+This usually consists of a special colour, bold and italic being set
+for the element using this class.

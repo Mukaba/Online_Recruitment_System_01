@@ -1,0 +1,97 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: logins.txt                                                         |
++------------------------------------------------------------------------------+
+
+There are several ways to implement logins for Mamook[tm]:
+1. NIS/YP tables
+2. Querying a separate database
+3. Storing encrypted passwords within the Mamook database
+4. Setting constants for loginIDs (this is only recommended in a test environment)
+
+misc/authenticate.inc is the file where logins are determined. Student and Office (staff) access 
+levels are set to use login methods 1, 2, and 4.  Employer access is set up for login method 3.
+
+If any of the methods are not to be used for your organization, you should comment out the relevant code.
+
+1.  NIS/YP tables
+
+NIS is enabled for logins by changing the $validators and $group_validators variables in authenticate.inc.
+The domain, map, and node need to be set to match your NIS configuration.  this->group_departments needs to 
+be set with the group, userlevel, and department of each defined NIS group.
+
+----------
+Example set-up:
+
+    var $validators = Array(
+            Array("domain"=>"nis.your_nisdomain.ca", "map"=>"passwd.byname")
+            );
+
+    var $group_validators = Array(
+            Array("domain"=>"nis.your_nisdomain.ca", "map"=>"netgroup.byuser", "node"=>".*")
+            );
+            
+    $this->group_departments = Array(
+            Array("group"=>"staff",
+                "userlevel"=>OFFICE,
+                "department"=>$departments["ENGR"]),
+            Array("group"=>"managers",
+                "userlevel"=>OFFICE,
+                "department"=>$departments["ENGR"]),
+            Array("group"=>"class2002",
+                "userlevel"=>STUDENT,
+                "department"=>$departments["ENGR"])
+            );
+----------
+
+
+2. Querying a separate database
+
+A database reference system can be used for authentication if you do not have NIS.  You can 
+write a perl script to query a separate database with the provided login and password 
+and return the required information.  You should return an integer indicating if the 
+query was successful or not (return 1 if successful), a letter indicating the type 
+of user (eg. S for student, A for admin), and an integer specific to that individual 
+(student number for students, employee_number for admin/staff).
+
+Note that this method could also be used to query the Mamook database instead of a 
+separate one.
+
+
+3. Storing encrypted passwords within the Mamook database
+
+Employer passwords are stored directly in the Mamook database in encrypted format.  You 
+cannot unencrypt the passwords, but you can use the same salt to encrypt the password that the 
+employer enters and then compare the two encrypted values.  The salt consists of the first two 
+characters in the encrypted password.
+
+
+4. Setting constants for loginIDs (this is only recommended in a test environment)
+
+There are two login constants defined in release_constants.inc:
+ADMIN_LOGIN and STUDENT_LOGIN
+These constants are set up to allow you to log in as either an administrator (Office 
+userlevel) or as a student with a pre-defined login ID and no password.  This should 
+ALWAYS be turned off in a production environment because it is a big security hole. 
+These logins can be used for testing purposes and for demo/training database setups 
+where you do not require everyone to have their own account.  These logins are enabled 
+and disabled in misc/release_constants.inc.  Note that the department 
+for these logins is set directly in authenticate.inc.

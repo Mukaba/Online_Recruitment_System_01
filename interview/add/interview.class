@@ -1,0 +1,215 @@
+<?php
+
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: interview.class                                                    |
+ +------------------------------------------------------------------------------+
+ | Description:                                                                 |
+ +------------------------------------------------------------------------------+
+
+*/
+/*
+ *	File Name: interview.class
+ */
+
+class interview{
+	
+	/*
+	 The following two variables must be manually set (set_values functions don't set them).
+	 These variables are all used with the new add interview screen to determine if this is a multi job
+	 interview, or if the job already exists in the system, or if its been created from scratch.
+	*/
+
+	var $job_id;			//int
+	var $employer_id;		//int
+	var $multi_job_interview;	//boolean
+	var $multi_job_ids;		//string containing all of the job ids for a multi job interview
+	var $multi_job_codes;		//array of strings
+	var $interview_only;		//boolean
+	var $existing_single_job;	//boolean
+
+	var $job_code;			//string
+	
+	var $company_name;		//string
+	var $employer_email;		//string
+	var $students;			//string of short listed students' login IDs as a whole, separated by white space
+	var $emailed_newsgroup;
+	
+	var $interview_medium;
+ 	var $interview_place;
+	var $no_time;
+	
+	var $presentation;
+	var $interview_type;
+	
+	var $interviewers;		//array of interviewers' names
+	var $locations;			//array
+	var $wait_locations;		//array
+	var $contact;
+    	
+	var $student_visible;
+	var $cancelled;	
+	/***  Presentation information  ***/	
+	var $pres_date;			
+	var $pres_time;
+	var $pres_len;			
+	var $pres_loc;		
+	var $pres_notes;
+	var $pres_viewable_by_all;
+	
+	var $notes;
+	var $staff_notes;
+
+	var $int_date;          //add
+	var $int_dates;			//edit
+    	var $schedules;			//multi-dimensional array
+
+	var $address1;
+	var $address2;
+	var $city;
+	var $province;
+	var $country;
+	var $direction;
+
+        var $use_room_number;
+	
+	function interview($interview)
+	{	
+		if($interview)
+		{	
+			$this->job_id = $interview->job_id;
+			$this->job_code = $interview->job_code;
+			$this->multi_job_interview = $interview->multi_job_interview;
+		        $this->multi_job_ids = $interview->multi_job_ids;
+		        $this->multi_job_codes = $interview->multi_job_codes;
+		        $this->interview_only = $interview->interview_only;
+		        $this->existing_single_job = $interview->existing_single_job;
+			$this->employer_id = $interview->employer_id;
+			
+			$this->company_name = $interview->company_name;
+
+			$this->employer_email = $interview->employer_email;
+			
+			$this->students = $interview->students;
+		
+			$this->interview_medium = $interview->interview_medium;
+			$this->interview_place = $interview->interview_place;
+			$this->interview_type = $interview->interview_type;
+
+			$this->presentation = $interview->presentation;
+			
+			$this->contact = $interview->contact;
+			$this->student_visible = $interview->student_visible;
+			$this->cancelled = $interview->cancelled;
+			$this->emailed_newsgroup = $interview->emailed_newsgroup;
+
+			$this->interviewers = $interview->interviewers;
+			$this->locations = $interview->locations;
+			$this->wait_locations = $interview->wait_locations;
+			$this->notes = $interview->notes;
+			$this->staff_notes = $interview->staff_notes;
+	
+			$this->pres_date = $interview->pres_date;
+			$this->pres_time = $interview->pres_time;
+			$this->pres_len = $interview->pres_len;
+
+			$this->pres_loc = $interview->pres_loc;
+			$this->pres_notes = $interview->pres_notes;
+			$this->pres_viewable_by_all = $interview->pres_viewable_by_all;
+			
+			$this->int_date = $interview->int_date;        //add
+			$this->int_dates = $interview->int_dates;      //edit
+			
+			$this->schedules = $interview->schedules;
+			$this->oncampus  = $interview->oncampus;
+			$this->no_time  = $interview->no_time;
+		
+			$this->address1  = 	$interview->address1;
+			$this->address2  = 	$interview->address2;
+			$this->city      = 	$interview->city;
+			$this->province  = 	$interview->province;
+			$this->country   = 	$interview->country;
+			$this->direction = 	$interview->direction;
+			$this->use_room_number = $interview->use_room_number;
+		}
+	}
+
+	/***	Debug Message	***/	
+	function print_debug_message()
+	{
+		echo("<table width='100%' border='1' class='row0d'>
+			<tr>
+				<td>job_code: 	 	$this->job_code</td>
+				<td>company name: 	$this->company_name</td>
+				<td>employer e-mail:	$this->employer_email</td></tr>
+			<tr>
+				<td>students: 	 	$this->students</td>
+				<td>place:		$this->interview_place</td></tr>
+			<tr>
+				<td>medium: 		$this->interview_medium</td>
+			    <td>note: 			$this->notes</td>
+				<td>staff_notes:	$this->staff_notes</td></tr>
+		    <tr>
+		    	<td>type: 		$this->interview_type</td>
+		    	<td>&nbsp;</td></tr>
+		    <tr>
+		    	<td>Interviewer 1: 	{$this->interviewers[0]}</td>
+		    	<td>Interviewer ID: 	{$this->interviewer_ids[0]}</td></tr>
+		    <tr>
+		    	<td colspan='2'>No time: 	$this->no_time</td></tr>");
+
+		if( $this->presentation == 1 )
+		{
+			echo("		    	
+		    <tr class='row1d'>
+				<td>pres_date: 		$this->pres_date</td>
+			    <td>pres_time: 		$this->pres_time ( $this->pres_len )</td></tr>
+			<tr class='row1d'>			
+			    <td>pres_loc: 		$this->pres_loc</td>
+			    <td>pres_notes:		$this->pres_notes</td></tr>
+			    <td>pres_viewable_by_all:	$this->pres_viewable_by_all</td></td>");
+		}
+		echo("			
+			<tr>
+				<td>contact: 		$this->contact</td>
+				<td>student_visible:	$this->student_visible</td></tr></table>");
+		for( $i = 0; $i < count( $this->schedules ); $i++ )
+		{
+			echo( "<b>" . $this->int_dates[$i] . "</b><br />");			
+			$this->printSchedule($this->schedules[$i]);
+		}
+		 				
+	}
+	
+	function printSchedule( $schedule )
+	{
+		foreach( $schedule as $s )
+		{
+			echo( $s['TYPE'] . "&nbsp;" . $s['START'] ."&nbsp;". $s['END'] . "<br />" ); 	
+		}   	
+		echo("<hr />");
+	}
+
+}
+
+?>

@@ -1,0 +1,14 @@
+form,p,td,th { font-size: 12px; }
+h1 { font-size: 17px; }
+h2 { font-size: 15px; }
+h3 { font-size: 13px; }
+h4 { font-size: 11px; }
+h5 { font-size: 9px; }
+h6 { font-size: 7px; }
+b.login { font-size: 11px; }
+.menuitem { font-size: 8px; }
+.shorttable {line-height: 8px; }
+.bar2 A { font-weight: lighter; font-size: 9px; line-height: 1.0em; }
+/* calendar */
+.cal-title { font-size: 14px; }
+div.clock { font-size: 12px; }

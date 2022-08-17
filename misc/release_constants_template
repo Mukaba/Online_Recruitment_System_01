@@ -1,0 +1,126 @@
+<?php
+/*
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: release_constants.inc                                              |
+ +------------------------------------------------------------------------------+
+*/
+
+// Indicate name of database.
+define("DATABASE", "MAMOOK");
+
+
+# Protected Paths: These should be a non web-accessible area of your server
+// Path to secured_constants.inc
+include('path/to/secured_constants.inc');
+
+define("PATH_ADODB", "path/to/adodb/"); // The path to the ADOdb library
+define("PHOTO_DIR", "path/to/student_photos/"); // The path for accessing student photos.
+define("SCRIPT_PATH", "path/to/your/scripts"); // The path to general scripts
+define("PATH_HTMLDOC", "path/to/htmldoc"); // Path to HTMLDoc executable (eg. /usr/bin/htmldoc)
+define("PATH_HTMLDOC_DATA", "path/to/htmldoc/shared"); // Path to HTMLDoc's data folder (eg. /usr/share/htmldoc)
+define("PATH_SENDMAIL", "path/to/sendmail"); // Path to sendmail executable
+
+
+# Web Paths: These should be a web-accessible area of your server
+// Relative path to directories containing plugins, delimited by a ':' (colon).
+// Also include path to colorschemes here (colourschemes must be web accessible)
+define("PATH_PLUGIN_DIR", "path/to/plugin/dir/:path/to/colorscheme/dir/");
+
+// URL to directory containing colorschemes
+define("URL_PLUGIN_COLORSCHEMES", "http://yourorganization.com/mamook/colorscheme_plugins/");
+
+# Log File Paths
+// Make sure the web server has sufficient permission to write to these directories 
+// and files.
+define("PATH_LOGS", "path/to/logs/"); // Path where log files should be recorded. 
+define("LOGFILE", "log.txt");  // File where security alerts are logged.
+// To test LOGFILE, log in as a student and use the url .../mamook.php?select=add
+
+
+# E-mails
+// DB_EMAIL_TO is the admin user e-mail account that debug messages are sent to.
+define("DB_EMAIL_TO", "email@yourorganization.com");
+
+// BRAND_NAME_SYSTEM_EMAIL is the e-mail account that system messages appear to be mailed from.
+define("BRAND_NAME_SYSTEM_EMAIL", "email@yourorganization.com");
+
+// These are the e-mail addresses used for sending employer evaluation forms to.
+define("EVAL_EMP_EMAIL", "email@yourorganization.com");
+define("EVAL_STU_EMAIL", "email@yourorganization.com");
+define("EVAL_STU_EMAIL_FUTURE_EMP", "email@yourorganization.com");
+
+// Empty e-mail address where overflow gets sent
+// also used if employer doesn't want to reveal their address
+define ("NULL_EMAIL", "nullemail@yourorganization.com");
+
+// The following line specifies the account to which security alerts are e-mailed.
+//  Set to "" to disable automatic security mailing.
+define("SECURITY_EMAIL", "email@yourorganization.com");
+
+// Most user types are able to send administrators feedback.
+// Please set both of the following FEEDBACK constants with valid
+// e-mail addresses. Both constants are required. 
+define("FEEDBACK_EMAIL", "email@yourorganization.com");
+define("FEEDBACK_BCC_EMAIL","email@yourorganization.com");
+
+# Authentication Settings
+// The following lines determine whether non-password protected administrator and student
+// accounts are available for testing purposes.
+// The student and admin departments are set directly in mamook/misc/authenticate.inc
+// The student and admin logins are set in secured_constants.inc
+// *** THESE SHOULD BE SET TO FALSE WHEN THE SYSTEM IS IN ACTUAL USE ***
+define("ADMIN_ENABLED", TRUE);
+define("STUDENT_ENABLED", TRUE);
+
+// Insert any IP addresses here for computers that will display enhanced error messages 
+// through db.inc.  Useful for testing purposes.  Add one IP per line.
+$IPS_FOR_DEBUG[] = ""; 
+
+// Constants used to determine what type of logins are being used for authentication.
+define("AUTH_USING_SCRIPT_LOGIN", TRUE);
+define("AUTH_USING_NIS_LOGIN", FALSE);
+define("AUTH_USING_LDAP_LOGIN", FALSE);
+define("SCRIPT_LOGIN_FILE", "customlogin.pl"); //Doesn't have to be pl
+define("SCRIPT_LOGIN", "netlink");
+define("NIS_LOGIN", "nis");
+
+
+# Misc settings
+//Organization identifiers
+define("ORGANIZATION", "Oragnaization Name");
+define("ORGANIZATION_FULL", "the Organization Name");
+define("ORGANIZATION_CODE", "Org");
+define("ORGANIZATION_DB_URL", "http://www.yourorganization.com/");
+define("BRAND_NAME", "Mamook");
+
+// Set SHOW_DB_ON_TITLE to "show_title" to have database name appear in window titlebar.
+// Useful for testing purposes, should be disabled for production use.
+define("SHOW_DB_ON_TITLE", "yes");
+// Enables or disables room booking module
+define("ROOM_BOOKING_ENABLED", false);
+
+// Set ALLOW_GENERIC_COLORSCHEME to only use your organization's schemes
+define("ALLOW_GENERIC_COLORSCHEME", TRUE);
+// Set name of your organization's default scheme (leave blank for Mamook generic scheme)
+define("DEFAULT_COLORSCHEME", "");
+
+?>

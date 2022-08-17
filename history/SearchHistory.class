@@ -1,0 +1,279 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: SearchHistory.class                                                |
+ +------------------------------------------------------------------------------+
+ | Description: This class stores all search variables, from the history        |
+ | search page. A class is used to ease the passing of multiple variables       |
+ | through forms.                                                               |
+ +------------------------------------------------------------------------------+
+
+*/
+
+    
+    
+class SearchHistory {
+
+	// Declare All Variables
+
+    // Variables used from simple search
+	var $search_by_term;
+	var $search_by_student;
+	var $student_number_select;
+	var $student_name_select;
+
+    // Variables used in advanced search
+    
+    var $student_num_search_type;
+	var $student_num;
+	var $first_name;
+	var $last_name;
+	var $gender;
+	var $grouping;         // Synonymous with department_id
+    var $discipline_id;
+    var $academic_year;
+    var $advisor;
+    var $coop_advisor;
+    var $citizen;
+    var $email_search_type;
+    var $email;
+    var $work_email_search_type;
+    var $work_email;
+	var $job_code;
+	var $work_term_number;
+    var $work_term_length; // To be used in future.
+    var $salary;           // To be used in future.
+    var $salary_period;    // To be used in future. 
+	var $wt_status;
+
+	var $work_term_city;
+    var $work_term_region;
+	var $work_term_province;
+	var $work_term_country;
+
+	var $company_city;
+    var $company_region;
+	var $company_province;
+	var $company_country;
+
+    var $supervisor_name;
+    var $site_visit_date_supervisor_equality;
+    var $site_visit_date_supervisor;
+    var $site_visit_by_supervisor;
+    var $site_visit_type_id_supervisor;
+
+    var $site_visit_date_equality;
+	var $site_visit_date;
+	var $site_visit_by;
+    var $site_visit_type_id;
+
+    var $report_code;
+    var $report_subject;
+    var $report_marker;
+
+    var $termsused;        // Array
+	var $term;             // Array
+	var $year;             // Array
+
+	var $flags;            // Array
+	var $nflags;		   // Array
+
+	var $column;           // Array
+	var $order;			   // Array
+
+
+	// Constructor
+	function SearchHistory($searchHistory = NULL) 
+    {
+        if ($searchHistory && is_string($searchHistory))
+        {
+            // We've been passed a packed searchHistory object.  Unpack it and then proceed as normal.
+            $searchHistory = unpackObject(($searchHistory));
+        }
+		if ($searchHistory) 
+        {
+			$this->search_by_term = $searchHistory->search_by_term;
+			$this->search_by_student = $searchHistory->search_by_student;
+			$this->student_number_select = $searchHistory->student_number_select;
+			$this->student_name_select = $searchHistory->student_name_select;
+
+			$this->student_num_search_type = $searchHistory->student_num_search_type;
+			$this->student_num = $searchHistory->student_num;
+			$this->first_name = $searchHistory->first_name;
+			$this->last_name = $searchHistory->last_name;
+            $this->gender = $searchHistory->gender;
+			$this->grouping = $searchHistory->grouping;
+            $this->discipline_id = $searchHistory->discipline_id;
+			$this->academic_year = $searchHistory->academic_year;
+            $this->advisor = $searchHistory->advisor;
+            $this->coop_advisor = $searchHistory->coop_advisor;
+            $this->citizen = $searchHistory->citizen;
+            $this->email_search_type = $searchHistory->email_search_type;
+            $this->email = $searchHistory->email;
+            $this->work_email_search_type = $searchHistory->work_email_search_type;
+            $this->work_email = $searchHistory->work_email;
+			$this->job_code = $searchHistory->job_code;
+			$this->work_term_number = $searchHistory->work_term_number;
+            $this->work_term_length = $searchHistory->work_term_length;
+            $this->salary = $searchHistory->salary;
+            $this->salary_period = $searchHistory->salary_period;
+			$this->wt_status = $searchHistory->wt_status;
+
+			$this->work_term_city = $searchHistory->work_term_city;
+            $this->work_term_region = $searchHistory->work_term_region;
+			$this->work_term_province = $searchHistory->work_term_province;
+			$this->work_term_country = $searchHistory->work_term_country;
+
+			$this->company_city = $searchHistory->company_city;
+            $this->company_region = $searchHistory->company_region;
+			$this->company_province = $searchHistory->company_province;
+			$this->company_country = $searchHistory->company_country;
+
+			$this->supervisor_name = $searchHistory->supervisor_name;
+			$this->site_visit_date_supervisor_equality = $searchHistory->site_visit_date_supervisor_equality;
+			$this->site_visit_date_supervisor = $searchHistory->site_visit_date_supervisor;
+			$this->site_visit_by_supervisor = $searchHistory->site_visit_by_supervisor;
+            $this->site_visit_type_id_supervisor = $searchHistory->site_visit_type_id_supervisor;
+
+			$this->site_visit_date_equality = $searchHistory->site_visit_date_equality;
+			$this->site_visit_date = $searchHistory->site_visit_date;
+			$this->site_visit_by = $searchHistory->site_visit_by;
+			$this->site_visit_type_id = $searchHistory->site_visit_type_id;
+
+            $this->report_code = $searchHistory->report_code;
+            $this->report_subject = $searchHistory->report_subject;
+            $this->report_marker = $searchHistory->report_marker;
+
+			$this->termsused = $searchHistory->termsused;
+			$this->term = $searchHistory->term;
+			$this->year = $searchHistory->year;
+
+			$this->flags = $searchHistory->flags;
+			$this->nflags = $searchHistory->nflags;
+
+			$this->column = $searchHistory->column;
+			$this->order = $searchHistory->order;
+		}
+
+	}
+
+	function setVariable (
+                $search_by_term,$search_by_student,$student_number_select,$student_name_select,$student_num_search_type,$student_num,$first_name,$last_name,$gender
+                ,$grouping,$discipline_id,$academic_year,$advisor,$coop_advisor,$citizen,$email_search_type,$email,$work_email_search_type,$work_email,$job_code
+                ,$work_term_number,$work_term_length,$salary,$salary_period,$wt_status,$work_term_city,$work_term_region,$work_term_province,$work_term_country
+                ,$company_city,$company_region,$company_province,$company_country,$supervisor_name,$site_visit_date_supervisor_equality,$site_visit_date_supervisor
+                ,$site_visit_by_supervisor,$site_visit_type_id_supervisor,$site_visit_date_equality,$site_visit_date,$site_visit_by,$site_visit_type_id,$report_code
+                ,$report_subject,$report_marker,$termsused,$term,$year,$flags,$nflags,$column,$order
+                )
+	{	
+			
+			$this->search_by_term = removeSlashes($search_by_term);
+			$this->search_by_student = removeSlashes($search_by_student);
+			$this->student_number_select = removeSlashes($student_number_select);
+			$this->student_name_select = removeSlashes($student_name_select);
+
+			$this->student_num_search_type = removeSlashes($student_num_search_type);
+			$this->student_num = removeSlashes($student_num);
+			$this->first_name = removeSlashes($first_name);
+			$this->last_name = removeSlashes($last_name);
+            $this->gender = removeSlashes($gender);
+			$this->grouping = removeSlashes($grouping);
+            $this->discipline_id = removeSlashes(trim_elements($discipline_id));
+			$this->academic_year = removeSlashes($academic_year);
+            $this->advisor = removeSlashes($advisor);
+            $this->coop_advisor = removeSlashes($coop_advisor);
+            $this->citizen = removeSlashes($citizen);
+            $this->email_search_type = removeSlashes($email_search_type);
+            $this->email = removeSlashes($email);
+            $this->work_email_search_type = removeSlashes($work_email_search_type);
+            $this->work_email = removeSlashes($work_email);
+			$this->job_code = removeSlashes($job_code);
+			$this->work_term_number = removeSlashes($work_term_number);
+			$this->work_term_length = removeSlashes($work_term_length);
+            $this->salary = removeSlashes($salary);
+            $this->salary_period = removeSlashes($salary_period);
+			$this->wt_status = removeSlashes($wt_status);
+
+			$this->work_term_city = removeSlashes($work_term_city);
+			$this->work_term_region = removeSlashes($work_term_region);
+            $this->work_term_province = removeSlashes($work_term_province);
+			$this->work_term_country = removeSlashes($work_term_country);
+
+			$this->company_city = removeSlashes($company_city);
+            $this->company_region = removeSlashes($company_region);
+			$this->company_province = removeSlashes($company_province);
+			$this->company_country = removeSlashes($company_country);
+
+			$this->supervisor_name = removeSlashes($supervisor_name);
+			$this->site_visit_date_supervisor_equality = removeSlashes($site_visit_date_supervisor_equality);
+			$this->site_visit_date_supervisor = removeSlashes($site_visit_date_supervisor);
+			$this->site_visit_by_supervisor = removeSlashes($site_visit_by_supervisor);
+			$this->site_visit_type_id_supervisor = removeSlashes($site_visit_type_id_supervisor);
+			$this->site_visit_date_equality = removeSlashes($site_visit_date_equality);
+			$this->site_visit_date = removeSlashes($site_visit_date);
+			$this->site_visit_by = removeSlashes($site_visit_by);
+			$this->site_visit_type_id = removeSlashes($site_visit_type_id);
+
+			$this->report_code = removeSlashes($report_code);
+			$this->report_subject = removeSlashes($report_subject);
+			$this->report_marker = removeSlashes($report_marker);
+
+			$this->termsused = removeSlashes($termsused);
+            $this->term = removeSlashes($term);
+			$this->year = removeSlashes($year);
+			
+			$this->flags= removeSlashes($flags);
+			$this->nflags = removeSlashes($nflags);
+			
+			$this->column = removeSlashes($column);
+			$this->order = removeSlashes($order);
+	}
+
+    // Function used to properly urlencode and serialize this class for passing between forms.  Returns a searchHistory object.
+
+    function packHistory()
+    {
+        notifyDeprecated("SearchHistory::packHistory()");
+        return;
+        $tempSearchHistory = new SearchHistory($this);
+
+        //pack arrays
+        $tempSearchHistory->termsused = (($tempSearchHistory->termsused));
+        $tempSearchHistory->term = (($tempSearchHistory->term));
+        $tempSearchHistory->year = (($tempSearchHistory->year));
+
+        $tempSearchHistory->flags = (($tempSearchHistory->flags));
+        $tempSearchHistory->nflags = (($tempSearchHistory->nflags));
+
+        $tempSearchHistory->discipline_id = (($tempSearchHistory->discipline_id));
+        $tempSearchHistory->column = (($tempSearchHistory->column));
+        $tempSearchHistory->order = (($tempSearchHistory->order));
+        
+        $tempSearchHistory = (($tempSearchHistory));
+
+        return $tempSearchHistory;
+    }
+ 
+}
+
+?>

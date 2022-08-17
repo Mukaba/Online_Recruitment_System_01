@@ -1,0 +1,225 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: Job.class                                                          |
+ +------------------------------------------------------------------------------+
+ | Description: Holds job information to ease passing and storing of            |
+ | information between pages.                                                   |
+ +------------------------------------------------------------------------------+
+
+*/
+
+// This file is basically a class created using interview.class as
+// a template.  addjob.class inherits from this class.
+
+class Job
+	
+{
+
+	// General job information
+	
+	var $position_title;			//string 
+	var $job_code;				//string
+	var $employer_code;			//string
+	var $num_positions;			//int
+ 	var $apply_method;			//string
+	var $receive_address;			//string	
+	var $region;				//int
+	var $city;				//string
+	var $provstate;				//int
+	var $country;				//int
+	var $start_term;			//string
+	var $start_year;			//string
+    var $start_date;            //date
+    var $start_date_date;       //int
+    var $start_date_month;      //int
+    var $start_date_year;       //int
+    var $end_date;              //date
+    var $end_date_date;         //int
+    var $end_date_month;        //int
+    var $end_date_year;         //int
+	var $salary_amount1;			//int
+	var $salary_amount2;			//int
+	var $salary_period;			//string
+	var $closing_date;			//string in date format 
+	var $closing_time;			//string in time format
+	var $workterm_lengths;			//array containing the workterm lengths
+	var $workterm_hours;			//int
+	var $other_postings;			//string
+	var $industry;				//int
+	var $is_rejectable;			//int
+	var $job_disciplines;			//array contained discipline ids
+		
+
+/*
+ The variables below are used to hold temporary input for the job.  The contact's name will not be changeable from here, 
+ although the rest of the information will be.  
+*/
+
+	var $contact_id;			//int
+	var $contact_name;			//string
+	var $contact_fax;			//string
+	var $contact_phone;			//string
+    var $contact_cellphone;			//string
+    var $contact_email;			//string
+
+
+/*
+ The variables below are used to hold temporary input for the job pertaining to the department this job is for.
+*/
+
+	var $department_id;			//int
+	var $department_name;			//string
+	var $department_website;		//string
+	var $department_description;		//string
+
+
+/*
+ The variables below are used to hold temporary input for the company.  The company's name will not be changeable from here,
+ although the rest of the information may.
+*/
+
+	var $employer_id;			//int
+	var $company_name;			//string
+	var $company_description;		//string
+	var $company_website;			//string
+
+
+	var $min_academic;			//int (minimum academic year.  1, 2, 3, 4+)
+	var $min_workterms;			//int (minimum workterms done.  0, 1, 2, 3, 4, 5+)
+	var $apply_departments;			//array of ints
+	var $host_department;			//int
+ 
+	var $job_description;			//string
+	var $skills_required;			//string
+	var $special_requirements;		//string
+	var $special_instructions;		//string
+	var $special_instr_button;		//string
+	var $show_special_instr_button;		//int-boolean
+	var $comments;				//string
+	var $admin_comments;			//string
+	var $for_student_comments;			//string
+	var $entered_by;				//int	
+	var $displayname_on_coverltr;				//int	
+	var $status;				//int
+	var $admin_status;			//int
+	var $student_status;			//int
+	var $date_posted;			//string in date format
+	var $last_updated_on;			//string
+	var $last_updated_by;			//string
+
+	
+	function Job($job)
+	{	
+		if($job)
+		{	
+			$this->position_title = $job->position_title;
+			$this->num_positions = $job->num_positions;
+			$this->apply_method = $job->apply_method;
+			
+			$this->city = $job->city;
+			$this->region = $job->region;
+			$this->provstate = $job->provstate;
+			$this->country = $job->country;
+			
+			$this->start_term = $job->start_term;
+			$this->start_year = $job->start_year;
+
+            $this->start_date = $job->start_date;
+            $this->start_date_date = $job->start_date_date;
+            $this->start_date_month = $job->start_date_month;
+            $this->start_date_year = $job->start_date_year;
+
+            $this->end_date = $job->end_date;
+            $this->end_date_date = $job->end_date_date;
+            $this->end_date_month = $job->end_date_month;
+            $this->end_date_year = $job->end_date_year;
+
+			$this->closing_date = $job->closing_date;
+			$this->closing_time = $job->closing_time;
+
+			$this->workterm_lengths = $job->workterm_lengths;
+			$this->workterm_hours = $job->workterm_hours;
+			
+			$this->receive_address = $job->receive_address;
+	
+			$this->salary_amount1 = $job->salary_amount1;
+			$this->salary_amount2 = $job->salary_amount2;
+			$this->salary_period = $job->salary_period;
+			
+			$this->min_academic = $job->min_academic;
+			$this->min_workterms = $job->min_workterms;
+			$this->apply_departments = $job->apply_departments;
+			$this->host_department = $job->host_department;
+
+			$this->other_postings = $job->other_postings;
+			$this->industry = $job->industry;
+			$this->job_disciplines = $job->job_disciplines;
+
+			$this->job_description = $job->job_description;
+			$this->skills_required = $job->skills_required;
+			$this->special_requirements = $job->special_requirements;
+			$this->displayname_on_coverltr = $job->displayname_on_coverltr;
+			$this->special_instructions = $job->special_instructions;
+			$this->special_instr_button = $job->special_instr_button;
+			$this->show_special_instr_button = $job->show_special_instr_button;
+		
+			$this->contact_id = $job->contact_id;
+			
+			$this->contact_name = $job->contact_name;
+			$this->contact_fax = $job->contact_fax;
+			$this->contact_phone = $job->contact_phone;
+            $this->contact_cellphone = $job->contact_cellphone;
+			$this->contact_email = $job->contact_email;
+
+			$this->department_id = $job->department_id;
+	
+			$this->department_name = $job->department_name;
+			$this->department_website = $job->department_website;
+			$this->department_description = $job->department_description;
+
+			$this->employer_id = $job->employer_id;
+			
+			$this->company_name = $job->company_name;
+			$this->company_website = $job->company_website;
+			$this->company_description = $job->company_description;
+
+			$this->comments = $job->comments;
+			$this->admin_comments = $job->admin_comments;
+			$this->for_student_comments = $job->for_student_comments;
+			$this->entered_by = $job->entered_by;
+			$this->status = $job->status;
+			$this->admin_status = $job->admin_status;
+			$this->student_status = $job->student_status;
+			$this->job_code = $job->job_code;
+			$this->employer_code = $job->employer_code;
+			$this->date_posted = $job->date_posted;
+			$this->entered_by = $job->entered_by;
+			$this->last_updated_on = $job->last_updated_on;
+			$this->last_updated_by = $job->last_updated_by;
+			
+		}
+	}
+}
+
+?>

@@ -1,0 +1,40 @@
+<?php
+
+// LoginIDs used for accessing the system without a password
+// Also need ADMIN_ENABLED and/or STUDENT_ENABLED to be 
+// set in misc/release_constants.inc 
+define("ADMIN_LOGIN", "");
+define("STUDENT_LOGIN", "");
+
+//This is the username of the administrator.  Only one name may be entered.
+define("ADMIN_USER_ID", "");
+
+// Salts used for student, employer, and office checks.
+// These need to be set to a two-character code.
+define("STUDENT_SALT", "");
+define("EMPLOYER_SALT", "");
+define("OFFICE_SALT", "");
+
+// SERVER is your domain.  
+define("SERVER","");
+
+// Database settings.
+// Database name setting is in release_constants
+define("DB_TYPE", ""); // The database type (mysql, mysqli)
+define("DB_USER", ""); // The database username
+define("DB_PASS", ""); // The database password
+
+// DSN Connect string for your database.  If this is used, it overrides the above settings.
+define("DB_DSN", "type://user:pass@server/database?option=value");
+
+//Mysql example:   mysql://username:password@localhost/mamook?persist     - this has persistent connections set
+//Mysqli example:  mysqli://username:password@localhost/mamook?port=1234  - this has a custom port
+//PostgreSQL example: postgres://user:pwd@localhost/mydb?persist
+
+// See the ADOdb manual (http://phplens.com/lens/adodb/docs-adodb.htm#dsnsupport) or the mamook Wiki (http://www.mamook.net) for more examples
+
+// Enter a string of characters and digits.  Once set 
+// this should not be changed.
+define("PACK_SECRET_KEY", "");
+?>
+

@@ -1,0 +1,459 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: ConvertToPDF.class                                                 |
+ +------------------------------------------------------------------------------+
+ | Description: This class deals with all of the converting of files to PDF.    |
+ +------------------------------------------------------------------------------+
+
+*/
+
+/* 
+    Below are all the function contained within this file:
+
+    convert_application_list ($job_id)
+    get_student_name ($student)
+    convert_resume ($student, $resume_id)
+    convert_job ($HTMLjob)
+    convert_contactinfo ($HTMLcompany)
+    convert_coverletter ($coverletter_id, $student_number)
+    convert_transcript ($student)
+    convert_single_application ($application_id)
+    convert_whole_applications ($application_ids, $table_of_contents = 'yes')
+    convert_coverletter_applications ($application_ids, $table_of_contents = 'yes')
+    convert_resume_applications ($application_ids, $table_of_contents = 'yes')
+    create_input_file ($string)
+    convert_notoc ()
+    convert ()
+    convert_HTMLjob ()
+    convert_HTMLcontactinfo ()
+    get_resume ($student, $resume_id)
+    get_coverletter ($coverletter_id)
+    get_application ($application_id)
+    get_transcript ($student)
+    send_output()
+
+    Magic functions for serialize() and unserialize():
+
+    __sleep()
+    __wakeup()
+*/
+
+
+class ConvertToPDF {
+    // variables used in __sleep() and __wakeup() for proper serialization
+    var $filename;
+    var $outfilename;
+
+    // default constructor
+    function ConvertToPDF()
+    {
+        define (  "FILE", uniqid( "PDF/PDFconversion/COOPX" )  . ".html");
+        define ( "OUTFILE", uniqid( "PDF/PDFconversion/COOPX" ) . ".pdf");
+    }
+
+    function convert_application_list ($job_id) {
+        global $userlevel;
+        if (isset($userlevel) && $userlevel != STUDENT) {
+            // FIRST we need to create the header for the page, putting important info into it
+
+            $header = "";
+            $header .= "<h3>University of Victoria Co-op</h3>";
+
+            $sql = "SELECT DISTINCT ji.job_code, ji.apply_method, ec.company_name, ji.status, ji.receive_address AS job_email,
+            CONCAT(c.first_name, ' ', c.last_name) AS contact_name, c.email AS contact_email, ji.position_title,
+            ji.term_id, ji.year, d.department_name, ji.employer_code, ed.department_name AS division_name
+                FROM employer_company AS ec, job_info AS ji
+                LEFT JOIN contact AS c ON c.contact_id = ji.contact_id
+                LEFT JOIN employer_login AS el ON el.contact_id = ji.contact_id
+                LEFT JOIN employer_department AS ed ON ed.department_id = ji.employer_department_id
+                LEFT JOIN department AS d ON d.department_id = ji.department_id
+                WHERE ji.job_id = '$job_id'
+                AND ec.employer_id = ji.employer_id";
+
+            $result = $GLOBALS['dbh']->Execute($sql);
+            $row = $result->FetchRow();
+
+            $header .= "<h2>Application packages for ". getTermName ($row["term_id"]) ." ". $row["year"] ." work term</h2>";
+            $header .= "<hr />";
+
+            $header .= "<table border='0'>";
+            $header .= "<tr>";
+            $header .= "<td align='left'><b>Position Title:</b></td>";
+            $header .= "<td>". $row["position_title"] ."</td>";
+            $header .= "<tr>";
+
+            $header .= "<tr>";
+            $header .= "<td align='left'><b>Company Name:</b></td>";
+            $header .= "<td>". $row["company_name"] . ($row["division_name"] ? " (". $row["division_name"] .")" : "") ."</td>";
+            $header .= "</tr>";
+
+            $header .= "<tr>";
+            $header .= "<td align='left'><b>Job Code:</b></td>";
+            $header .= "<td>". $row["job_code"] ."</td>";
+            $header .= "</tr>";
+
+            $header .= "<tr>";
+            $header .= "<td align='left'><b>Job Contact:</b></td>";
+            $header .= "<td>". $row["contact_name"] ."</td>";
+            $header .= "</tr>";
+
+            if ($row["employer_code"]) {
+
+                $header .= "<tr>";
+                $header .= "<td align='left'><b>Employer Job Code:</b></td>";
+                $header .= "<td>". $row["employer_code"] ."</td>";
+                $header .= "</tr>";
+            }
+
+            $header .= "<tr>";
+            $header .= "<td align='left'><b>Host Department:</b></td>";
+            $header .= "<td>". $row["department_name"] ."</td>";
+            $header .= "</tr>";
+            $header .= "</table>";
+
+            $header .= "<hr />";
+
+            // NEXT we actually create the list
+            $list = "";
+            $list .= "<table border='0' cellpadding='2'>";
+            $list .= "<tr>";
+            $list .= "<td align='left'>&nbsp;<b><u>Name</u></b>&nbsp;</td>";
+            $list .= "<td align='left'>&nbsp;<b><u>Department(s)</u></b>&nbsp;</td>";
+            // for later on will need to change query to accomodate
+            //            $list .= "<td align='left'>&nbsp;<b><u>Academic Year</u></b>&nbsp;</td>";
+            //            $list .= "<td align='left'>&nbsp;<b><u>Work Term Num.</u></b>&nbsp;</td>";
+            $list .= "</tr>";
+
+            $sql = "SELECT DISTINCT CONCAT(s.first_name, ' ', s.last_name) AS name, s.student_number
+                FROM applications AS a, student AS s
+                WHERE a.job_id = '$job_id'
+                AND a.app_status IN ('". APP_ACTIVATED_ONLINE ."', '". APP_UNAVAILABLE ."', '". APP_PAPER_SENT ."', '". APP_SPECIAL ."')
+                AND s.student_number = a.student_number
+                ORDER BY s.last_name";
+            $result = $GLOBALS['dbh']->Execute ($sql);
+
+            while ($row = $result->FetchRow()) {
+
+                $depts = getStudentDepartments ($row["student_number"]);
+                $department = "";
+                for ($i = 0; $i < sizeof ($depts); $i ++) {
+                    $department .= getDepartmentName ($depts[$i]) ."; ";
+                }
+                $department = substr ($department, 0, -2);
+
+                $list .= "<tr>";
+                $list .= "<td align='left'>&nbsp;". $row["name"] ."&nbsp;&nbsp;&nbsp;&nbsp;</td>";
+                $list .= "<td align='left'>&nbsp;$department&nbsp;</td>";
+                $list .= "</tr>";
+            }
+
+            $list .= "</table>";
+
+            // throw in a footer with some other info
+            $footer = "";
+            $footer .= "<br /><hr />";
+            $footer .= "Printed on: ". date('Y-m-d, H:i', time());
+
+
+            // combine 'em all
+            $html = $header . $list . $footer;
+
+            $this->create_input_file ($html);
+            $this->convert_notoc();
+            $this->send_output();
+        }
+        }
+
+        function get_student_name ($student) {
+
+            $sql = "SELECT CONCAT(first_name, ' ', last_name) as name 
+                FROM student WHERE student_number = '" . addslashes(stripslashes($student)) . "'";
+            $result = $GLOBALS['dbh']->Execute( $sql );
+            $row =  $result->FetchRow();
+            return $row["name"];
+        }
+
+        function convert_resume ($student, $resume_id) {
+
+            $resume = $this->get_resume( $student, $resume_id );
+            $resume = "<h1></h1>" . $resume;
+            $this->create_input_file( $resume );
+            $this->convert_notoc();
+            $this->send_output();
+        }
+
+        function convert_job ($HTMLjob) {
+
+            $this->create_input_file($HTMLjob);
+            $this->convert_HTMLjob();
+            $this->send_output();
+        }
+
+        function convert_contactinfo ($HTMLcompany) {
+
+            $this->create_input_file($HTMLcompany);
+            $this->convert_HTMLcontactinfo();
+            $this->send_output();
+        }
+
+        function convert_coverletter ($coverletter_id, $student_number) {
+
+            $letter = $this->get_coverletter( $coverletter_id );
+            //$name = $this->get_student_name( $student_number );
+            //$letter = "<h1>" . $name . "</h1>" . $letter;
+            $this->create_input_file( $letter );
+            $this->convert_notoc();
+            $this->send_output();
+        }
+
+        function convert_transcript ($student) {
+
+            $transcript = $this->get_transcript( $student );
+            $transcript = "<h1></h1>" . $transcript;
+            $this->create_input_file( $transcript );
+            $this->convert();
+            $this->send_output();
+        }
+
+        function convert_single_application ($application_id) {
+
+            $application = $this->get_application ($application_id);
+            $this->create_input_file ($application);
+            $this->convert_notoc ();
+            $this->send_output ();
+        }
+
+        function convert_whole_applications ($application_ids, $table_of_contents = 'yes') {
+
+            // just in case things aren't ordered, let's order 'em
+            $sql = "SELECT DISTINCT a.application_id
+                FROM applications AS a, student AS s
+                WHERE a.application_id IN ('". implode ("', '", $application_ids) ."')
+                AND a.student_number = s.student_number
+                ORDER BY s.last_name, s.first_name";
+
+            $result = $GLOBALS['dbh']->Execute ($sql);
+
+            while ($row = $result->FetchRow())
+                $app_pack .= $this->get_application ($row["application_id"]);
+
+            $this->create_input_file($app_pack);
+
+            if ($table_of_contents == 'yes')
+                $this->convert();
+            else
+                $this->convert_notoc();
+
+            $this->send_output();
+        }
+
+        function convert_coverletter_applications ($application_ids, $table_of_contents = 'yes') {
+
+            $sql = "SELECT DISTINCT a.application_id, a.coverletter_id, a.student_number
+                FROM applications AS a, student AS s
+                WHERE a.application_id IN ('". implode ("', '", $application_ids) ."')
+                AND a.student_number = s.student_number
+                ORDER BY s.last_name, s.first_name";
+
+            $result = $GLOBALS['dbh']->Execute ($sql);
+
+            while ($row = $result->FetchRow()) {
+                $app_pack .= "<h1>". $this->get_student_name ($row["student_number"]) ."</h1>";	
+                $app_pack .= $this->get_coverletter ($row["coverletter_id"]);
+            }
+
+            $this->create_input_file ($app_pack);
+
+            if ($table_of_contents == 'yes')
+                $this->convert ();
+            else
+                $this->convert_notoc ();
+
+            $this->send_output ();
+        }
+
+        function convert_resume_applications ($application_ids, $table_of_contents = 'yes') {
+
+            $sql = "SELECT DISTINCT a.application_id, a.resume_id, a.student_number
+                FROM applications AS a, student AS s
+                WHERE a.application_id IN ('". implode ("', '", $application_ids) ."')
+                AND a.student_number = s.student_number
+                ORDER BY s.last_name, s.first_name";
+
+            $result = $GLOBALS['dbh']->Execute ($sql);
+
+            while ($row = $result->FetchRow()) {
+                $app_pack .= "<h1>". $this->get_student_name ($row["student_number"]) ."</h1>";
+                $app_pack .= $this->get_resume ($row["student_number"], $row["resume_id"]);
+            }
+
+            $this->create_input_file ($app_pack);
+
+            if ($table_of_contents == 'yes')
+                $this->convert ();
+            else
+                $this->convert_notoc ();
+
+            $this->send_output ();
+        }
+
+        function create_input_file ($string) {
+
+            $string = "<html><body>" . $string . "</body></html>";
+            $fp = fopen (FILE, "a");
+
+            fputs($fp, $string);
+            fclose($fp);
+        }
+
+        function convert_notoc () {
+
+            $cmd = PATH_HTMLDOC . " --path ".PHOTO_DIR." -f " . OUTFILE . " --webpage --color --footer ... --header ... --no-title --size Letter " . FILE;
+            `$cmd`;
+        }
+        function convert () {
+
+            $cmd = PATH_HTMLDOC . " --datadir " . PATH_HTMLDOC_DATA . " -f " . OUTFILE . " --book --color --footer ..1 --header ... --toclevels 2 --no-title --size Letter " .  FILE;
+            `$cmd`;
+        }
+
+        function convert_HTMLjob () {
+
+            $cmd = PATH_HTMLDOC . " --datadir " . PATH_HTMLDOC_DATA . " -f " . OUTFILE . " --webpage --color --footer ... --header ... --no-title --size Letter " . FILE;
+            `$cmd`;
+        }
+
+        function convert_HTMLcontactinfo () {
+
+            $cmd = PATH_HTMLDOC . " --path ".PHOTO_DIR." --datadir " . PATH_HTMLDOC_DATA . " -f " . OUTFILE . " --webpage --color --footer ... --header ... --no-title --size Letter " . FILE;
+            `$cmd`;
+        }
+
+        function get_resume ($student, $resume_id) {
+
+            $sql = "SELECT resume
+                FROM resume 
+                WHERE resume_id = '" . addslashes($resume_id) .
+                "' AND student_number = '" . addslashes(stripslashes($student)) . "'";
+
+            $result = $GLOBALS['dbh']->Execute( $sql );
+
+            $row =  $result->FetchRow();
+            $resume = $row["resume"];
+
+            $resume = "<H2><font color='#FFFFFF' size='0'>Resume</font></H2>" . $resume;
+
+            $resume = ereg_replace("& ", "&amp; ",$resume);
+            return $resume;
+        }
+
+        function get_coverletter ($coverletter_id) {
+
+            $sql = "SELECT letter 
+                FROM coverletter 
+                WHERE coverletter_id = " . addslashes(stripslashes($coverletter_id));
+
+            $result = $GLOBALS['dbh']->Execute( $sql );
+
+            $row =  $result->FetchRow();
+            $letter = $row["letter"];
+
+            $letter = "<H2><font color='#FFFFFF' size='0'>Cover Letter</font></H2>" . $letter;
+
+            $letter = ereg_replace("& ", "&amp; ",$letter);
+
+            return $letter;
+        }
+
+        function get_application ($application_id) {
+
+            $sql = "SELECT coverletter_id, resume_id, transcript, student_number
+                FROM applications AS a
+                WHERE application_id = '" . addslashes(stripslashes($application_id)) . "'";
+
+            $result = $GLOBALS['dbh']->Execute ($sql);
+            $row = $result->FetchRow();
+
+            $app = "<h1><font color='#FFFFFF' size='0'>". $this->get_student_name($row["student_number"]) ."</font></h1>";
+
+            // coverletter if needed
+            if (($row["coverletter_id"] != 0) && ($row["coverletter_id"] != NULL)) 
+                $app .= $this->get_coverletter($row["coverletter_id"]) ."<!--PAGE BREAK-->";
+
+            $app .= $this->get_resume($row["student_number"], $row["resume_id"]);
+
+            if (trim($row["transcript"]))
+                $app .= "<!-- PAGE BREAK --> ". $this->get_transcript($row["student_number"]);
+
+            $app = "<html><body> " . $app . "</center></p></body></html>";
+
+            return $app;
+        }
+
+        function get_transcript ($student) {
+
+            $sql = "SELECT transcript 
+                FROM transcript 
+                WHERE student_number = '" . addslashes(stripslashes($student)) . "'";
+
+            $result = $GLOBALS['dbh']->Execute( $sql );
+
+            $row =  $result->FetchRow();
+            $transcript = $row["transcript"];
+
+            $transcript = "<H2><font color='#FFFFFF' size='0'>Transcript</font></H2>" . $transcript;
+            return $transcript;
+        }
+
+        function send_output() {
+
+            header("Content-type: application/pdf");
+            header("Content-Disposition: attachment; filename=Mamook.pdf" );
+            header("Content-Description: PHP4 Generated Data");
+            header("Content-Transfer-Encoding: binary\n");
+
+            $fp = fopen( OUTFILE, "r" );
+
+            if (!(fpassthru($fp))) {
+                fclose($fp);
+            }
+            unlink ( FILE );
+            unlink ( OUTFILE );
+        }
+
+        // preserve the file names for serialization.
+        function __sleep() {
+            $this->filename = FILE;
+            $this->outfilename = OUTFILE;
+
+            return array('filename', 'outfilename');
+        }
+
+        // redefine the constants to what they were before serialization
+        function __wakeup() {
+            define ("FILE", $this->filename);
+            define ("OUTFILE", $this->outfilename);
+        }
+    }
+    ?>

@@ -1,0 +1,271 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: AddHistory.class                                                   |
+ +------------------------------------------------------------------------------+
+ | Description: This class holds all relevent variables and functions required  |
+ |              for placing a student in an 'own job'. (A job that had no job   |
+ |              posting through the system.) It inherits variables and          |
+ |              functions from SkeletonHistory. This class also deals with      |
+ |              history containers, so the the container_functions.inc needs to |
+ |              be included as well.                                            |
+ +------------------------------------------------------------------------------+
+
+ function setMainFormValues($company_name, $student_number, $term_id, $year)
+ function validateMainFormValues()
+ function setStudentDepartmentValues($record_id)
+ function setCompanyDivisionValues($division_id)
+ function setContainerInfoTermValues($start_date, $work_term_length, $keep_eligible_flag)
+ function setContainerInfoHoursValues($start_date, $end_date, $work_term_hours_per_week, $keep_eligible_flag)
+ function validateContainerInfoTermValues()
+ function validateContainerInfoHoursValues()
+ function validateStudentNumber()
+ function checkCompanyName()
+ function setCity($city)
+*/
+
+include("placement/SkeletonHistory.class");
+include_once("history/container_functions.inc");
+
+class AddHistory extends SkeletonHistory 
+{
+    var $city;                  //string
+
+    //constructor
+    function AddHistory($addHistory) 
+    {
+        $this->city = $addHistory->city;
+        SkeletonHistory::SkeletonHistory($addHistory);
+    }
+
+    // the following set methods represent variables being set from page to page, and we capture those variables using these set methods.
+    function setMainFormValues($company_name, $student_number, $term_id, $year) 
+    {
+        $this->setCompanyName($company_name);
+        $this->setStudentNumber($student_number);
+        $this->setTermID($term_id);
+        $this->setYear($year);
+    }
+
+    function validateMainFormValues() 
+    {
+        $error_array = array();
+
+        $error_array[] = $this->checkCompanyName();
+        $error_array[] = $this->validateStudentNumber();
+        $error_array[] = $this->validateTermID();
+        $error_array[] = $this->validateYear();
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+
+    // handle form values from the multiple department check form
+    function setStudentDepartmentValues($record_id) 
+    {
+        $sql = ("
+            SELECT s.first_name, s.last_name, sd.department_id, sd.discipline_id, d.history_containers_min_days_for_wt
+            FROM student_department sd
+            INNER JOIN student s
+            ON sd.student_number = s.student_number
+            LEFT JOIN discipline d
+            ON sd.discipline_id = d.discipline_id
+            WHERE record_id = '".addslashes($record_id)."'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $this->setFirstName($row['first_name']);
+        $this->setLastName($row['last_name']);
+        $this->setRecordID($record_id);
+        $this->setStudentDepartmentID($row['department_id']);
+        $this->setDisciplineID($row['discipline_id']);
+        $this->setHistoryContainersMinDaysForWT($row['history_containers_min_days_for_wt']);
+    }
+
+    function setCompanyDivisionValues($division_id) 
+    {
+        $sql = ("
+            SELECT ec.employer_id,ec.company_name,ed.department_name
+            , IF (ed.location_info = '".USE_COMPANY."', ec.city, ed.city) AS city
+            FROM employer_department AS ed 
+            INNER JOIN employer_company AS ec
+            ON ed.employer_id=ec.employer_id 
+            WHERE ed.department_id = '".addslashes($division_id)."' AND ec.company_display='1'
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+
+        $this->setEmployerID($row['employer_id']);
+        $this->setCompanyName($row['company_name']);
+        $this->setDivisionID($division_id);
+        $this->setDivisionName($row['department_name']);
+        $this->setCity($row['city']);
+    }
+    
+    // used when the student's container mode is based on terms
+    function setContainerInfoTermValues($start_date, $work_term_length, $work_term_hours_per_week, $keep_eligible_flag) 
+    {
+        $this->setStartDate($start_date);
+        $this->setWorkTermLength($work_term_length);
+        $this->setWorkTermHoursPerWeek($work_term_hours_per_week);
+        $this->setKeepEligibleFlag($keep_eligible_flag);
+    }
+
+    // used when the student's container mode is based on hours 
+    function setContainerInfoHoursValues($start_date, $end_date, $work_term_hours_per_week, $keep_eligible_flag) 
+    {
+        $this->setStartDate($start_date);
+        $this->setEndDate($end_date);
+        $this->setWorkTermHoursPerWeek($work_term_hours_per_week);
+        $this->setKeepEligibleFlag($keep_eligible_flag);
+    }
+
+    // checks to make sure all required fields are entered and correct ($start_date, $end_date, $work_term_length)
+    // if an error is found, it'll send back an error message array.
+    function validateContainerInfoTermValues() 
+    {
+        $error_array = array();
+
+        if (!$this->start_date)
+        {
+            $error_array[] = "You must enter a start date for this placement record.";
+        }
+        else
+        {
+            $error_array[] = $this->validateStartDate();
+        }
+
+        if (!$this->work_term_length)
+        {
+            $error_array[] = "You must provide how many months the student will be working for this placement.";
+        }
+        else
+        {
+            $error_array[] = $this->validateWorkTermLength();
+        }
+
+        if (!$this->work_term_hours_per_week)
+        {
+            $error_array[] = "You must provide how many hours per week the student will be working for this placement.";
+        }
+        else
+        {
+            $error_array[] = $this->validateWorkTermHoursPerWeek();
+        }
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+
+    // checks to make sure all required fields are entered and correct ($start_date, $end_date, $work_term_hours_per_week)
+    // if an error is found, it'll send back an error message array.
+    function validateContainerInfoHoursValues() 
+    {
+        $error_array = array();
+
+        if (!$this->start_date)
+        {
+            $error_array[] = "You must enter a start date for this placement record.";
+        }
+        else
+        {
+            $error_array[] = $this->validateStartDate();
+        }
+
+        if (!$this->end_date)
+        {
+            $error_array[] = "You must enter an end date for this placement record.";
+        }
+        else
+        {
+            $error_array[] = $this->validateEndDate();
+        }
+
+        if ($this->start_date && $this->end_date)
+        {
+            $error_array[] = $this->validateStartAndEndDate();
+        }
+
+        if (!$this->work_term_hours_per_week)
+        {
+            $error_array[] = "You must provide how many hours per week the student will be working for this placement.";
+        }
+        else
+        {
+            $error_array[] = $this->validateWorkTermHoursPerWeek();
+        }
+
+        if (sizeof($error_array))
+        {
+            $error_array = trim_array($error_array);
+        }
+
+        return $error_array;
+    }
+    //overwriting parent's validate student number method. This is because when we place a student in an own job, we should only be allowed to place students
+    //who are in our department group.
+    function validateStudentNumber() 
+    {
+        global $departments_in_group;
+        // preparing a string for a sql statement that looks like: WHERE department_id IN ('1','2');
+        $departments_in_str = "'".implode("', '",$departments_in_group)."'";
+        
+        if (!isValidStudentNumber($this->student_number, $departments_in_str)) 
+        {
+            return "The given student number is not valid. Check to make sure this student number exists in your department/group.";
+        }
+    }
+
+    // check to see if the company name matches anything in our database. 
+    function checkCompanyName() 
+    {
+        $sql = ("
+            SELECT COUNT(*) AS num_company
+            FROM employer_company
+            WHERE company_display = '1' AND company_name LIKE '%".addslashes($this->company_name)."%' 
+            ");
+        $result = $GLOBALS['dbh']->Execute($sql);
+        $row = $result->FetchRow();
+        if ($row['num_company'] == 0) 
+        {
+            return "The company you entered does not exist in the database.  Please check to make sure you have spelled it correctly, or, if you would like to "
+                   . "add this contact to the database, do so under 'Employer Info', using the menu to the left.";
+        }
+    }
+
+    function setCity($city) 
+    {
+        $this->city = trim(removeSlashes(addslashes($city)));
+    }
+}
+
+?>

@@ -1,0 +1,707 @@
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+| Filename: general_table_documentation.txt                                    |
++------------------------------------------------------------------------------+
+
+This file's purpose is to document all of the tables currently used in Mamook[tm] by the
+contact module.
+
+This document was created on Feb 6, 2003
+
+Documentation follows the following format:
+
+Table Name
+
+Table's Purpose
+
+
+	Column Name
+
+	Column's Purpose
+
+	2nd Column's Name
+
+	2nd Column's Purpose
+
+	etc.
+
+-----------------
+
+2nd Table Name
+
+2nd Table's Purpose
+
+etc.
+
+
+--------------------------------------------------------------------------------
+
+Table Name: area_list
+
+Purpose: Area list keeps stores all of the areas that a job can be placed in.  These are used
+to allow a student or administrator to search for jobs that are in a given area (eg. Europe,
+Canada, etc.).
+
+
+	Column Name: area_id
+
+	Purpose: This field is the id number used to keep track of different areas.  This is
+	the primary key for the table.
+
+	Column Name: area_name
+	
+	Purpose: This field is simply the name of the corresponding area.
+
+---------------------------------------------------------------------------------
+
+Table Name: country_list
+
+Purpose: Country list stores all of the countries that a job (or anything else) can be placed
+in.
+
+
+	Column Name: country_id
+
+	Purpose: This field is the id number used to keep track of different countries.  This is
+	the primary key for the table.
+
+	Column Name: country_name
+
+	Purpose: This field is simply the name of the corresponding country.
+
+	Column Name: area_id
+	
+	Purpose: This field holds the area_id of the area that the country belongs to.  Eg.
+	England would have the area_id that correponds to Europe.
+
+    Column Name: order_by
+
+    Purpose: This field allows us to specify an order for countries other than alphabetical.
+    (Typically we want to display Canada and USA first).
+
+---------------------------------------------------------------------------------
+
+Table Name: provstate_list
+
+Purpose: This table stores all of the provinces and states that a job (or anything else) can
+be placed in.  This table is only really applicable for jobs that are in either Canda or US.
+
+
+	Column Name: provstate_id
+
+	Purpose: This field is the id number used to keep track of different provinces and states.
+	This is the primary key for the table.
+
+	Column Name: provstate_name
+
+	Purpose: This field is simply the name of the corresponding province or state.
+
+	Column Name: country_id
+
+	Purpose: This field holds the country_id of the country that the province or state
+	belongs to.  Eg. British Columbia would hold the country_id that corresponds to
+	Canada.
+
+    Column Name: abbreviation
+
+    Purpose: This field holds the abbreviated form of this specific province/state.
+
+---------------------------------------------------------------------------------
+
+Table Name: region_list
+
+Purpose: This table stores all of the regions that a job (or anything else) can be placed
+in.  This table is only really applicable for jobs that are in certain provinces of Canada.
+
+	
+	Column Name: region_id
+
+	Purpose: This field is the id number used to keep track of different regions.  This
+	is the primary key for the table.
+
+	Column Name: region_name
+
+	Purpose: This field is simply the name of the corresponding region.
+
+	Column Name: provstate_id
+	
+	Purpose: This field hold the provstate_id of the province that the region belongs
+	to.  Eg.  Greater Victoria Area would hold the provstate_id that corresponds to
+	British Columbia.
+
+    Column Name: city_name
+
+    Purpose: This field holds the default city name associated with this region.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_group
+
+Purpose: This table is used to define different co-op
+programs as part of a co-op group.
+
+
+	Column Name: group_id
+
+	Purpose: This field holds the id number of the
+	group that the department listed below belongs to.
+	Since co-op groups don't have names, this is the only
+	thing used to represent a co-op group (currently).
+
+	Column Name: department_id
+
+	Purpose: This field holds the id number of the 
+	co-op department that belongs to the group listed above.
+
+---------------------------------------------------------------------------------
+
+Table Name: department
+
+Purpose: department
+
+Purpose: This table keeps track of all the co-op departments that there
+are at the University.
+
+
+	Column Name: department_id
+
+	Purpose: This field holds the id number used to keep track of
+	the different co-op departments.  This is the primary key
+	for the table.
+
+	Column Name: department_code
+
+	Purpose: This field holds the department code of this co-op
+	department.  Eg.  At UVic, Engineering is 'ENGR'
+
+	Column Name: department_name
+
+	Purpose: This field holds the name of the department.  Eg.
+	'Engineering'.
+
+	Column Name: default_building_id
+
+	Purpose: This field holds the id number that corresponds
+	to the building that should be used as default for interviews
+	with this co-op department.
+
+	Column Name: email
+
+	Purpose: This field holds the default suffix for email
+	address of contacts and students within this department.
+	When determing someone's email address, there login_id
+	and department email suffix is combined to form it.
+
+	Column Name: general_instructions
+
+	Purpose: This field holds the department's general instructions 
+	that are concatenated to the top of every interview schedule 
+	when it is emailed out to employers.  Eg.  'A copy of your 
+	interview schedule is below.  Please contact us if you 
+	have any problems'.  These instructions are not specific
+	to any one type of interview.
+
+	Column Name: oncampus_instructions
+
+	Purpose: This field holds the department's instructions 
+	that will be concatenated to the top of interview schedules 
+	when the interview in question is being held on campus.  These
+	instructions are added in addition to the department's general
+	instructions.  Eg.  'The interview will be held on campus in
+	the engineering office wing.  Please check in with the office
+	when you arrive'.
+
+	Column Name: offcampus_instructions
+
+	Purpose: This field holds the department's instructions
+	that will be concatenated to the top of interview schedules 
+	when the interview in question is being held off campus.
+	These instructions will be added in addition to the department's
+	general instructions.
+
+	Column Name: phone_instructions
+
+	Purpose: This field holds the department's instructions
+	that will be concatenated to the top of interview schedules
+	when the interview in question is a phone interview.  These
+	instructions will be added in addition to the department's 
+	general instructions.  Eg.  'For any students without 
+	phone numbers listed, the phone interview will be conducted
+	at the number 250-721-0000'
+
+	Column Name: newsgroup_email
+
+	Purpose: This field holds the email address of this
+	department's newsgroup.  This field is used to determine
+	where to send emails when interviews are posted.
+
+	Column Name: video_instructions
+
+	Purpose: This field holds the department's instructions
+	that will be concatenated to the top of interview schedules
+	when the interview in question is a video conference interview.
+	These instructions will be added ina ddition to the department's
+	general instructions. 
+
+    Column Name: department_faculty
+
+    Purpose: This field is a text field holding the name of the faculty that this
+    co-op department belongs to, since multiple unique departments can belong
+    to the same faculty.
+
+    Column Name: phone_assistance
+
+    Purpose: This field is a text field hold the phone number that is attached to
+    outgoing e-mails from this department, indicating to employers and students 
+    who they can call for assistance.
+
+    Column Name: default_int_phone
+
+    Purpose: This field holds the default phone to be used in a phone interview
+    when a student has not provided their own.
+
+    Column Name: default_login
+
+    Purpose: This field is used primarily by UVic, as they have two different types
+    of logging in to the system.  This field can hold either NIS_LOGIN or SCRIPT_LOGIN (both
+    constants kept in the constants.inc file).
+
+    Column Name: student_interview_instructions
+
+    Purpose: These are the default instructions attached to interview information
+    e-mailed out to students, specific to this department.
+
+    Column Name: job_list
+
+    Purpose: This field is a boolean value representing whether or not this department
+    is considered a department that would be involved in the job process of getting
+    students hired.  Some departments in the system are there solely for administrative
+    purposes, such as 'Director's Office of Co-op', which would have a 0 in this field.
+    Departments with this value set to 0 will not show up in any pull-down lists
+    related to jobs.
+
+    Column Name: resume_html_editable
+
+    Purpose: This column is obsolete, and can be deleted.
+
+    Column Name: application_employer_body
+
+    Purpose: This field holds the body of the e-mail that is sent to employers with outgoing
+    applications.
+
+    Column Name: primary_contact_id
+
+    Purpose: This field holds the contact_id of the main contact at the given department.
+    This contact will typically be the default contact chosen for pull-down menus related
+    to contacts at this department, and will be the contact e-mailed when this department
+    has been assigned as a host for a new job.
+
+    Column Name: resume_allow_html_editor
+
+    Purpose: This field is a boolean value representing whether or not this department's
+    students are allowed to edit their resumes by directly modifying the HTML.
+
+    Column Name: resume_allow_builder
+
+    Purpose: This field is a boolean value that represents whether or not this departments
+    students are allowed to use the HTML builder to create their resumes.  A 1 in this field
+    means that the students can use the builder.
+
+    Column Name: placement_contact_id
+
+    Purpose:  This field holds the contact_id of the person that is responsible for student-job
+    placement coordination.  They will be emailed with regards to various placement questions
+    and activities.
+
+    Column Name: using_full_system
+
+    Purpose: This field is a boolean indicating whether or not this department is using
+    the full set of system modules, or only the interview module.  A 1 in this field
+    indicates that the department is using the full system.
+
+    Column Name: menus_being_used_id
+
+    Purpose: This field is a foreign key corresponding to the menus_being_used table
+    and indicates the level of menus that this department is using.
+
+    Column Name: coverletter_allow_html_editor
+
+    Purpose: This field indicates whether or not this department's students are allowed
+    to directly edit the HTML of their coverletters.  A 1 in this field indicates that
+    the students are allowed to do this.
+
+    Column Name: coverletter_allow_builder
+
+    Purpose: This field indicates whether or not this department's students are allowed
+    to use the coverletter builder to create and edit their coverletters.  A 1 in this
+    field indicates that they are allowed to use the builder.
+
+    Column Name: job_app_paper_instructions
+
+    Purpose: This field holds the instructions that are appended to the bottom of paper
+    applications.
+
+    Column Name: shortlist_contact_id
+
+    Purpose: This field holds the contact_id of the contact for this department that is
+    in charge of shorltisting duties.
+
+    Column Name: interview_contact_id
+
+    Purpose: This field holds the contact_id of the contact for this department that is
+    in charge of interview duties.
+
+    Column Name: jobhost_contact_id
+
+    Purpose: This field holds the contact_id of the contact for this department that is
+    setn e-mails regarding jobs that have recently entered the 24-hour hold.
+
+---------------------------------------------------------------------------------
+
+Table Name: department_module
+
+Purpose: This table determines which modules each department can view and
+access when using the co-op website.
+
+
+	Column Name: module_id
+
+	Purpose: The id number of the module that the associated department
+	below is able to see.
+
+	Column Name: department_id
+
+	Purpose: This is the id number of the department that is able to
+	see the module associated with the above module id number.
+
+---------------------------------------------------------------------------------
+
+Table Name: login_info
+
+Purpose: This table is used to keep track of various information about
+people logging into the system.
+
+
+	Column Name: login_id
+
+	Purpose: This field stores the login id of the person that
+	this record pertains to.  This field, along with the contact_id
+    or student_number defines a unique tuple in this table.
+
+	Column Name: contact_id
+
+	Purpose: This field stores the contact id of the person
+	that this record pertains to.
+
+	Column Name: student_number
+
+	Purpose: This field stores the student number of the
+	person that this record pertains to.
+
+	Column Name: last_datetime_in
+
+	Purpose: This field stores the last date and time that
+	this person logged in.
+
+	Column Name: num_logins
+
+	Purpose: This field keeps track of the number of times
+	that this person has logged in.
+
+	Column Name: last_browser
+
+	Purpose: This field keeps track of the most recent browser
+	that this person logged in using.
+
+	Column Name: last_platform
+
+	Purpose: This field keeps track of the most recent platform
+	that this person logged in using.
+
+	Column Name: last_IP_address
+
+	Purpose: This field keeps track of the most recent IP
+	address that this person logged in from.
+
+---------------------------------------------------------------------------------
+ 
+Table Name: menu_item
+
+Purpose: This table holds all of the first level menu items
+that can be displayed to any given user (based on their user
+level).
+
+
+	Column Name: menu_id
+
+	Purpose: This is the id number used to keep track of
+	different menu items.  This is the primary key for
+	the table.
+
+	Column Name: menu_name
+
+	Purpose: This is the name of this menu item.  The 
+	contents of this field are what is displayed on
+	the menu bar (provided the user has access to this
+	menu item).
+
+	Column Name: module_id
+
+	Purpose: This is the id number of the module that 
+	this menu item belongs to.
+
+	Column Name: menu_owner
+
+	Purpose: This is the number that corresponds to the
+	userlevel that owns (and consequently, gets to see)
+	this menu item.  The userlevel numbers are defined
+	in CoopX/misc/constants.inc.
+
+	Column Name: order_by
+
+	Purpose: This is field is used to determine the order
+	in which menu items are shown on the menu bar.
+
+--------------------------------------------------------------------------------- 
+
+Table Name: menu_sub_item
+
+Purpose: This table holds all of the second level menu items.
+These are the menu items that actually hold the values for
+the select variable used by Mamook to determine what it should
+be showing the user.
+
+
+	Column Name: menu_id
+
+	Purpose: This is the id number that corresponds to the
+	first level menu item that this sub menu item appears
+	below.
+
+	Column Name: menu_name
+
+	Purpose: This is the name of this sub menu item.  The
+	contents of this field are what is displayed on the menu
+	bar (provided the user has access to this menu item).
+
+	Column Name: select_var
+
+	Purpose: This is the value that is assigned to the select
+	variable when this sub menu item is clicked on.
+
+	Column Name: sub_item_id
+
+	Purpose: This is the id number used to keep track of all
+	the different sub menu items.  This is the primary key
+	for the table.
+
+	Column Name: order_by
+
+	Purpose: This is field is used to determine the order
+	in which sub menu items are shown underneath their 
+	parent menu item.
+
+---------------------------------------------------------------------------------
+
+Table Name: module
+
+Purpose: This field stores all of the different modules
+that are used by Mamook.
+
+
+	Column Name: module_id
+
+	Purpose: This is the id number used to keep track of all
+	the different modules.  This is the primary key for the 
+	table.
+
+	Column Name: module_name
+
+	Purpose: This field holds the name of the module.
+
+	Column Name: order_by
+
+	Purpose: This field is used to determine the order
+	in which module names are shown when pulled out for
+	the purpose of being displayed in a pull down menu.
+
+---------------------------------------------------------------------------------
+
+Table Name: broken_queries
+
+Purpose: This table is used to store any queries that break.
+
+    Column Name: query_id
+
+    Purpose: This is the primary key for the table
+
+    Column Name: query
+
+    Purpose: This is the skeletonized version of the query.  Specific
+    instances of the query are transformed to a more generalized form
+    before being stored.
+
+    Column Name: date_time
+
+    Purpose: The date and time that this query was first recorded as breaking.
+
+    Column Name: contact_id
+
+    Purpose: This is the contact_id of the person currently logged in when the
+    query was first recorded as breaking.
+
+    Column Name: student_number
+
+    Purpose: This is the student_number of the person currently logged in when
+    the query was first recorded as breaking.  This column and contact_id are
+    mutually exclusive.
+
+    Column Name: IP_address
+
+    Purpose: This is the IP address of the user that as logged in when the query
+    was first recorded as breaking.
+
+    Column Name: counter
+
+    Purpose: This counter records the number of times that we have recorded the
+    query as breaking.
+
+---------------------------------------------------------------------------------
+
+Table Name: installed_components
+
+Purpose: This table stores the various installed components, seperate from the core of the system, that are active.
+    
+
+    Column Name: description
+
+    Purpose: This is the description of the installed component
+
+    Column Name: installed
+
+    Purpose: This is a boolean value, related to whether or not the described component is installed.
+
+---------------------------------------------------------------------------------
+
+Table Name: menus_being_used
+
+Purpose: This table stores the various different levels of menu usage that can be assigned to any given department.
+    
+
+    Column Name: menus_being_used_id
+
+    Purpose: This is the primary key for this level of menu access
+
+    Column Name: description
+
+    Purpose: This is a description of the type of menu access represented by this tuple.
+
+---------------------------------------------------------------------------------
+
+Table Name: preferences
+
+Purpose: This table stores the colorscheme being used by a given contact or student.  This table seems silly
+at first glance, but has been created so that in the future, it will be possible to implement other preferences
+that apply to both students and contacts (as colorscheme will eventually).
+
+    
+    Column Name: contact_id
+
+    Purpose: This is the contact id of the contact that this preference is for.
+
+    Column Name: student_number
+
+    Purpose: This is the student number of the student that this preference is for.
+
+    Column Name: colorscheme
+
+    Purpose: This is name of the colorscheme that this user has specified they would like to use.
+    Currently, this is stored as a varchar, and this field is the only thing the database knows about
+    colorschemes.
+
+---------------------------------------------------------------------------------
+
+Table Name: user_types
+
+Purpose: This table stores the various user types that we have in the system.  This table is
+mostly used in conjunction with the menu_item and menu_sub_item tables.  These values typically
+correspond to the userlevel constants in constants.inc
+
+    
+    Column Name: user_type
+
+    Purpose: This is the name of the user_type, so for example, 'Student'
+
+    Column Name: user_type_id
+
+    Purpose: This is the name of title (so basically the title itself)
+
+---------------------------------------------------------------------------------
+
+Table name:  term
+Purpose:  Stores the academic terms available.  Eg, Fall, Spring, Summer.
+
+Primary Key:  { term_id }
+
+    Column Name:  term_code
+    Purpose:  Stores a short code name for each term.  Eg, F, S, K for Fall,
+    Spring, Summer.
+
+    Column Name:  term_name
+    Purpose:  Stores the actual name of the term.  Eg, Fall.
+
+    Column Name:  start_date, end_date
+    Purpose:  Stores the start and end months for the terms.
+
+    Column Name:  year_order
+    Purpose:  Stores the order in which the terms occur in the year, as opposed
+    to the academic order.  Eg.  3, 1, 2 for Fall, Spring, Summer respectively.
+
+---------------------------------------------------------------------------------
+
+Table Name:  semesters
+Purpose:  Stores the different types of semester classifications used by
+each department.  Eg, Work Term 1, Academic Term 1A, etc.
+
+Primary Key:  { semesters_id }
+Foreign Keys:
+                description_type -> semesters_description_type
+
+---------------------------------------------------------------------------------
+
+Table Name:  semesters_description_type
+Purpose:  General classifications of semesters:  Work Term, Academic Term,
+Miscellaneous Term, etc.
+
+Primary Key:  { description_type }
+
+---------------------------------------------------------------------------------
+
+Table Name:  semesters_table
+Purpose:  Table used to facilitate the display of tables listing out the
+semesters a student has completed according to year and term.
+
+Primary Key:  { term_id, year, semesters_id, record_id }
+Foreign Keys:
+                record_id -> student_department
+                semesters_id -> semesters
+                term_id -> term
+

@@ -1,0 +1,35 @@
+form,p,td,th { font-size: 12pt; }
+form,p,td    { font-family: arial, helvetica, sans-serif; } 
+
+h1,h2,h3,h4,h5,h6,th { font-family: verdana, arial, helvetica, sans-serif; }
+h1 { font-size: 23pt; }
+h2 { font-size: 19pt; }
+h3 { font-size: 16pt; }
+h4 { font-size: 14pt; }
+h5 { font-size: 12pt; }
+h6 { font-size: 10pt; }
+p { font-family: verdana, arial, helvetica, sans-serif; }
+ol { font-family: verdana, arial, helvetica, sans-serif; }
+ul { font-family: verdana, arial, helvetica, sans-serif; }
+b.login { font-size: 14pt; }
+
+.shorttable {line-height: 4pt; }
+
+.menuitem { font-family: verdana, helvetica, arial, sans-serif; }
+.menuitem { font-size: 10pt; }
+
+.bar a { line-height: 1.2em; }
+.barbase { font-weight: lighter; }
+.comments { font-weight: lighter; font-size : 188888888pt; }
+
+.bar2 a { font-weight: normal; line-height: 1.0em; font-size: 12pt; }
+
+/* calendar */
+.cal-title { font-size: 14pt; }
+.cal-dates {}
+.cal-day-names {}
+
+/*fixed width font for schedule email text areas*/
+.fixed_font { font-family: courier, monospace, sans-serif; }
+
+div.clock { font-size: 12pt; }

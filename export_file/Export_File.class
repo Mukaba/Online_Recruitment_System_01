@@ -1,0 +1,252 @@
+<?php
+/*
+
+ +------------------------------------------------------------------------------+
+ | Mamook(R) Software                                                           |
+ +------------------------------------------------------------------------------+
+ | Copyright (c) 2000-2005 University of Victoria.  All rights reserved.        |
+ +------------------------------------------------------------------------------+
+ | THE LICENSED WORK IS PROVIDED UNDER THE TERMS OF THE ADAPTIVE PUBLIC LICENSE |
+ | ("LICENSE") AS FIRST COMPLETED BY: The University of Victoria. ANY USE,      |
+ | PUBLIC DISPLAY, PUBLIC PERFORMANCE, REPRODUCTION OR DISTRIBUTION OF, OR      |
+ | PREPARATION OF DERIVATIVE WORKS BASED ON, THE LICENSED WORK CONSTITUTES      |
+ | RECIPIENT'S ACCEPTANCE OF THIS LICENSE AND ITS TERMS, WHETHER OR NOT SUCH    |
+ | RECIPIENT READS THE TERMS OF THE LICENSE. "LICENSED WORK" AND "RECIPIENT"    |
+ | ARE DEFINED IN THE LICENSE. A COPY OF THE LICENSE IS LOCATED IN THE TEXT     |
+ | FILE ENTITLED "LICENSE.TXT" ACCOMPANYING THE CONTENTS OF THIS FILE. IF A     |
+ | COPY OF THE LICENSE DOES NOT ACCOMPANY THIS FILE, A COPY OF THE LICENSE MAY  |
+ | ALSO BE OBTAINED AT THE FOLLOWING WEB SITE: http://www.mamook.net            |  
+ |                                                                              |
+ | Software distributed under the License is distributed on an "AS IS" basis,   |
+ | WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for |
+ | the specific language governing rights and limitations under the License.    | 
+ +------------------------------------------------------------------------------+
+ | Filename: Export_File.class                                                  |
+ +------------------------------------------------------------------------------+
+ | Description: This file is used when exporting to a file.                     |
+ +------------------------------------------------------------------------------+
+
+*/
+
+
+define ("TABFILE", uniqid ("export_file/TAB") .".tab");
+
+class ExportTabFile {
+
+	
+	function EmployerMailLabels ($contact_id_string) {
+
+		// open up the file
+		$fp = fopen (TABFILE, "a");
+		
+		// start off by throwing headers in
+
+		$info = "Name\tCompany\tAddress 1\tAddress 2\tAddress 3\tCity\tProv/State\tPostal Code\tCountry";
+		fputs ($fp, $info);
+
+        // The following SQL query is a little scary, so I'm going to write some pseudo code to help explain what's going on.
+        // The query has to be written like this because a contact's address information can reside in the contact, employer_department,
+        // or employer_company table depending on its location_info value in the database. 
+
+        // The IF() function has the following signature: IF(condition, then, else)
+
+        //  IF (c.location_info = '".USE_COMPANY."' 
+        //      , ec.street_address_1               
+        //      , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."' 
+        //          , ec.street_address_1
+        //          , IF (c.location_info = '".USE_DEPARTMENT."'
+        //              , ed.street_address_1
+        //              , c.street_address_1
+        //              )
+        //          )
+        //     )
+        //  AS c_street_address_1,
+
+        //  Translates to:
+
+        //  if (contact.location_info == USE_COMPANY)
+        //  {
+        //      c_street_address_1 = employer_company.street_address_1;
+        //  }
+        //  elseif (contact.location_info == USE_DEPARTMENT && contact.location_info == USE_COMPANY)
+        //  {
+        //      c_street_address_1 = employer_company.street_address_1;
+        //  }
+        //  elseif (contact.location_info == USE_DEPARTMENT)
+        //  {
+        //      c_street_address_1 = employer_department.street_address_1;
+        //  }
+        //  else
+        //  {
+        //      c_street_address_1 = contact.street_address_1;
+        //  }
+
+		$sql = ("
+            SELECT CONCAT(t.title_name, ' ', c.first_name, ' ', c.last_name) AS name, ec.company_name, ed.department_name, 
+            IF (c.location_info = '".USE_COMPANY."'
+                , ec.street_address_1
+                , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'
+                    , ec.street_address_1
+                    , IF (c.location_info = '".USE_DEPARTMENT."'
+                        , ed.street_address_1
+                        , c.street_address_1
+                        )
+                    )
+               )
+            AS c_street_address_1,
+
+            IF (c.location_info = '".USE_COMPANY."'
+                , ec.street_address_2
+                , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'
+                    , ec.street_address_2
+                    , IF (c.location_info = '".USE_DEPARTMENT."'
+                        , ed.street_address_2                                                                                                           
+                        , c.street_address_2)))
+            AS c_street_address_2,
+
+            IF (c.location_info = '".USE_COMPANY."'
+                    , ec.street_address_3
+                    , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'
+                        , ec.street_address_3
+                        , IF (c.location_info = '".USE_DEPARTMENT."'
+                            , ed.street_address_3
+                            , c.street_address_3)))
+            AS c_street_address_3,
+
+            IF (c.location_info = '".USE_COMPANY."'
+                    , ec.city
+                    , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'
+                        , ec.city
+                        , IF (c.location_info = '".USE_DEPARTMENT."'
+                            , ed.city
+                            , c.city)))
+            AS c_city,
+
+            IF (c.location_info = '".USE_COMPANY."'
+                    , ecpl.provstate_name                                                                                                                     
+                    , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'                                                     
+                        , ecpl.provstate_name                                                                                                                
+                        , IF (c.location_info = '".USE_DEPARTMENT."'                                                                                         
+                            , edpl.provstate_name                                                                                                           
+                            , cpl.provstate_name)))                                                                                                         
+            AS c_provstate_name,
+
+            IF (c.location_info = '".USE_COMPANY."'
+                    , eccl.country_name
+                    , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'
+                        , eccl.country_name
+                        , IF (c.location_info = '".USE_DEPARTMENT."'
+                            , edcl.country_name
+                            , ccl.country_name)))
+            AS c_country_name,
+
+            IF (c.location_info = '".USE_COMPANY."'
+                    , ec.postal_code                                                                                                                          
+                    , IF (c.location_info = '".USE_DEPARTMENT."' AND ed.location_info = '".USE_COMPANY."'                                                     
+                        , ec.postal_code                                                                                                                     
+                        , IF (c.location_info = '".USE_DEPARTMENT."'                                                                                         
+                            , ed.postal_code                                                                                                                
+                            , c.postal_code)))                                                                                                              
+            AS c_postal_code
+
+            FROM contact AS c
+            INNER JOIN contact_employer AS ce
+            ON c.contact_id = ce.contact_id
+			LEFT JOIN title AS t 
+            ON c.title = t.title_id
+			LEFT JOIN employer_company AS ec 
+            ON ce.employer_id = ec.employer_id
+			LEFT JOIN employer_department AS ed 
+            ON ce.department_id = ed.department_id
+            LEFT JOIN provstate_list cpl                                                                                                 
+            ON c.provstate_id = cpl.provstate_id
+            LEFT JOIN provstate_list edpl
+            ON ed.provstate_id = edpl.provstate_id
+            LEFT JOIN provstate_list ecpl
+            ON ec.provstate_id = ecpl.provstate_id
+            LEFT JOIN country_list ccl
+            ON c.country_id = ccl.country_id
+            LEFT JOIN country_list edcl
+            ON ed.country_id = edcl.country_id
+            LEFT JOIN country_list eccl
+            ON ec.country_id = eccl.country_id
+
+			WHERE c.contact_id IN (". unpackObject($contact_id_string, false) .")
+			ORDER BY c.last_name, c.first_name
+            ");
+		$result = $GLOBALS['dbh']->Execute ($sql);
+
+		while ($row = $result->FetchRow()) {
+
+            $info = "\n". $row['name'] ."\t";
+
+            $row['company_name'] = trim($row['company_name']);
+            $row['department_name'] = trim($row['department_name']);
+            
+            // If the division and company name is the same, only include one of them
+            if (strcasecmp ($row['company_name'], $row['department_name']) == 0)
+            {
+                $info .= $row['company_name'];
+            }
+            // Otherwise, present as normal.
+            elseif ($row['company_name'] && $row['department_name'])
+            {
+                $info .= $row['company_name'].", ".$row['department_name'];
+            }
+            // If only a department name is available, print that without the trailingn comma. 
+            elseif (!$row['company_name'] && $row['department_name'])
+            {
+                $info .= $row['department_name'];
+            }
+            elseif ($row['company_name'] && !$row['department_name'])
+            {
+                $info .= $row['company_name'];
+            }
+
+            $info .= "\t";
+
+            $info .= $row['c_street_address_1']."\t";
+            $info .= $row['c_street_address_2']."\t";
+            $info .= $row['c_street_address_3']."\t";
+            $info .= $row['c_city']."\t";
+            $info .= $row['c_provstate_name']."\t";
+            $info .= $row['c_postal_code']."\t";
+            $info .= $row['c_country_name'];
+            
+			fputs ($fp, $info);
+
+		}
+
+		fclose ($fp);
+		$this->send_output ("contact_labels");
+
+	}
+
+	function CreateTabFileString ($string) {
+
+		$fp = fopen (TABFILE, "a");
+
+		// insert the string into the file
+		fputs ($fp, $string);
+		fclose ($fp);
+
+		$this->send_output ();
+	}
+
+	// actually send the output
+	function send_output($filename = 'Mamook'){
+
+		header ("Content-type: text/tab-separated-values");
+		header ("Content-Disposition: attachment; filename=". $filename .".txt");
+		header ("Content-Description: PHP4 Generated Data");
+
+		$fp = fopen (TABFILE, "r");
+
+		if (!(fpassthru ($fp)))
+			fclose ($fp);
+
+		unlink (TABFILE);
+	}
+
+}
+?>
