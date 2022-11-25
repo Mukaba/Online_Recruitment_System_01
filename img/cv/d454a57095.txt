@@ -1,0 +1,9 @@
+db:  	smashjob
+user: Root
+pwd: 	#b1%S8q2!-K)j4mR
+
+==========================
+
+db: smashjob
+user: root
+pwd: Qe&Z+rM4l/0Cw>-s
