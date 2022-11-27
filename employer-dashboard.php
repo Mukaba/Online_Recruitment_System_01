@@ -4,7 +4,6 @@
       require('./include/layout/output_buffer.php');
       require('./include/database/pdo_connect.php');
       require_once('./include/functions/employer.php');
-
       function logged_in () {
           return (isset($_SESSION['id'])) ? true : false;
       }
@@ -38,7 +37,6 @@
               <a href="#" class="a-button">Find the right applicant</a>
           </div>
     </div>
-
     <div class="jumbotron hero-holder">
         <div class="jumbo-content">
           <div class="p-content text-center">

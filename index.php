@@ -4,10 +4,6 @@
     require('include/layout/modal.php');
     jobseeker_logged_in_redirect();
 ?>
-
-
-
-
 <!DOCTYPE html>
 <html class="no-js" lang="en" ng-app="myApp">
 <head>    
