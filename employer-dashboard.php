@@ -7,12 +7,10 @@
       function logged_in () {
           return (isset($_SESSION['id'])) ? true : false;
       }
-
       require('./include/layout/variables.php');
       require('./include/layout/employerheader.php');
       require('./include/layout/employer-profile-header.php');
  ?>
-
 <section class="main-content">
     <div class="row first-row">
           <div class="col-sm-6">
@@ -25,7 +23,6 @@
               <img class="img-responsive block-img" src="img/portfolio.jpg" alt="" />
           </div>
     </div>
-
     <div class="row second-row">
           <div class="col-sm-6">
               <img class="img-responsive block-img" src="img/bg.jpg" alt="" />
@@ -48,7 +45,6 @@
           </div>
         </div>
     </div>
-
     <div class="row third-row">
           <div class="col-sm-6">
               <p class="text-justify">
@@ -60,7 +56,6 @@
               <img class="img-responsive block-img" src="img/hire-bg.jpg" alt="" />
           </div>
     </div>
-
     <div class="row fourth-row">
           <div class="col-sm-6">
               <img class="img-responsive block-img" src="img/counter-bg.jpg" alt="" />
@@ -73,7 +68,6 @@
           </div>
     </div>
 </section>
-
  <?php
     require('./include/layout/page-header-footer.php');
     require('./include/layout/footer2.php');

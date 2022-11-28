@@ -3,9 +3,7 @@
     require_once('include/functions/main.php');
     require('include/layout/header.php');
     logged_in_redirect();
-
     if (isset($_POST['register_employer'])) {
-
         $company_name =htmlentities(strip_tags(trim($_POST['company_name'])));
         $company_website =htmlentities(strip_tags(trim($_POST['company_website'])));
         $company_email =htmlentities(strip_tags(trim($_POST['company_email'])));

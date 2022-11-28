@@ -148,21 +148,11 @@
 </head>
 
 <body ng-cloak>
-         <!--[if lt IE 8]>
-        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    	<![endif]-->
-
   <!--=========Header===========-->
   <header id="header">
   <div class="container-fluid">
   <div id="logo" class="pull-left">
         <h1><a href="#intro" class="scrollto">SearchUp <h6>Online Recruitment System</h6> </a></h1>
-        <!-- <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-One-navbar-collapse-1" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button> -->
       </div>
       <nav id="nav-menu-container" id = "bs-One-navbar-collapse-1">
             <?php
@@ -289,10 +279,8 @@
               </div>
               <h2 class="title"><a href="#">Our Mission</a></h2>
         <center>      
-        <p>
-            The purpose of this project is to make a place which hold all information about competitive candidates to competitive vacant jobs, We do belief that job information's availability can make a positive difference to employers, and to the society at large.
-            SearchUp aims to be the driver of this change. 
-        </p>
+        <p>The purpose of this project is to make a place which hold all information about competitive candidates to competitive vacant jobs, We do belief that job information's availability can make a positive difference to employers, and to the society at large.
+            SearchUp aims to be the driver of this change.</p>
         </center>
         
             </div>
@@ -423,8 +411,6 @@
 
       </div>
     </section><!-- #testimonials -->
-
-   
     <!--==========================
       Contact Section
     ============================-->
@@ -468,25 +454,6 @@
     </section><!-- #contact -->
 
   </main>
-
-<!--login-->
-<!-- <div id="id01" class="modal">
-  
-  <form class="modal-content animate" id="loginform" method="post"  name="loginform" action="loginprocessing.php">
-      <div class="container">
-      <label for="uname"><b>Email</b></label>
-      <input type="email" id="email" name="email" placeholder="Enter Email" required="required"><br>
-
-      <label for="psw"><b>Password</b></label>
-      <input type="password" id="password" name="password" placeholder="Enter Password" required="required" autocomplete="off">
-      </div>
-
-    <div class="clearfix">
-        <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-        <button type="submit" class="signupbtn" id="loginsubmit" name="loginsubmit">Login</button>
-      </div>
-  </form>
-</div> -->
 <script>
 // Get the modal
 // var modal = document.getElementById('id01');
